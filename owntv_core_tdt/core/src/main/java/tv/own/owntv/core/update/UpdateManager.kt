@@ -95,8 +95,6 @@ class UpdateManager(
 
     /** Queries GitHub's latest release; moves to Available / UpToDate / a semantic failure. */
     fun check() {
-        // This experimental fork has its own package/signature, not upstream releases.
-        if (context.packageName.startsWith("tv.own.owntv.tdt")) { _state.value = State.UpToDate; return }
         if (_state.value is State.Checking || _state.value is State.Downloading) return
         _state.value = State.Checking
         scope.launch {
@@ -104,9 +102,14 @@ class UpdateManager(
                 val request = Request.Builder()
                     .url("https://api.github.com/repos/${CoreBuildInfo.releaseRepo}/releases/latest")
                     .header("Accept", "application/vnd.github+json")
-                    .header("User-Agent", "OwnTV")
+                    .header("User-Agent", "Channelplus")
                     .build()
                 client.newCall(request).execute().use { resp ->
+                    // A new public repository may not have its first release yet.
+                    if (resp.code == 404) {
+                        _state.value = State.UpToDate
+                        return@launch
+                    }
                     if (!resp.isSuccessful) throw CheckHttpException(resp.code)
                     val body = resp.body.string()
                     if (body.isBlank()) throw InvalidReleaseResponseException()
@@ -151,7 +154,7 @@ class UpdateManager(
                 val dir = File(context.filesDir, "updates").apply { mkdirs() }
                 val out = File(dir, "owntv-update.apk")
                 out.delete() // never build on top of a previous half-download
-                val request = Request.Builder().url(info.apkUrl).header("User-Agent", "OwnTV").build()
+                val request = Request.Builder().url(info.apkUrl).header("User-Agent", "Channelplus").build()
                 try {
                     client.newCall(request).execute().use { resp ->
                         if (!resp.isSuccessful) throw DownloadHttpException(resp.code)
