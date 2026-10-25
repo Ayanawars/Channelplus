@@ -1,5 +1,7 @@
 package tv.own.owntv.features.setup
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import android.widget.Toast
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
@@ -24,7 +26,14 @@ internal fun TunerSourceOption(onImport: (name: String, url: String) -> Unit) {
     val noInputs = stringResource(R.string.tuner_source_missing)
     var inputs by remember { mutableStateOf<List<TunerSourceSyncer.Input>>(emptyList()) }
     var choosing by remember { mutableStateOf(false) }
+    var pendingImport by remember { mutableStateOf<Pair<String, String>?>(null) }
     val scope = rememberCoroutineScope()
+    val setupLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        pendingImport?.let { (name, url) ->
+            pendingImport = null
+            onImport(name, url)
+        }
+    }
     val discover = {
         scope.launch {
             inputs = withContext(Dispatchers.IO) { runCatching { TunerSourceSyncer.discover(context) }.getOrDefault(emptyList()) }
@@ -50,10 +59,23 @@ internal fun TunerSourceOption(onImport: (name: String, url: String) -> Unit) {
         onSelect = { id ->
             choosing = false
             val input = inputs.firstOrNull { it.id == id }
-            onImport(
-                if (TunerSourceSyncer.isPluto(input?.providerPackage)) input?.name ?: title else title,
-                TunerSourceSyncer.sourceUrl(id, input?.providerPackage, input?.filterByOwner == true),
-            )
+            val name = input?.takeIf { TunerSourceSyncer.isPluto(it.providerPackage) }?.name ?: title
+            val url = TunerSourceSyncer.sourceUrl(id, input?.providerPackage, input?.filterByOwner == true)
+            scope.launch {
+                val needsSetup = TunerSourceSyncer.isPluto(input?.providerPackage) &&
+                    !withContext(Dispatchers.IO) { TunerSourceSyncer.hasChannels(context, id) }
+                val setupIntent = if (needsSetup) TunerSourceSyncer.createSetupIntent(context, id) else null
+                if (setupIntent != null) {
+                    pendingImport = name to url
+                    runCatching { setupLauncher.launch(setupIntent) }
+                        .onFailure {
+                            pendingImport = null
+                            onImport(name, url)
+                        }
+                } else {
+                    onImport(name, url)
+                }
+            }
         },
         onDismiss = { choosing = false },
     )
