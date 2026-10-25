@@ -21,21 +21,30 @@ class TunerSourceSyncer(
     private val channels: ChannelDao,
     private val epg: EpgDao?,
 ) {
-    data class Input(val id: String, val name: String)
+    data class Input(
+        val id: String,
+        val name: String,
+        val providerPackage: String? = null,
+        val filterByOwner: Boolean = false,
+    )
     private data class Station(val id: Long, val name: String, val number: Int?)
 
     suspend fun sync(source: SourceEntity) {
-        val input = Uri.parse(source.url).getQueryParameter("input")
+        val sourceUri = Uri.parse(source.url)
+        val input = sourceUri.getQueryParameter("input")
             ?: error(context.getString(tv.own.owntv.core.R.string.tuner_invalid_source))
+        val provider = sourceProvider(sourceUri)
+        val ownerFilter = if (sourceUri.getQueryParameter("ownerFilter") == "1") provider else null
         val manager = context.getSystemService(TvInputManager::class.java)
         check(manager?.tvInputList?.any { it.id == input } == true) { context.getString(tv.own.owntv.core.R.string.tuner_missing) }
-        val stations = readStations(input)
+        val stations = readStations(input, ownerFilter)
         // A denied/filtered read must never erase the previous working list.
         check(stations.isNotEmpty()) { context.getString(tv.own.owntv.core.R.string.tuner_empty) }
-        val categoryKey = "antenna"
+        val categoryKey = if (provider == PLUTO_PACKAGE) "pluto:$input" else "antenna"
+        val categoryName = if (provider == PLUTO_PACKAGE) PLUTO_LABEL else context.getString(tv.own.owntv.core.R.string.tuner_antenna_name)
         var category = categories.findByRemoteIds(source.id, MediaType.LIVE, listOf(categoryKey)).firstOrNull()
         if (category == null) {
-            categories.insertAll(listOf(CategoryEntity(sourceId = source.id, mediaType = MediaType.LIVE, name = context.getString(tv.own.owntv.core.R.string.tuner_antenna_name), remoteId = categoryKey)))
+            categories.insertAll(listOf(CategoryEntity(sourceId = source.id, mediaType = MediaType.LIVE, name = categoryName, remoteId = categoryKey)))
             category = categories.findByRemoteIds(source.id, MediaType.LIVE, listOf(categoryKey)).first()
         }
         val categoryId = requireNotNull(category).id
@@ -57,7 +66,7 @@ class TunerSourceSyncer(
             val now = System.currentTimeMillis()
             for (station in stations) {
                 currentCoroutineContext().ensureActive()
-                // EPG failures do not prevent watching antenna channels or discard a previous guide.
+                // EPG failures do not prevent watching TV input channels or discard a previous guide.
                 try { importGuide(source.id, input, station, now) }
                 catch (e: kotlinx.coroutines.CancellationException) { throw e }
                 catch (e: Exception) { android.util.Log.w("TunerSource", "EPG unavailable for channel ${station.id}: ${e.javaClass.simpleName}") }
@@ -65,14 +74,16 @@ class TunerSourceSyncer(
         }
     }
 
-    private suspend fun readStations(input: String): List<Station> {
+    private suspend fun readStations(input: String, ownerFilter: String? = null): List<Station> {
         val columns = arrayOf(TvContract.Channels._ID, TvContract.Channels.COLUMN_DISPLAY_NAME,
-            TvContract.Channels.COLUMN_DISPLAY_NUMBER, TvContract.Channels.COLUMN_SERVICE_TYPE)
+            TvContract.Channels.COLUMN_DISPLAY_NUMBER, TvContract.Channels.COLUMN_SERVICE_TYPE,
+            TvContract.Channels.COLUMN_PACKAGE_NAME)
         val stations = ArrayList<Station>()
         context.contentResolver.query(TvContract.buildChannelsUriForInput(input), columns, null, null, null)?.use { c ->
             while (c.moveToNext()) {
                 currentCoroutineContext().ensureActive()
                 if (c.getString(3) == TvContract.Channels.SERVICE_TYPE_AUDIO) continue
+                if (ownerFilter != null && c.getString(4) != ownerFilter) continue
                 stations += Station(c.getLong(0), c.getString(1) ?: context.getString(tv.own.owntv.core.R.string.tuner_channel_name, c.getLong(0)), c.getString(2)?.toIntOrNull())
             }
         }
@@ -80,8 +91,10 @@ class TunerSourceSyncer(
     }
 
     suspend fun refreshGuide(source: SourceEntity, storeId: Long = source.id): Int {
-        val input = Uri.parse(source.url).getQueryParameter("input") ?: error(context.getString(tv.own.owntv.core.R.string.tuner_missing))
-        val stations = readStations(input)
+        val sourceUri = Uri.parse(source.url)
+        val input = sourceUri.getQueryParameter("input") ?: error(context.getString(tv.own.owntv.core.R.string.tuner_missing))
+        val ownerFilter = if (sourceUri.getQueryParameter("ownerFilter") == "1") sourceProvider(sourceUri) else null
+        val stations = readStations(input, ownerFilter)
         check(stations.isNotEmpty()) { context.getString(tv.own.owntv.core.R.string.tuner_empty) }
         val now = System.currentTimeMillis()
         var count = 0
@@ -116,10 +129,48 @@ class TunerSourceSyncer(
 
     companion object {
         const val READ_PERMISSION = "android.permission.READ_TV_LISTINGS"
+        private const val PLUTO_PACKAGE = "tv.pluto.android"
+        private const val PLUTO_LABEL = "Pluto TV"
+        fun isPluto(providerPackage: String?): Boolean = providerPackage == PLUTO_PACKAGE
         fun isSource(url: String) = url.startsWith("owntv-tuner://")
-        fun sourceUrl(id: String): String = Uri.Builder().scheme("owntv-tuner").authority("input").appendQueryParameter("input", id).build().toString()
-        fun discover(context: Context): List<Input> = context.getSystemService(TvInputManager::class.java)?.tvInputList.orEmpty()
-            .filter { !it.isPassthroughInput && it.type == TvInputInfo.TYPE_TUNER && it.id.contains("/HW") }
-            .map { Input(it.id, it.loadLabel(context).toString()) }
+        fun sourceUrl(id: String, providerPackage: String? = null, filterByOwner: Boolean = false): String = Uri.Builder()
+            .scheme("owntv-tuner").authority("input").appendQueryParameter("input", id)
+            .apply {
+                if (providerPackage != null) appendQueryParameter("provider", providerPackage)
+                if (filterByOwner) appendQueryParameter("ownerFilter", "1")
+            }.build().toString()
+
+        private fun sourceProvider(uri: Uri): String? = uri.getQueryParameter("provider")?.takeIf { it == PLUTO_PACKAGE }
+
+        fun discover(context: Context): List<Input> {
+            val available = context.getSystemService(TvInputManager::class.java)?.tvInputList.orEmpty()
+                .filterNot { it.isPassthroughInput }
+            val hardware = available.filter { it.type == TvInputInfo.TYPE_TUNER && it.id.contains("/HW") }
+                .map { Input(it.id, it.loadLabel(context).toString()) }
+            val pluto = linkedMapOf<String, Input>()
+            available.filter { it.serviceInfo.packageName == PLUTO_PACKAGE }
+                .filter { info -> hasChannels(context, info.id) }
+                .forEach { info -> pluto[info.id] = Input(info.id, info.loadLabel(context).toString(), PLUTO_PACKAGE) }
+
+            val projection = arrayOf(TvContract.Channels.COLUMN_INPUT_ID, TvContract.Channels.COLUMN_PACKAGE_NAME,
+                TvContract.Channels.COLUMN_SERVICE_TYPE)
+            runCatching {
+                context.contentResolver.query(TvContract.Channels.CONTENT_URI, projection,
+                    "${TvContract.Channels.COLUMN_PACKAGE_NAME} = ?", arrayOf(PLUTO_PACKAGE), null)?.use { cursor ->
+                    val availableIds = available.mapTo(hashSetOf()) { it.id }
+                    while (cursor.moveToNext()) {
+                        val inputId = cursor.getString(0) ?: continue
+                        if (inputId !in availableIds || cursor.getString(2) == TvContract.Channels.SERVICE_TYPE_AUDIO) continue
+                        pluto.putIfAbsent(inputId, Input(inputId, PLUTO_LABEL, PLUTO_PACKAGE, filterByOwner = true))
+                    }
+                }
+            }
+            return hardware + pluto.values
+        }
+
+        private fun hasChannels(context: Context, inputId: String): Boolean = runCatching {
+            context.contentResolver.query(TvContract.buildChannelsUriForInput(inputId),
+                arrayOf(TvContract.Channels._ID), null, null, null)?.use { it.moveToFirst() } ?: false
+        }.getOrDefault(false)
     }
 }
