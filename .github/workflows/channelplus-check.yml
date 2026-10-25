@@ -1,0 +1,31 @@
+name: Channelplus checks
+on:
+  push:
+    branches: [main, codex/complete-import-channel-review]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+      - run: sdkmanager 'platforms;android-37' 'build-tools;37.0.0'
+      - name: Create disposable CI signing key
+        run: keytool -genkeypair -keystore "$RUNNER_TEMP/ci.jks" -storepass android -keypass android -alias tunerprobe -keyalg RSA -validity 30 -dname 'CN=Channelplus CI'
+      - name: Check and build
+        working-directory: owntv_tdt
+        env:
+          CHANNELPLUS_TEST_KEYSTORE: ${{ runner.temp }}/ci.jks
+        run: ./gradlew :app:testStandardDebugUnitTest :app:assembleStandardDebug --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Channelplus-CI-test-only
+          path: owntv_tdt/app/build/outputs/apk/standard/debug/*.apk

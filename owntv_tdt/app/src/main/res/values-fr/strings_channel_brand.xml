@@ -1,0 +1,66 @@
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<string name="update_ready">Channel + v<xliff:g id="available">%1$s</xliff:g> est prêt (vous utilisez la v<xliff:g id="current">%2$s</xliff:g>).</string>
+<string name="recovery_title">Channel + n’a pas pu ouvrir sa base de données</string>
+<string name="settings_recording_timers_inexact">Cet appareil n’autorise pas Channel + à programmer des alarmes exactes, donc un enregistrement peut démarrer avec quelques minutes de retard. Les enregistrements commencent plus tôt pour compenser.</string>
+<string name="recording_failed_drm">Cette chaîne est protégée par DRM : elle peut être regardée mais pas enregistrée. La protection vient de votre fournisseur, pas d\'Channel +.</string>
+<string name="sports_alerts_when_closed">Alertes quand Channel + est fermé</string>
+<string name="sports_alerts_footnote">Quand Channel + est fermé, les alertes arrivent en général en moins d’une minute. Si le téléphone reste longtemps immobile écran éteint, Android peut les retenir jusqu’à environ 15 minutes. La carte de score en direct n’est pas retenue.</string>
+<string name="sports_no_playlist_body">Scores, classements et alertes fonctionnent sans. Avec une playlist, Channel + trouve toutes les chaînes qui diffusent ce match.</string>
+<string name="sports_sport_buttons_description">Mes sports : uniquement vos choix. Tous les sports : chaque championnat connu d’Channel +, plus long à charger.</string>
+<string name="common_own_tv_user">Utilisateur Channel +</string>
+<string name="player_trailer_blocked_title">Cette bande-annonce ne peut pas être lue dans Channel +</string>
+<string name="content_exit_owntv">Quitter Channel + ?</string>
+<string name="content_storage_folder_fallback">Votre dossier de téléchargement n’est pas disponible pour le moment : les téléchargements sont enregistrés dans le dossier d’Channel + jusqu’à son retour.</string>
+<string name="content_epg_own_player">Lecteur Channel +</string>
+<string name="settings_proxy_description">Faire transiter tout le trafic et toute la lecture d’Channel + par un proxy HTTP.</string>
+<string name="settings_ffmpeg_audio_description">Activé : ExoPlayer peut aussi décoder le son pour lequel l\'appareil n\'a pas de décodeur, comme le DTS, le TrueHD ou le MP2. Les décodeurs de l\'appareil restent prioritaires. Désactivé : ExoPlayer n\'utilise que les décodeurs de l\'appareil. mpv décode toujours avec FFmpeg. Modifier ce réglage redémarre Channel +.</string>
+<string name="settings_ffmpeg_audio_restart_message">Le décodeur audio change après le redémarrage d\'Channel +.</string>
+<string name="settings_app_startup_description">Écran qu’Channel + ouvre au démarrage</string>
+<string name="settings_open_subtitles_access_priority">Laissez les deux champs vides pour utiliser le Worker partagé d’Channel +. Une URL de Worker personnalisée est prioritaire sur une clé d’API directe. Les sessions de compte restent propres à chaque profil.</string>
+<string name="settings_restore_remote_description">Sur n’importe quel appareil doté d’un navigateur sur le même Wi-Fi — téléphone, ordinateur ou autre téléviseur —, scannez le QR (ou ouvrez l’URL), saisissez ce PIN, choisissez votre fichier de sauvegarde Channel + et envoyez-le. Vous choisissez ensuite ici ce qu’il faut restaurer.</string>
+<string name="settings_catchup_player_internal">Lecteur Channel +</string>
+<string name="settings_sources_probe_warning">Beaucoup de fournisseurs n’indiquent jamais combien de chaînes vous pouvez regarder en même temps ; Channel + le découvre donc en en ouvrant quelques-unes et en observant lesquelles tiennent. Tout ce qui est en cours de lecture s’arrêtera, et cela peut prendre jusqu’à deux minutes.</string>
+<string name="settings_sources_probe_unknown">Channel + n’a pas pu déterminer combien de chaînes ce fournisseur autorise.</string>
+<string name="settings_dns_toggle_description">Résoudre tous les noms de domaine consultés par Channel + au moyen d’un serveur DNS personnalisé.</string>
+<string name="settings_live_tune_timeout_description">Si une chaîne en direct n\'a affiché aucune image passé ce délai, Channel + arrête d\'essayer et vous le dit, au lieu de laisser un écran noir pendant qu\'il passe en revue tous ses lecteurs. « Jamais » continue d\'essayer, ce qui peut prendre bien plus d\'une minute sur une chaîne que votre fournisseur a supprimée. Les attentes demandées par votre fournisseur ne sont pas comptées.</string>
+<string name="settings_surround_forced_description">Surround — envoyer le Dolby/DTS vers un véritable récepteur 5.1/7.1. Si le son coupe ou saccade, Channel + revient quand même à la stéréo et vous le signale.</string>
+<string name="settings_auto_frame_rate_warning_description">Cet appareil fonctionne sous Android <xliff:g id="android_version">%1$s</xliff:g>. Avant Android 12, le téléviseur ne peut pas indiquer à Channel + les fréquences de rafraîchissement vers lesquelles il peut basculer en douceur ; changer la fréquence peut donc faire passer l\'écran au noir pendant une seconde ou deux — parfois plus d\'une fois au cours d\'un programme.\n\nNous vous recommandons de laisser la fréquence d\'images automatique désactivée ici. Si votre téléviseur bascule proprement, activez-la et voyez : vous pouvez la désactiver à nouveau à tout moment.</string>
+<string name="settings_auto_frame_rate_warning_description_mobile">Cet appareil fonctionne sous Android <xliff:g id="android_version">%1$s</xliff:g>. Avant Android 12, l\'appareil ne peut pas indiquer à Channel + les fréquences de rafraîchissement vers lesquelles il peut basculer en douceur ; changer la fréquence peut donc faire passer l\'écran au noir pendant une seconde ou deux — parfois plus d\'une fois au cours d\'un programme.\n\nNous vous recommandons de laisser la fréquence d\'images automatique désactivée ici. Si votre écran bascule proprement, activez-la et voyez : vous pouvez la désactiver à nouveau à tout moment.</string>
+<string name="local_sync_error_unreachable">Impossible de joindre cet appareil. Sur celui-ci, ouvrez Channel + → Plus → Synchronisation locale et activez le mode synchronisation. Les deux appareils doivent être sur le même Wi-Fi.</string>
+<string name="settings_app_icon_summary">Couleur de l\'icône et du logo Channel +</string>
+<string name="settings_app_icon_sheet_mobile">L’apparence d’Channel + sur votre écran d’accueil. L’app redémarre une fois.</string>
+<string name="app_icon_restart_title">Redémarrer Channel + ?</string>
+<string name="app_icon_restart_message">Vous avez choisi une nouvelle icône et un nouveau logo. Ils s\'appliqueront après le redémarrage d\'Channel +.</string>
+<string name="settings_help_theme">Channel + est conçu pour le thème sombre. Système suit le réglage du téléviseur s’il en a un ; Clair convient à une pièce lumineuse.</string>
+<string name="settings_help_fonts">La police utilisée dans tout Channel + et la taille du texte. Les fenêtres utilisent la même police.</string>
+<string name="settings_help_app_icon">L’icône d’Channel + sur l’écran d’accueil du téléviseur. Le lanceur peut mettre un instant à afficher le changement.</string>
+<string name="settings_help_brand_accent">Le logo Channel + du menu, de « À propos » et de la configuration affiche son triangle de lecture dans votre couleur d’accent. L’icône de l’écran d’accueil garde ses propres couleurs.</string>
+<string name="settings_help_startup">Ce qu’Channel + affiche au démarrage : l’accueil, la dernière chaîne regardée, vos favoris ou une chaîne de votre choix.</string>
+<string name="settings_help_check_updates">Cherche maintenant sur GitHub une version plus récente d’Channel + et propose de l’installer. Vos playlists, favoris et réglages restent tels quels.</string>
+<string name="settings_help_update_startup">Cherche une nouvelle version à chaque démarrage d’Channel + et vous prévient s’il y en a une. Rien n’est installé sans votre accord.</string>
+<plurals name="settings_help_language">
+        <item quantity="one">La langue de tous les menus et messages d’Channel +. <xliff:g id="count">%1$d</xliff:g> langue ; suit la langue du téléviseur tant que vous n’en choisissez pas.</item>
+        <item quantity="many">La langue de tous les menus et messages d’Channel +. <xliff:g id="count">%1$d</xliff:g> langues ; suit la langue du téléviseur tant que vous n’en choisissez pas.</item>
+        <item quantity="other">La langue de tous les menus et messages d’Channel +. <xliff:g id="count">%1$d</xliff:g> langues ; suit la langue du téléviseur tant que vous n’en choisissez pas.</item>
+    </plurals>
+<string name="settings_language_system_help">Channel + suit la langue du téléviseur (actuellement <xliff:g id="language">%1$s</xliff:g>). Choisissez-en une ci-dessous pour l’utiliser uniquement dans Channel +.</string>
+<string name="settings_language_pick_help">Utiliser <xliff:g id="language">%1$s</xliff:g> dans Channel +, quelle que soit la langue du téléviseur.</string>
+<string name="settings_help_bg_background">Stage affiche les couleurs douces d’Channel +. Image affiche une image à vous derrière chaque écran. Uni est un fond sombre et plat.</string>
+<string name="setup_disclaimer">Channel + n’est qu’un lecteur multimédia. Il ne comprend aucune chaîne, liste de lecture ni aucun contenu. Vous devez ajouter vos propres sources Xtream, M3U ou Stalker auxquelles vous accédez légalement.</string>
+<string name="setup_set_up_owntv">Configurer Channel +</string>
+<string name="setup_sync_device_description">Copiez tout depuis votre autre appareil Channel + via le Wi-Fi</string>
+<string name="setup_byo_source_description">Channel + est un lecteur — ajoutez votre propre source Xtream, M3U ou Stalker.</string>
+<string name="companion_pin_page_title">Channel + — Saisir le PIN</string>
+<string name="companion_add_page_title">Channel + — Ajouter une source</string>
+<string name="companion_saved_page_title">Channel + — Envoyé</string>
+<string name="companion_backup_page_title">Channel + — Restaurer une sauvegarde</string>
+<string name="companion_backup_description">Choisissez un fichier de sauvegarde Channel + (.own ou un ancien fichier .json) et appuyez sur Envoyer. Il est transféré vers la TV — prenez la télécommande et choisissez-y les éléments à restaurer.</string>
+<string name="companion_image_page_title">Channel + — Image d’arrière-plan</string>
+<string name="companion_download_page_title">Channel + — Télécharger la sauvegarde</string>
+<string name="companion_download_description">Votre téléviseur a préparé un fichier de sauvegarde Channel +. Appuyez sur le bouton pour l’enregistrer sur cet appareil (owntv-backup.own). Conservez-le en lieu sûr — vous pourrez effectuer une restauration à partir de ce fichier ultérieurement.</string>
+<string name="local_sync_browser_title">Synchronisation locale Channel +</string>
+<string name="local_sync_browser_body">Cette adresse est destinée à l\'application Channel + de votre autre appareil. Ouvrez-y Synchronisation locale et choisissez cet appareil dans la liste.</string>
+<string name="setup_welcome_title">Bienvenue dans Channel +</string>
+<string name="setup_line_app_icon">L’apparence d’Channel + sur l’écran d’accueil du téléviseur</string>
+<string name="setup_line_app_icon_mobile">L’apparence d’Channel + sur votre écran d’accueil</string>
+</resources>

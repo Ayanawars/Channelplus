@@ -1,0 +1,65 @@
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<string name="update_ready">Channel + v<xliff:g id="available">%1$s</xliff:g> er klar (du har v<xliff:g id="current">%2$s</xliff:g>).</string>
+<string name="recovery_title">Channel + kunne ikke åbne sin database</string>
+<string name="settings_recording_timers_inexact">Denne enhed tillader ikke Channel + at sætte præcise alarmer, så en optagelse kan starte et par minutter for sent. Optagelser starter tidligere for at opveje det.</string>
+<string name="recording_failed_drm">Denne kanal er DRM-beskyttet, så den kan ses, men ikke optages. Beskyttelsen kommer fra din udbyder, ikke fra Channel +.</string>
+<string name="sports_alerts_when_closed">Advarsler, når Channel + er lukket</string>
+<string name="sports_alerts_footnote">Når Channel + er lukket, kommer advarsler normalt inden for et minut. Hvis telefonen har ligget stille med slukket skærm længe, kan Android holde dem tilbage i op til ca. 15 minutter. Live-resultatkortet holdes ikke tilbage.</string>
+<string name="sports_no_playlist_body">Resultater, stillinger og advarsler virker uden. Med en playliste finder Channel + alle kanaler, der viser kampen.</string>
+<string name="sports_sport_buttons_description">Mine sportsgrene: kun det, du har valgt. Alle sportsgrene: alle ligaer, Channel + kender, og det tager længere at indlæse.</string>
+<string name="common_own_tv_user">Channel +-bruger</string>
+<string name="player_trailer_blocked_title">Denne trailer kan ikke afspilles i Channel +</string>
+<string name="content_exit_owntv">Afslut Channel +?</string>
+<string name="content_storage_folder_fallback">Din downloadmappe er ikke tilgængelig lige nu, så downloads gemmes i Channel +\'s egen mappe, indtil den er tilbage.</string>
+<string name="content_epg_own_player">Channel +-afspiller</string>
+<string name="settings_proxy_description">Send al trafik og afspilning fra Channel + gennem en HTTP-proxy.</string>
+<string name="settings_ffmpeg_audio_description">Til: ExoPlayer kan også afkode lyd, som enheden ikke har en dekoder til, f.eks. DTS, TrueHD eller MP2. Enhedens egne dekodere kommer stadig først. Fra: ExoPlayer bruger kun enhedens dekodere. mpv afkoder altid med FFmpeg. En ændring genstarter Channel +.</string>
+<string name="settings_ffmpeg_audio_restart_message">Lyddekoderen skifter, når Channel + er genstartet.</string>
+<string name="settings_app_startup_description">Hvad Channel + åbner ved start</string>
+<string name="settings_open_subtitles_access_priority">Lad begge felter være tomme for at bruge Channel +’s delte Worker. En egen Worker-URL har forrang for en direkte API-nøgle. Kontosessioner er fortsat profilspecifikke.</string>
+<string name="settings_restore_remote_description">På en vilkårlig enhed med browser på samme wi-fi – telefon, computer eller et andet tv – scan QR-koden (eller åbn URL’en), indtast denne PIN-kode, vælg din Channel +-sikkerhedskopi, og send den. Du vælger derefter her, hvad der skal gendannes.</string>
+<string name="settings_catchup_player_internal">Channel +-afspiller</string>
+<string name="settings_sources_probe_warning">Mange udbydere oplyser aldrig, hvor mange kanaler du må se samtidig, så Channel + finder ud af det ved at åbne nogle stykker og se, hvilke der overlever. Alt, der afspilles nu, stopper, og det kan tage op til to minutter.</string>
+<string name="settings_sources_probe_unknown">Channel + kunne ikke finde ud af, hvor mange kanaler denne udbyder tillader.</string>
+<string name="settings_dns_toggle_description">Foretag alle Channel +-domæneopslag via en brugerdefineret DNS-server.</string>
+<string name="settings_live_tune_timeout_description">Hvis en live-kanal ikke har vist billede inden for denne tid, holder Channel + op med at prøve og siger det til dig i stedet for at efterlade en sort skærm, mens den arbejder sig gennem alle sine afspillere. “Aldrig” bliver ved med at prøve, hvilket kan tage langt over et minut på en kanal, din udbyder har fjernet. Ventetid, som udbyderen selv beder om, tælles ikke med.</string>
+<string name="settings_surround_forced_description">Surround – send Dolby/DTS til en ægte 5.1/7.1-modtager. Hvis lyden forsvinder eller hakker, falder Channel + stadig tilbage til stereo og fortæller dig det.</string>
+<string name="settings_auto_frame_rate_warning_description">Denne enhed kører Android <xliff:g id="android_version">%1$s</xliff:g>. Under Android 12 kan TV\'et ikke fortælle Channel +, hvilke opdateringshastigheder det kan skifte problemfrit imellem, så en ændring af hastigheden kan få skærmen til at blive sort i et sekund eller to — sommetider mere end én gang under et program.\n\nVi anbefaler at lade Auto-billedhastighed være slået fra her. Hvis dit TV skifter problemfrit, kan du slå det til og se: du kan altid skifte tilbage.</string>
+<string name="settings_auto_frame_rate_warning_description_mobile">Denne enhed kører Android <xliff:g id="android_version">%1$s</xliff:g>. Under Android 12 kan enheden ikke fortælle Channel +, hvilke opdateringshastigheder den kan skifte problemfrit imellem, så en ændring af hastigheden kan få skærmen til at blive sort i et sekund eller to — sommetider mere end én gang under et program.\n\nVi anbefaler at lade Auto-billedhastighed være slået fra her. Hvis din skærm skifter problemfrit, kan du slå det til og se: du kan altid skifte tilbage.</string>
+<string name="local_sync_error_unreachable">Enheden kunne ikke nås. Åbn Channel + → Mere → Lokal synkronisering på den, og slå Synkroniseringstilstand til. Begge enheder skal være på samme Wi-Fi.</string>
+<string name="settings_app_icon_summary">Farve på Channel +-ikonet og -logoet</string>
+<string name="settings_app_icon_sheet_mobile">Sådan vises Channel + på din startskærm. Appen genstarter én gang.</string>
+<string name="app_icon_restart_title">Genstart Channel +?</string>
+<string name="app_icon_restart_message">Du har valgt et nyt ikon og logo. De træder i kraft, når Channel + genstartes.</string>
+<string name="settings_help_theme">Channel + er designet til mørk. System følger tv’ets egen indstilling, hvis den findes; lys passer til et lyst rum.</string>
+<string name="settings_help_fonts">Skrifttypen i hele Channel + og tekstens størrelse. Pop op-vinduer bruger samme skrifttype.</string>
+<string name="settings_help_app_icon">Channel +-ikonet på tv’ets startskærm. Det kan tage et øjeblik, før startskærmen viser ændringen.</string>
+<string name="settings_help_brand_accent">Channel +-logoet i menuen, Om og opsætningen viser afspilningstrekanten i din accentfarve. Ikonet på startskærmen beholder sine egne farver.</string>
+<string name="settings_help_startup">Hvad Channel + viser ved start: Hjem, den kanal, du så sidst, dine favoritter eller en kanal, du vælger.</string>
+<string name="settings_help_check_updates">Søger nu på GitHub efter en nyere Channel + og tilbyder at installere den. Dine playlister, favoritter og indstillinger forbliver, som de er.</string>
+<string name="settings_help_update_startup">Søger efter en ny version, hver gang Channel + starter, og fortæller dig, når der er en. Intet installeres uden at spørge.</string>
+<plurals name="settings_help_language">
+        <item quantity="one">Sproget i alle menuer og beskeder i Channel +. <xliff:g id="count">%1$d</xliff:g> sprog; følger tv’ets eget sprog, indtil du vælger et.</item>
+        <item quantity="other">Sproget i alle menuer og beskeder i Channel +. <xliff:g id="count">%1$d</xliff:g> sprog; følger tv’ets eget sprog, indtil du vælger et.</item>
+    </plurals>
+<string name="settings_language_system_help">Channel + følger tv’ets sprog (nu <xliff:g id="language">%1$s</xliff:g>). Vælg et nedenfor for kun at bruge det i Channel +.</string>
+<string name="settings_language_pick_help">Brug <xliff:g id="language">%1$s</xliff:g> i Channel +, uanset tv’ets sprog.</string>
+<string name="settings_help_bg_background">Stage viser Channel +s egne bløde farver. Billede viser dit eget billede bag hver skærm. Ensfarvet er en flad mørk flade.</string>
+<string name="setup_disclaimer">Channel + er udelukkende en medieafspiller. Den indeholder ingen kanaler, afspilningslister eller noget indhold. Du er selv ansvarlig for at tilføje dine egne Xtream-, M3U- eller Stalker-kilder, som du har lovlig adgang til.</string>
+<string name="setup_set_up_owntv">Konfigurer Channel +</string>
+<string name="setup_sync_device_description">Kopiér alt fra din anden Channel +-enhed over Wi-Fi</string>
+<string name="setup_byo_source_description">Channel + er en afspiller — tilføj din egen Xtream-, M3U- eller Stalker-kilde.</string>
+<string name="companion_pin_page_title">Channel + — Indtast PIN</string>
+<string name="companion_add_page_title">Channel + — Tilføj kilde</string>
+<string name="companion_saved_page_title">Channel + — Sendt</string>
+<string name="companion_backup_page_title">Channel + — Gendan sikkerhedskopi</string>
+<string name="companion_backup_description">Vælg en Channel +-sikkerhedskopifil (.own eller en ældre .json-fil), og tryk på Send. Den overføres til tv\'et — tag fjernbetjeningen, og vælg dér, hvad der skal gendannes.</string>
+<string name="companion_image_page_title">Channel + — Baggrundsbillede</string>
+<string name="companion_download_page_title">Channel + — Download sikkerhedskopi</string>
+<string name="companion_download_description">Dit tv har klargjort en sikkerhedskopifil til Channel +. Tryk på knappen for at gemme den på denne enhed (owntv-backup.own). Opbevar den et sikkert sted — du kan gendanne fra den senere.</string>
+<string name="local_sync_browser_title">Channel + lokal synkronisering</string>
+<string name="local_sync_browser_body">Denne adresse er til Channel +-appen på din anden enhed. Åbn Lokal synkronisering der, og vælg denne enhed på listen.</string>
+<string name="setup_welcome_title">Velkommen til Channel +</string>
+<string name="setup_line_app_icon">Sådan vises Channel + på tv’ets startskærm</string>
+<string name="setup_line_app_icon_mobile">Sådan vises Channel + på din startskærm</string>
+</resources>

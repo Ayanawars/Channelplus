@@ -45,7 +45,7 @@ dependencyResolutionManagement {
 // because OwnTV_Core publishes under the same group and artifact ids this app asks for. CI leaves
 // owntv.corePath unset and resolves the pinned version instead.
 // Set it in ~/.gradle/gradle.properties, never here:  owntv.corePath=E:/MEGA/CODE/AI/OwnTV_Core
-providers.gradleProperty("owntv.corePath").orNull?.takeIf { it.isNotBlank() }?.let { includeBuild(it) }
+includeBuild(providers.gradleProperty("owntv.corePath").orNull ?: "../owntv_core_tdt")
 
 rootProject.name = "OwnTV"
 include(":app")
