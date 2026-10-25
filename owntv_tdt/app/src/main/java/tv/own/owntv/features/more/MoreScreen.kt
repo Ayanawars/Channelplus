@@ -2,6 +2,11 @@ package tv.own.owntv.features.more
 
 import androidx.compose.foundation.layout.size
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
+import tv.own.owntv.ui.stage.StageTile
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
@@ -98,104 +103,83 @@ fun MoreScreen(
     vm: MoreCountsViewModel = koinViewModel(),
     settingsVm: SettingsViewModel = koinViewModel(),
 ) {
-    var selected by rememberSaveable { mutableStateOf(MoreItem.SETTINGS) }
+    var selected by rememberSaveable { mutableStateOf<MoreItem?>(null) }
+    var hubItem by rememberSaveable { mutableStateOf(MoreItem.SETTINGS) }
     val itemFocus = remember { MoreItem.entries.associateWith { FocusRequester() } }
     // What OK / ▶ focuses on the page: a fixed target, or the page's own choice (its first row).
     val pageTarget = remember { FocusRequester() }
     var pageEntry by remember { mutableStateOf<(() -> Boolean)?>(null) }
     var pageFocused by remember { mutableStateOf(false) }
-    val enterPage: () -> Boolean = { pageEntry?.invoke() ?: runCatching { pageTarget.requestFocus() }.getOrDefault(false) }
-    val backToSheet: () -> Unit = { runCatching { itemFocus.getValue(selected).requestFocus() } }
-    // Like the rail: ▲ ▼ move focus, OK selects the item (its page shows, focus stays on the item),
-    // ▶ goes into the page that is shown.
+    val enterPage: () -> Boolean = { if (selected == null) runCatching { itemFocus.getValue(hubItem).requestFocus() }.getOrDefault(false) else pageEntry?.invoke() ?: runCatching { pageTarget.requestFocus() }.getOrDefault(false) }
+    val backToSheet: () -> Unit = { hubItem = selected ?: MoreItem.SETTINGS; selected = null; pageEntry = null }
+    // The hub opens one full-width page; Back returns focus to the card that opened it.
     val choose: (MoreItem) -> Unit = { item -> if (item != selected) { selected = item; pageEntry = null } }
 
-    // The rail's ▶ lands on the item the sheet was last on.
+    // The rail enters the hub or the currently open page.
     DisposableEffect(onEntryHook) {
-        onEntryHook?.invoke { runCatching { itemFocus.getValue(selected).requestFocus() }.getOrDefault(false) }
+        onEntryHook?.invoke { enterPage() }
         onDispose { onEntryHook?.invoke(null) }
     }
     LaunchedEffect(restoreFocus) {
         if (!restoreFocus) return@LaunchedEffect
         withFrameNanos { }
         withFrameNanos { }
-        if (!enterPage()) runCatching { itemFocus.getValue(selected).requestFocus() }
+        enterPage()
         onRestored()
     }
     // Composed before the page, so a page's own Back (a step popup, a dialog) still wins over it.
-    BackHandler(enabled = pageFocused) { backToSheet() }
+    BackHandler(enabled = pageFocused && selected != null) { backToSheet() }
+    LaunchedEffect(selected) {
+        withFrameNanos { }
+        enterPage()
+    }
 
-    val favorites by vm.favorites.collectAsStateWithLifecycle()
-    val history by vm.history.collectAsStateWithLifecycle()
-    val sync by vm.sync.collectAsStateWithLifecycle()
-    val lastBackup by vm.lastBackup.collectAsStateWithLifecycle()
     val playlists by vm.playlistCount.collectAsStateWithLifecycle()
     val pinned by settingsVm.quickPinnedKeys.collectAsStateWithLifecycle()
-    val context = LocalContext.current
     var logVersion by remember { mutableIntStateOf(0) }
-    val logCount by produceState(0, logVersion) { value = withContext(Dispatchers.IO) { PlaybackErrorLog.read(context).size } }
 
     Box(modifier.fillMaxSize().onFocusChanged { if (it.hasFocus) onChildFocused() }) {
-        // --- The sheet (`.gsheet`, 440 wide at 24 / 24 / 24): the full height.
-        Column(
-            Modifier
-                .padding(start = 24.mpx, top = 24.mpx, bottom = 24.mpx)
-                .width(440.mpx)
-                .fillMaxHeight()
-                .stageGlass(32.mpx, overContent = true)
-                .padding(horizontal = 16.mpx, vertical = 26.mpx)
-                // ◀ back from the page lands on the item that page belongs to.
-                .focusProperties { onEnter = { runCatching { itemFocus.getValue(selected).requestFocus() } } }
-                .onPreviewKeyEvent { e ->
-                    e.type == KeyEventType.KeyDown && e.key == Key.DirectionRight && enterPage()
-                }
-                .focusGroup(),
-        ) {
-            ProfileRow(profileName, playlistLabel, playlists, avatarId, avatarPath, onSwitchProfile, onPickAvatar)
-            val item = @Composable { it: MoreItem, icon: OwnTVIcon, label: String, value: String?, warn: Boolean ->
-                StageGroupItem(
-                    text = label, icon = icon, value = value, warn = warn,
-                    selected = selected == it,
-                    onClick = { choose(it) },
-                    modifier = Modifier.focusRequester(itemFocus.getValue(it)),
-                )
-            }
-            item(MoreItem.SETTINGS, OwnTVIcon.SETTINGS, stringResource(R.string.common_nav_settings), null, false)
-            GroupLabel(stringResource(R.string.more_group_your_things))
-            item(MoreItem.FAVORITES, OwnTVIcon.FAVORITE, stringResource(R.string.content_category_favorites), favorites.total.toString(), false)
-            item(MoreItem.HISTORY, OwnTVIcon.HISTORY, stringResource(R.string.content_category_history), history.total.toString(), false)
-            GroupLabel(stringResource(R.string.more_group_keep_safe))
-            item(
-                MoreItem.BACKUP, OwnTVIcon.DOWNLOADS, stringResource(R.string.settings_backup_restore),
-                lastBackup?.let { relativeShort(it.at) } ?: stringResource(R.string.common_never), lastBackup == null,
-            )
-            item(MoreItem.LOCAL_SYNC, OwnTVIcon.PHONE, stringResource(R.string.local_sync_title), stringResource(if (sync.listening) R.string.common_on else R.string.common_off), false)
-            GroupLabel(stringResource(R.string.settings_app_group))
-            item(MoreItem.ERROR_LOG, OwnTVIcon.WARNING, stringResource(R.string.settings_playback_error_log), logCount.toString(), false)
-            item(MoreItem.ABOUT, OwnTVIcon.INFO, stringResource(R.string.settings_about), BuildConfig.VERSION_NAME, false)
-            // Maintainer-only; DEV_TOOLS is a compile-time constant, so R8 removes it from published APKs.
-            if (BuildConfig.DEV_TOOLS) item(MoreItem.DEVELOPER, OwnTVIcon.GEAR, "Developer", "DEV", false)
-            Spacer(Modifier.weight(1f))
-            StageKeyHints(
-                listOf(
-                    stringResource(R.string.common_ok) to stringResource(R.string.content_key_select),
-                    "▶" to stringResource(R.string.content_key_enter),
-                    stringResource(R.string.common_back) to stringResource(R.string.content_key_menu),
-                ),
-                Modifier.padding(start = 14.mpx),
-                textSize = 15,
-            )
-        }
-
-        // --- The page: everything right of the sheet, below the top-right cluster.
+        // Hub and child pages share all available width below the top-right cluster.
         Box(
             Modifier
-                .padding(start = 520.mpx, top = 128.mpx, end = 64.mpx)
+                .padding(start = 64.mpx, top = 128.mpx, end = 64.mpx)
                 .fillMaxSize()
                 .onFocusChanged { pageFocused = it.hasFocus },
         ) {
             val setEntry: (() -> Boolean) -> Unit = { pageEntry = it }
             when (selected) {
+                null -> Column(Modifier.fillMaxSize()) {
+                    PageHead(stringResource(R.string.common_nav_more)) {}
+                    ProfileRow(profileName, playlistLabel, playlists, avatarId, avatarPath, onSwitchProfile, onPickAvatar)
+                    val cards = listOf(
+                        Triple(MoreItem.SETTINGS, OwnTVIcon.SETTINGS, stringResource(R.string.common_nav_settings)),
+                        Triple(MoreItem.FAVORITES, OwnTVIcon.FAVORITE, stringResource(R.string.content_category_favorites)),
+                        Triple(MoreItem.HISTORY, OwnTVIcon.HISTORY, stringResource(R.string.content_category_history)),
+                        Triple(MoreItem.BACKUP, OwnTVIcon.DOWNLOADS, stringResource(R.string.settings_backup_restore)),
+                        Triple(MoreItem.LOCAL_SYNC, OwnTVIcon.PHONE, stringResource(R.string.local_sync_title)),
+                        Triple(MoreItem.ERROR_LOG, OwnTVIcon.WARNING, stringResource(R.string.settings_playback_error_log)),
+                        Triple(MoreItem.ABOUT, OwnTVIcon.INFO, stringResource(R.string.settings_about)),
+                    )
+                    Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(bottom = 24.mpx), verticalArrangement = Arrangement.spacedBy(18.mpx)) {
+                        cards.chunked(3).forEach { row ->
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(18.mpx)) {
+                                row.forEach { (item, icon, label) ->
+                                    StageTile(
+                                        modifier = Modifier.weight(1f).height(140.mpx).focusRequester(itemFocus.getValue(item)).semantics { contentDescription = label },
+                                        onClick = { choose(item) },
+                                    ) { focused ->
+                                        Column(verticalArrangement = Arrangement.spacedBy(12.mpx)) {
+                                            OwnTVIcon(icon, StageColors.Text, Modifier.size(28.mpx))
+                                            Text(label, style = stageText(22, 700), color = StageColors.Text, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                        }
+                                    }
+                                }
+                                repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
+                            }
+                        }
+                    }
+                }
+
                 MoreItem.SETTINGS -> SettingsPage(
                     entry = pageTarget, pinned = pinned.size,
                     onOpenGroup = { onOpenSettings(it, false) },

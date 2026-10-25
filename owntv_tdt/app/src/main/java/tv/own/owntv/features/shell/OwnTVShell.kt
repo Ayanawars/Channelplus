@@ -664,7 +664,7 @@ fun OwnTVShell(
     LaunchedEffect(railFocused, navStyle, navHideAfterMs) {
         railIdleHidden = false
         if (navStyle == tv.own.owntv.core.settings.SettingsRepository.NavStyle.FLOATING && !railFocused) {
-            kotlinx.coroutines.delay(navHideAfterMs.toLong())
+            kotlinx.coroutines.delay(180)
             railIdleHidden = true
         }
     }
@@ -864,6 +864,21 @@ fun OwnTVShell(
             showAvatarPicker -> showAvatarPicker = false
             showPlaylistPicker -> showPlaylistPicker = false
             showExit -> showExit = false
+            railFocused -> {
+                railFocused = false
+                railIdleHidden = true
+                railKeyAt = 0L
+                val enter = when (selectedSection) {
+                    MainSection.HOME -> homeEntry
+                    MainSection.EPG, MainSection.LIVE_TV -> guideEntry
+                    MainSection.MOVIES, MainSection.SERIES -> vodEntry
+                    MainSection.DOWNLOADS -> downloadsEntry
+                    MainSection.MORE -> moreEntry
+                    MainSection.SPORTS -> sportsEntry
+                    else -> null
+                }
+                if (enter?.invoke() != true) runCatching { contentAreaFocus.requestFocus() }
+            }
             // Settings is reached through More now, so Back out of its root goes back there — one
             // level out, not two. `SettingsScreen` passes its own `onBack` for the same purpose, but
             // its root handler does not always win against this one, which left Back looking dead on
