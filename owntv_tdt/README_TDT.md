@@ -42,6 +42,6 @@ Requisitos: JDK 21, SDK Android Platform 37.0 y Build Tools 37.0.0. Configura `A
 ./gradlew --no-daemon -Powntv.corePath=../owntv_core_tdt -Pksp.incremental=false -Pkotlin.incremental=false :app:assembleStandardDebug
 ```
 
-La copia de fuentes personal de la versión 2 (fuera de este repositorio) incluye `owntv_tdt/test-signing.jks`, la firma de pruebas usada para esta versión (contraseña `android`, alias `tunerprobe`). Consérvalo si vas a compilar una actualización compatible con este APK. No hace falta abrirlo ni instalarlo para usar la aplicación.
+El archivo de fuentes personal incluye `owntv_tdt/test-signing.jks`, la firma de pruebas usada para esta versión (contraseña `android`, alias `tunerprobe`). Consérvalo si vas a compilar una actualización compatible con este APK. No hace falta abrirlo ni instalarlo para usar la aplicación.
 
 Comprobaciones seleccionadas: inventario de textos traducibles, compilación ARM, firma APK y pruebas JVM de direcciones de canales, restricciones de grabación y conservación del orden entre listas. No se dispone de la TV física en este entorno para probar la navegación nueva.

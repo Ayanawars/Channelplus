@@ -1,5 +1,5 @@
 <resources>
-    <string name="tdt_app_name">OwnTV TDT 2</string>
+    <string name="tdt_app_name">Channel +</string>
     <string name="tuner_source_title">Antenna / terrestrial TV</string>
     <string name="tuner_source_description">Add channels and the guide from this TV’s built-in tuner. Tune them first in your television settings.</string>
     <string name="tuner_source_permission">Allow access to TV listings. If no permission dialog appears, grant READ_TV_LISTINGS through ADB.</string>

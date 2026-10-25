@@ -1,0 +1,65 @@
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<string name="update_ready">Channel + v<xliff:g id="available">%1$s</xliff:g> hazır (sizde v<xliff:g id="current">%2$s</xliff:g> yüklü).</string>
+<string name="recovery_title">Channel + veritabanını açamadı</string>
+<string name="settings_recording_timers_inexact">Bu cihaz Channel +’nin tam zamanlı alarm kurmasına izin vermiyor, bu yüzden bir kayıt birkaç dakika geç başlayabilir. Kayıtlar bunu telafi etmek için erken başlar.</string>
+<string name="recording_failed_drm">Bu kanal DRM korumalı olduğundan izlenebilir ancak kaydedilemez. Bu koruma Channel +\'den değil, sağlayıcınızdan geliyor.</string>
+<string name="sports_alerts_when_closed">Channel + kapalıyken uyarılar</string>
+<string name="sports_alerts_footnote">Channel + kapalıyken uyarılar genellikle bir dakika içinde gelir. Telefon uzun süre ekranı kapalı ve hareketsiz kaldıysa Android bunları yaklaşık 15 dakikaya kadar geciktirebilir. Canlı skor kartı geciktirilmez.</string>
+<string name="sports_no_playlist_body">Skorlar, puan durumları ve uyarılar onsuz da çalışır. Oynatma listesiyle Channel + bu maçı gösteren her kanalı bulur.</string>
+<string name="sports_sport_buttons_description">Sporlarım: yalnızca seçtiklerin. Tüm sporlar: Channel +’nin bildiği her lig, yüklemesi daha uzun sürer.</string>
+<string name="common_own_tv_user">Channel + Kullanıcısı</string>
+<string name="player_trailer_blocked_title">Bu fragman Channel +’de oynatılamıyor</string>
+<string name="content_exit_owntv">Channel +\'den çıkılsın mı?</string>
+<string name="content_storage_folder_fallback">İndirme klasörünüz şu anda kullanılamıyor; geri gelene kadar indirmeler Channel +\'nin kendi klasörüne kaydediliyor.</string>
+<string name="content_epg_own_player">Channel + oynatıcısı</string>
+<string name="settings_proxy_description">Tüm Channel + trafiğini ve oynatmayı bir HTTP proxy üzerinden gönderin.</string>
+<string name="settings_ffmpeg_audio_description">Açık: ExoPlayer, cihazın kod çözücüsü olmayan sesleri de (ör. DTS, TrueHD veya MP2) çözebilir. Cihazın kendi kod çözücüleri yine önceliklidir. Kapalı: ExoPlayer yalnızca cihazın kod çözücülerini kullanır. mpv her zaman FFmpeg ile çözer. Değiştirmek Channel + uygulamasını yeniden başlatır.</string>
+<string name="settings_ffmpeg_audio_restart_message">Ses kod çözücüsü Channel + yeniden başladıktan sonra değişir.</string>
+<string name="settings_app_startup_description">Channel + başlatıldığında açılacak bölüm</string>
+<string name="settings_open_subtitles_access_priority">Channel +’nin paylaşılan Worker’ını kullanmak için ikisini de boş bırakın. Özel bir Worker URL’si, doğrudan API anahtarına göre önceliklidir. Hesap oturumları profile özel kalır.</string>
+<string name="settings_restore_remote_description">Aynı Wi-Fi’daki tarayıcılı herhangi bir cihazda — telefon, bilgisayar veya başka bir TV — QR kodunu tarayın (veya URL’yi açın), bu PIN’i girin, Channel + yedek dosyanızı seçip gönderin. Neyin geri yükleneceğini sonra burada seçersiniz.</string>
+<string name="settings_catchup_player_internal">Channel + oynatıcı</string>
+<string name="settings_sources_probe_warning">Birçok sağlayıcı aynı anda kaç kanal izleyebileceğinizi hiç belirtmez; bu yüzden Channel + birkaç kanal açıp hangilerinin devam ettiğine bakarak bunu kendisi bulur. Şu anda oynatılan her şey duracak ve bu işlem iki dakikaya kadar sürebilir.</string>
+<string name="settings_sources_probe_unknown">Channel + bu sağlayıcının kaç kanala izin verdiğini belirleyemedi.</string>
+<string name="settings_dns_toggle_description">Tüm Channel + alan adı sorguları özel bir DNS sunucusu üzerinden çözümlenir.</string>
+<string name="settings_live_tune_timeout_description">Bir canlı kanal bu süre içinde görüntü vermediyse, Channel + tüm oynatıcılarını tek tek denerken siyah ekran bırakmak yerine denemeyi bırakır ve size söyler. “Asla” denemeyi sürdürür; sağlayıcınızın kaldırdığı bir kanalda bu bir dakikayı rahatça aşabilir. Sağlayıcınızın istediği bekleme süreleri sayılmaz.</string>
+<string name="settings_surround_forced_description">Surround — Dolby/DTS\'yi gerçek bir 5.1/7.1 alıcıya gönderin. Ses kesilirse veya takılırsa Channel + yine de stereoya geri döner ve size bildirir.</string>
+<string name="settings_auto_frame_rate_warning_description">Bu cihaz Android <xliff:g id="android_version">%1$s</xliff:g> sürümüyle çalışıyor. Android 12\'den önceki sürümlerde TV, Channel +\'ye hangi yenileme hızlarına sorunsuz geçebileceğini bildiremez; bu yüzden hızı değiştirmek ekranın bir iki saniyeliğine kararmasına neden olabilir — bazen bir program sırasında birden fazla kez.\n\nBurada otomatik yenileme hızını kapalı bırakmanızı öneririz. TV\'niz sorunsuz geçiş yapıyorsa açıp deneyin: istediğiniz zaman geri değiştirebilirsiniz.</string>
+<string name="settings_auto_frame_rate_warning_description_mobile">Bu cihaz Android <xliff:g id="android_version">%1$s</xliff:g> sürümüyle çalışıyor. Android 12\'den önceki sürümlerde cihaz, Channel +\'ye hangi yenileme hızlarına sorunsuz geçebileceğini bildiremez; bu yüzden hızı değiştirmek ekranın bir iki saniyeliğine kararmasına neden olabilir — bazen bir program sırasında birden fazla kez.\n\nBurada otomatik yenileme hızını kapalı bırakmanızı öneririz. Ekranınız sorunsuz geçiş yapıyorsa açıp deneyin: istediğiniz zaman geri değiştirebilirsiniz.</string>
+<string name="local_sync_error_unreachable">Bu cihaza ulaşılamadı. O cihazda Channel + → Daha fazla → Yerel eşitleme yolunu açıp Eşitleme modunu açın. Her iki cihaz da aynı Wi-Fi ağında olmalıdır.</string>
+<string name="settings_app_icon_summary">Channel + simgesinin ve logosunun rengi</string>
+<string name="settings_app_icon_sheet_mobile">Channel +’nin ana ekranınızda nasıl göründüğü. Uygulama bir kez yeniden başlar.</string>
+<string name="app_icon_restart_title">Channel + yeniden başlatılsın mı?</string>
+<string name="app_icon_restart_message">Yeni bir simge ve logo seçtiniz. Channel + yeniden başlatıldığında geçerli olur.</string>
+<string name="settings_help_theme">Channel + koyu tema için tasarlandı. Sistem, varsa TV’nin kendi ayarını izler; açık tema aydınlık bir oda için uygundur.</string>
+<string name="settings_help_fonts">Channel +’nin her yerinde kullanılan yazı tipi ve metin boyutu. Açılır pencereler de aynı yazı tipini kullanır.</string>
+<string name="settings_help_app_icon">TV’nizin ana ekranındaki Channel + simgesi. Başlatıcının değişikliği göstermesi biraz sürebilir.</string>
+<string name="settings_help_brand_accent">Menüdeki, Hakkında bölümündeki ve kurulumdaki Channel + logosu oynat üçgenini vurgu renginizde gösterir. Ana ekrandaki simge kendi renklerini korur.</string>
+<string name="settings_help_startup">Channel + başlarken ne gösterecek: Ana sayfa, en son izlediğiniz kanal, favorileriniz veya seçtiğiniz bir kanal.</string>
+<string name="settings_help_check_updates">GitHub’da şimdi daha yeni bir Channel + arar ve yüklemeyi önerir. Oynatma listeleriniz, favorileriniz ve ayarlarınız olduğu gibi kalır.</string>
+<string name="settings_help_update_startup">Channel + her başladığında yeni bir sürüm arar ve varsa size bildirir. Sormadan hiçbir şey yüklenmez.</string>
+<plurals name="settings_help_language">
+        <item quantity="one">Channel +’deki tüm menülerin ve iletilerin dili. <xliff:g id="count">%1$d</xliff:g> dil; siz seçene kadar TV’nin kendi dilini izler.</item>
+        <item quantity="other">Channel +’deki tüm menülerin ve iletilerin dili. <xliff:g id="count">%1$d</xliff:g> dil; siz seçene kadar TV’nin kendi dilini izler.</item>
+    </plurals>
+<string name="settings_language_system_help">Channel + televizyonun dilini kullanır (şu an <xliff:g id="language">%1$s</xliff:g>). Yalnızca Channel +’de kullanmak için aşağıdan bir dil seçin.</string>
+<string name="settings_language_pick_help">Televizyonun dili ne olursa olsun Channel +’de <xliff:g id="language">%1$s</xliff:g> kullan.</string>
+<string name="settings_help_bg_background">Stage, Channel +’nin kendi yumuşak renklerini gösterir. Resim, kendi resminizi her ekranın arkasında gösterir. Düz, koyu ve düz bir dolgudur.</string>
+<string name="setup_disclaimer">Channel + yalnızca bir medya oynatıcısıdır. Hiçbir kanal, oynatma listesi veya içerik içermez. Yasal olarak erişebildiğiniz kendi Xtream, M3U veya Stalker kaynaklarınızı eklemek sizin sorumluluğunuzdadır.</string>
+<string name="setup_set_up_owntv">Channel +\'yi kurun</string>
+<string name="setup_sync_device_description">Diğer Channel + cihazınızdaki her şeyi Wi-Fi üzerinden kopyalayın</string>
+<string name="setup_byo_source_description">Channel + bir oynatıcıdır — kendi Xtream, M3U veya Stalker kaynağınızı ekleyin.</string>
+<string name="companion_pin_page_title">Channel + — PIN Girin</string>
+<string name="companion_add_page_title">Channel + — Kaynak ekle</string>
+<string name="companion_saved_page_title">Channel + — Gönderildi</string>
+<string name="companion_backup_page_title">Channel + — Yedeklemeyi geri yükle</string>
+<string name="companion_backup_description">Bir Channel + yedekleme dosyası (.own veya eski bir .json dosyası) seçip Gönder düğmesine basın. Dosya TV\'ye aktarılır — uzaktan kumandayı alın ve orada nelerin geri yükleneceğini seçin.</string>
+<string name="companion_image_page_title">Channel + — Arka plan görseli</string>
+<string name="companion_download_page_title">Channel + — Yedeklemeyi indir</string>
+<string name="companion_download_description">TV\'niz bir Channel + yedekleme dosyası hazırladı. Bu cihaza (owntv-backup.own) kaydetmek için düğmeye dokunun. Dosyayı güvenli bir yerde saklayın — daha sonra bu dosyadan geri yükleme yapabilirsiniz.</string>
+<string name="local_sync_browser_title">Channel + yerel eşitleme</string>
+<string name="local_sync_browser_body">Bu adres, diğer cihazınızdaki Channel + uygulaması içindir. Orada Yerel eşitlemeyi açın ve listeden bu cihazı seçin.</string>
+<string name="setup_welcome_title">Channel +’ye hoş geldiniz</string>
+<string name="setup_line_app_icon">Channel +’nin TV’nin ana ekranında nasıl göründüğü</string>
+<string name="setup_line_app_icon_mobile">Channel +’nin ana ekranınızda nasıl göründüğü</string>
+</resources>

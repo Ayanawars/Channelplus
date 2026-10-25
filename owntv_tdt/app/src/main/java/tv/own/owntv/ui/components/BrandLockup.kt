@@ -59,10 +59,6 @@ private fun accentTriangle(): Color? {
 fun BrandMark(icon: AppIcon, size: Dp, modifier: Modifier = Modifier, followAccent: Boolean = true) {
     val small = size <= 32.dp
     val accent = accentTriangle().takeIf { followAccent }
-    if (icon == AppIcon.PIXEL && !small) {
-        PixelMark(modifier.size(size), triangle = accent ?: Color(icon.accent))
-        return
-    }
     Box(modifier.size(size)) {
         Image(painterResource(if (small) icon.markSmall else icon.mark), contentDescription = null, modifier = Modifier.fillMaxSize())
         if (accent != null && icon.isCard(small)) {

@@ -7,7 +7,7 @@ android {
     buildToolsVersion = "37.0.0"
     namespace = "tv.own.owntv.baselineprofile"
     compileSdk {
-        version = release(37)
+        version = release(37) { minorApiLevel = 0 }
     }
 
     compileOptions {

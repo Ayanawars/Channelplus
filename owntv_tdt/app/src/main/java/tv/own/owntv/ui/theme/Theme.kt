@@ -1,5 +1,9 @@
 package tv.own.owntv.ui.theme
 
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import tv.own.owntv.features.themes.applyTo
+import tv.own.owntv.features.themes.stagePalette
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
@@ -99,22 +103,28 @@ fun OwnTVTheme(
     popupSizePercent: Int = PopupSizeScale.DEFAULT,
     content: @Composable () -> Unit,
 ) {
-    val useDark = when (themeMode) {
+    val downloadedState by tv.own.owntv.features.themes.DownloadableThemes.get(
+        androidx.compose.ui.platform.LocalContext.current,
+    ).state.collectAsStateWithLifecycle()
+    val downloaded = downloadedState.active
+    val useDark = downloaded?.theme?.let { !it.light } ?: when (themeMode) {
         ThemeMode.DARK -> true
         ThemeMode.LIGHT -> false
         ThemeMode.SYSTEM -> systemInDarkTheme
     }
 
-    val colors = ownTvColors(
+    val baseColors = ownTvColors(
         isDark = useDark,
         accent = accent,
         customAccent = customAccent,
         focusHighlight = focusHighlight,
     )
 
+    val colors = downloaded?.theme?.applyTo(baseColors) ?: baseColors
     CompositionLocalProvider(
+        tv.own.owntv.features.themes.LocalDownloadedTheme provides downloaded,
         LocalOwnTVColors provides colors,
-        LocalStagePalette provides if (useDark) StagePalette.Dark else StagePalette.Light,
+        LocalStagePalette provides (downloaded?.theme?.stagePalette() ?: if (useDark) StagePalette.Dark else StagePalette.Light),
         LocalThemeMode provides themeMode,
         LocalFocusBorderWidth provides focusBorderWidthDp.dp,
         LocalAnimationLevel provides animationLevel,

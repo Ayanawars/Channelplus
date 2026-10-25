@@ -66,6 +66,7 @@ import tv.own.owntv.ui.components.OwnTVSpinner
 @Composable
 fun ManageSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     val vm: SettingsViewModel = koinViewModel()
+    val withTunerPermission = tv.own.owntv.features.setup.rememberTunerPermission()
     val sources by vm.sources.collectAsStateWithLifecycle()
     val importState by vm.importState.collectAsStateWithLifecycle()
     val progress by vm.progress.collectAsStateWithLifecycle()
@@ -325,7 +326,9 @@ fun ManageSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                         onCustomize = { contextId = source.id; contextIndex = index; customizingSource = source },
                         onEdit = { contextId = source.id; contextIndex = index; editingSource = source },
                         onTest = { contextId = source.id; contextIndex = index; vm.testSource(source) },
-                        onResync = { contextId = source.id; contextIndex = index; resyncChoice = source },
+                        onResync = { contextId = source.id; contextIndex = index; if (tv.own.owntv.core.sync.TunerSourceSyncer.isSource(source.url)) {
+                            withTunerPermission { vm.resync(source) }
+                        } else resyncChoice = source },
                         onCancelSync = { contextId = source.id; contextIndex = index; vm.cancelResync(source) },
                         onDelete = { contextId = source.id; contextIndex = index; confirmDelete = source },
                     )

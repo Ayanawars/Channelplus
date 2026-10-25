@@ -279,6 +279,17 @@ class ShellViewModel(
         }
     }
 
+    /** First launch needs a data owner, but Channel + does not require a setup wizard. */
+    suspend fun ensureStartupProfile(defaultName: String) {
+        val preferred = settings.activeProfileId.first()
+        val existing = profileDao.getAllOnce()
+        if (existing.any { it.id == preferred }) return
+        val id = existing.firstOrNull()?.id ?: profiles.create(
+            name = defaultName, avatarId = 0, isKids = false, pin = null, fallbackName = defaultName,
+        )
+        profiles.switchTo(id)
+    }
+
     private suspend fun currentProfileId(): Long? {
         val preferred = settings.activeProfileId.first()
         return profileDao.resolveExistingProfileId(preferred)

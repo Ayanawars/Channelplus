@@ -664,7 +664,7 @@ fun OwnTVShell(
     LaunchedEffect(railFocused, navStyle, navHideAfterMs) {
         railIdleHidden = false
         if (navStyle == tv.own.owntv.core.settings.SettingsRepository.NavStyle.FLOATING && !railFocused) {
-            kotlinx.coroutines.delay(navHideAfterMs.toLong())
+            kotlinx.coroutines.delay(180)
             railIdleHidden = true
         }
     }
@@ -858,12 +858,31 @@ fun OwnTVShell(
         if (openedSeries == null && searchReturn == MainSection.SERIES && selectedSection == MainSection.SERIES) returnToSearch()
     }
 
+    val closeNavigation: () -> Unit = {
+
+                railFocused = false
+                railIdleHidden = true
+                railKeyAt = 0L
+                val enter = when (selectedSection) {
+                    MainSection.HOME -> homeEntry
+                    MainSection.EPG, MainSection.LIVE_TV -> guideEntry
+                    MainSection.MOVIES, MainSection.SERIES -> vodEntry
+                    MainSection.DOWNLOADS -> downloadsEntry
+                    MainSection.MORE -> moreEntry
+                    MainSection.SPORTS -> sportsEntry
+                    else -> null
+                }
+                if (enter?.invoke() != true) runCatching { contentAreaFocus.requestFocus() }
+            
+    }
+
     BackHandler {
         when {
             playerMode == PlayerMode.FULLSCREEN -> exitPlayer()
             showAvatarPicker -> showAvatarPicker = false
             showPlaylistPicker -> showPlaylistPicker = false
             showExit -> showExit = false
+            railFocused -> closeNavigation()
             // Settings is reached through More now, so Back out of its root goes back there — one
             // level out, not two. `SettingsScreen` passes its own `onBack` for the same purpose, but
             // its root handler does not always win against this one, which left Back looking dead on
@@ -880,7 +899,7 @@ fun OwnTVShell(
 
     // With Glass on, the shell's own base paints must be transparent so the background (rendered in
     // MainActivity behind this shell) shows through the gaps between and around panels. Solid otherwise.
-    val shellBase = if (LocalGlass.current.enabled) Color.Transparent else tv.own.owntv.ui.theme.LocalStagePalette.current.page
+    val shellBase = if (LocalGlass.current.enabled || tv.own.owntv.features.themes.LocalDownloadedTheme.current != null) Color.Transparent else tv.own.owntv.ui.theme.LocalStagePalette.current.page
 
     // Long-press Back (the second way in). Deliberately timed from the FIRST KeyDown rather than counted from
     // key repeats: several TVs re-fire KeyDown while a key is held, so a repeat-counting version fires
@@ -909,6 +928,11 @@ fun OwnTVShell(
     Box(
         modifier = modifier.fillMaxSize().background(shellBase)
             .onPreviewKeyEvent { e ->
+                // Close navigation before a child screen interprets Back as leaving its page.
+                if (e.key == Key.Back && railHasFocus && !showExit && !showAvatarPicker && !showPlaylistPicker && playerMode != PlayerMode.FULLSCREEN) {
+                    if (e.type == KeyEventType.KeyUp) closeNavigation()
+                    return@onPreviewKeyEvent true
+                }
                 if (e.type == KeyEventType.KeyDown) {
                     if (e.key == Key.DirectionLeft || e.key == Key.DirectionRight) railKeyAt = android.os.SystemClock.uptimeMillis()
                     // A key pressed on the rail is the user using it, however focus got there.

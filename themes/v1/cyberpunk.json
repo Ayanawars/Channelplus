@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "id": "cyberpunk",
+  "name": "Cyberpunk",
+  "version": 1,
+  "light": false,
+  "colors": {
+    "page": "#070C1B",
+    "surface": "#10182A",
+    "surfaceHigh": "#182139",
+    "text": "#F0F2FF",
+    "muted": "#B5BFDF",
+    "accent": "#FF4FE8",
+    "onAccent": "#240A28",
+    "secondary": "#22DFFF",
+    "tertiary": "#FFDB70",
+    "focus": "#FF4FE8",
+    "outline": "#53658A"
+  },
+  "wallpaper": {
+    "url": "https://raw.githubusercontent.com/Ayanawars/Channelplus/codex/complete-import-channel-review/themes/v1/cyberpunk.jpg",
+    "bytes": 242314,
+    "sha256": "fb65d1961aff7778df3602fa5553675d555f9a9f5fbc490e2c9e989f8dc27047"
+  }
+}

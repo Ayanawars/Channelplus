@@ -1,0 +1,24 @@
+<resources>
+    <string name="themes_title">Temas descargables</string>
+    <string name="themes_description">Descarga, aplica y elimina temas. Tus ajustes de apariencia originales se conservan.</string>
+    <string name="themes_original">Usar tema original</string>
+    <string name="themes_original_active">Tema original · Activo</string>
+    <string name="themes_refresh">Actualizar catálogo</string>
+    <string name="themes_busy">Procesando…</string>
+    <string name="themes_failure">No se pudo completar la acción. Comprueba la conexión y el espacio disponible y vuelve a intentarlo. Los temas descargados siguen disponibles.</string>
+    <string name="themes_active">Activo</string>
+    <string name="themes_downloaded">Descargado · Disponible sin conexión</string>
+    <string name="themes_size">%1$s KB de descarga</string>
+    <string name="themes_download">Descargar</string>
+    <string name="themes_apply">Aplicar</string>
+    <string name="themes_delete">Eliminar</string>
+    <string name="more_backup_short">Copia de seguridad</string>
+    <string name="more_sync_short">Sincronización</string>
+    <string name="more_diagnostics_short">Diagnóstico</string>
+    <string name="more_settings_desc">Personaliza Channel +</string>
+    <string name="more_favorites_desc">Tus favoritos siempre a mano</string>
+    <string name="more_history_desc">Retoma lo que estabas viendo</string>
+    <string name="more_backup_desc">Guarda tus listas y preferencias</string>
+    <string name="more_sync_desc">Conecta tus dispositivos</string>
+    <string name="more_diagnostics_desc">Revisa los errores de reproducción</string>
+</resources>

@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "id": "pastel",
+  "name": "Pastel",
+  "version": 1,
+  "light": true,
+  "colors": {
+    "page": "#E7F4FC",
+    "surface": "#FFFFFF",
+    "surfaceHigh": "#F6F8FF",
+    "text": "#112C50",
+    "muted": "#475673",
+    "accent": "#1768B2",
+    "onAccent": "#FFFFFF",
+    "secondary": "#6F53A6",
+    "tertiary": "#856200",
+    "focus": "#1768B2",
+    "outline": "#647F9D"
+  }
+}

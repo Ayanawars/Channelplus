@@ -174,6 +174,8 @@ fun SettingsScreen(
     var showZoom by remember { mutableStateOf(false) }
     var showAppIcon by remember { mutableStateOf(false) }
     var showPopupSize by remember { mutableStateOf(false) }
+    var showDownloadableThemes by remember { mutableStateOf(false) }
+    val downloadableThemesFocus = remember { FocusRequester() }
     var showTheme by remember { mutableStateOf(false) }
     var showAccent by remember { mutableStateOf(false) }
     var showFocusHighlight by remember { mutableStateOf(false) }
@@ -266,13 +268,13 @@ fun SettingsScreen(
         }
         onStartConsumed()
     }
-    val anyDialogOpen = showZoom || showPopupSize || showTheme || showAccent || showUpdate || showCatchupTime || showCatchupSources || showCatchupSourceValue || showEpgOffset || showGuideDays || showAnimations || showStartup || showStartupChannelPicker || showAfrWarning || showLivePreviewPanelWarning || showBgImageChooser || showBgPicker || showAmbientGlow || showFocusHighlight || showBgRemote || showVodLayout || showNavigation || showLiveLayout || stageSettings.open != null
+    val anyDialogOpen = showDownloadableThemes || showZoom || showPopupSize || showTheme || showAccent || showUpdate || showCatchupTime || showCatchupSources || showCatchupSourceValue || showEpgOffset || showGuideDays || showAnimations || showStartup || showStartupChannelPicker || showAfrWarning || showLivePreviewPanelWarning || showBgImageChooser || showBgPicker || showAmbientGlow || showFocusHighlight || showBgRemote || showVodLayout || showNavigation || showLiveLayout || stageSettings.open != null
     // When a dialog closes, restore focus to the row that opened it. NOTE: this restore crosses
     // INTO the root focus group from outside (the dialog), but onEnter does NOT fire for programmatic
     // requestsFocus (only for directional entry) — so dialogReturn must be cleared HERE, not in onEnter.
     // If it's left set, the next directional entry (e.g. sidebar→here) would re-route to a stale row.
     var dialogReturn by remember { mutableStateOf<FocusRequester?>(null) }
-    LaunchedEffect(showZoom, showPopupSize, showTheme, showAccent, showUpdate, showCatchupTime, showCatchupSources, showCatchupSourceValue, showEpgOffset, showGuideDays, showAnimations, showStartup, showStartupChannelPicker, showAfrWarning, showLivePreviewPanelWarning, showBgImageChooser, showBgPicker, showAmbientGlow, showFocusHighlight, showBgRemote, showVodLayout, showNavigation, showLiveLayout, stageSettings.open) {
+    LaunchedEffect(showDownloadableThemes, showZoom, showPopupSize, showTheme, showAccent, showUpdate, showCatchupTime, showCatchupSources, showCatchupSourceValue, showEpgOffset, showGuideDays, showAnimations, showStartup, showStartupChannelPicker, showAfrWarning, showLivePreviewPanelWarning, showBgImageChooser, showBgPicker, showAmbientGlow, showFocusHighlight, showBgRemote, showVodLayout, showNavigation, showLiveLayout, stageSettings.open) {
         // Only after a popup really closed: on first composition there is no opener, and holding a stale
         // offset for the settle frames bounced the page.
         if (!anyDialogOpen && dialogReturn != null) {
@@ -556,6 +558,12 @@ fun SettingsScreen(
             onClick = { saveScroll(); dialogReturn = catchupSourcesRowFocus; showCatchupSources = true },
         ) else null,
         RootGroup("group_appearance", stringResource(R.string.settings_appearance_group), OwnTVIcon.PALETTE, stringResource(R.string.settings_group_summary_appearance)),
+        RootRow(
+            "downloadable_themes", TileTone.PRIMARY, OwnTVIcon.PALETTE,
+            title = stringResource(R.string.themes_title), desc = stringResource(R.string.themes_description),
+            chip = null, chipTone = TileTone.PRIMARY, focus = downloadableThemesFocus,
+            onClick = { saveScroll(); dialogReturn = downloadableThemesFocus; showDownloadableThemes = true },
+        ),
         RootRow(
             "theme", TileTone.PRIMARY, OwnTVIcon.THEME,
             title = stringResource(R.string.settings_theme), desc = stringResource(R.string.settings_theme_description),
@@ -977,6 +985,7 @@ fun SettingsScreen(
             // No entries for the download folder, Backup, Local sync or Clear history. They
             // are not in Settings any more, and a result for something that is not here is a lie
             // about where it lives. The no-results state deliberately says nothing else either.
+            SettingsSearchEntry(stringResource(R.string.settings_group_appearance), stringResource(R.string.themes_title), stringResource(R.string.themes_description), OwnTVIcon.PALETTE, TileTone.PRIMARY) { saveScroll(); dialogReturn = searchFieldFocus; showDownloadableThemes = true },
             SettingsSearchEntry(stringResource(R.string.settings_group_appearance), stringResource(R.string.settings_theme), stringResource(R.string.settings_search_keywords_theme), OwnTVIcon.THEME, TileTone.PRIMARY,
                 chip = themeLabel(themeMode)) { saveScroll(); dialogReturn = searchFieldFocus; showTheme = true },
             SettingsSearchEntry(stringResource(R.string.settings_group_appearance), stringResource(R.string.settings_accent), stringResource(R.string.settings_search_keywords_accent), OwnTVIcon.PALETTE, TileTone.SECONDARY,
@@ -1268,6 +1277,7 @@ fun SettingsScreen(
     }
     if (showEpgOffset) EpgOffsetRootDialog(settingsVm, epgOffset, onClose = { showEpgOffset = false })
     if (showGuideDays) GuideDaysDialog(settingsVm, guideDays, onClose = { showGuideDays = false })
+    if (showDownloadableThemes) tv.own.owntv.features.themes.ThemeCatalogDialog { showDownloadableThemes = false }
     if (showTheme) ThemeDialogHost(settingsVm, themeMode, onClose = { showTheme = false })
     if (showStartup) StartupDialogHost(settingsVm, startupMode, onClose = { showStartup = false }, onPickChannel = { showStartupChannelPicker = true })
     if (showStartupChannelPicker) StartupChannelPickerHost(settingsVm, startupChannel, onClose = { showStartupChannelPicker = false })
@@ -2076,7 +2086,7 @@ private fun CatchupSourceValueHost(settingsVm: SettingsViewModel, src: tv.own.ow
 }
 
 /** The repository line More › About shows. */
-internal const val GITHUB_REPO = "github.com/ahXN00/OwnTV"
+internal const val GITHUB_REPO = "github.com/Ayanawars/Channelplus"
 internal const val TELEGRAM_LINK = "t.me/owntvplayer"
 
 /**

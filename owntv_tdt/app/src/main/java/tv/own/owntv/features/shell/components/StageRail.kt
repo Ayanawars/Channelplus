@@ -163,10 +163,10 @@ fun StageRail(
     }
     val items = StageRailOrder.filter { it == MainSection.SEARCH || it in visibleSections } + MainSection.MORE
 
-    // Slide in from the edge (320 ms, or a snap with animations off): the capsule when it leaves
+    // Slide in from the edge (180 ms, or a snap with animations off): the capsule when it leaves
     // HIDDEN, the open rail each time it opens.
     val slide = remember { Animatable(0f) }
-    val slideSpec: androidx.compose.animation.core.AnimationSpec<Float> = ownTvTween(320)
+    val slideSpec: androidx.compose.animation.core.AnimationSpec<Float> = ownTvTween(180)
     LaunchedEffect(open, state == RailState.HIDDEN) {
         val target = if (state == RailState.HIDDEN) -1f else 0f
         if (open) slide.snapTo(-1f)

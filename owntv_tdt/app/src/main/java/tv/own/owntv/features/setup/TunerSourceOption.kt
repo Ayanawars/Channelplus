@@ -1,9 +1,6 @@
 package tv.own.owntv.features.setup
 
-import android.content.pm.PackageManager
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -21,7 +18,6 @@ internal fun TunerSourceOption(onImport: (name: String, url: String) -> Unit) {
     val context = LocalContext.current
     val title = stringResource(R.string.tuner_source_title)
     val description = stringResource(R.string.tuner_source_description)
-    val noPermission = stringResource(R.string.tuner_source_permission)
     val noInputs = stringResource(R.string.tuner_source_missing)
     var inputs by remember { mutableStateOf<List<TunerSourceSyncer.Input>>(emptyList()) }
     var choosing by remember { mutableStateOf(false) }
@@ -30,17 +26,14 @@ internal fun TunerSourceOption(onImport: (name: String, url: String) -> Unit) {
         if (inputs.isEmpty()) Toast.makeText(context, noInputs, Toast.LENGTH_LONG).show()
         else choosing = true
     }
-    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) discover() else Toast.makeText(context, noPermission, Toast.LENGTH_LONG).show()
-    }
+    val withTunerPermission = rememberTunerPermission()
     StageSettingRow(
         icon = OwnTVIcon.LIVE_TV,
         title = title,
         desc = description,
         value = SettingValue.Opens(null),
         onClick = {
-            if (context.checkSelfPermission(TunerSourceSyncer.READ_PERMISSION) == PackageManager.PERMISSION_GRANTED) discover()
-            else permission.launch(TunerSourceSyncer.READ_PERMISSION)
+            withTunerPermission { discover() }
         },
         help = SettingHelp(title, description),
     )

@@ -3,6 +3,10 @@ package tv.own.owntv.features.more
 import tv.own.owntv.ui.theme.stageTone
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
@@ -227,6 +231,8 @@ private var lastOpenedCard: Int? = null
 @Composable
 internal fun SettingsPage(entry: FocusRequester, pinned: Int, onOpenGroup: (Int) -> Unit, onSearch: () -> Unit) {
     val back = lastOpenedCard
+    val cardsScroll = rememberScrollState()
+    val cardsScope = rememberCoroutineScope()
     val profiles = tv.own.owntv.features.settings.profileCount()
     Column(Modifier.fillMaxSize().focusGroup()) {
         PageHead(stringResource(R.string.common_nav_settings)) {
@@ -244,15 +250,20 @@ internal fun SettingsPage(entry: FocusRequester, pinned: Int, onOpenGroup: (Int)
                 Text(stringResource(R.string.more_settings_search), style = stageText(19, 500), color = if (focused) StageColors.Text else StageColors.Dim, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
-        Column(Modifier.padding(top = 22.mpx), verticalArrangement = Arrangement.spacedBy(20.mpx)) {
+        Column(Modifier.weight(1f).padding(top = 22.mpx).verticalScroll(cardsScroll).padding(bottom = 24.mpx), verticalArrangement = Arrangement.spacedBy(20.mpx)) {
             SettingsCards.chunked(3).forEach { row ->
                 // 150 at the default font; a larger app font grows the row rather than cutting the
                 // summary, and the row's cards keep one height.
                 Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(20.mpx)) {
                     row.forEach { card ->
                         val index = SettingsCards.indexOf(card)
+                        val bring = remember(index) { BringIntoViewRequester() }
                         StageTile(
-                            modifier = Modifier.weight(1f).heightIn(min = 150.mpx).fillMaxHeight().then(if (index == back) Modifier.focusRequester(entry) else Modifier),
+                            modifier = Modifier.weight(1f).heightIn(min = 150.mpx).fillMaxHeight()
+                                .bringIntoViewRequester(bring)
+                                .onFocusChanged { state ->
+                                    if (state.isFocused) cardsScope.launch { bring.bringIntoView() }
+                                }.then(if (index == back) Modifier.focusRequester(entry) else Modifier),
                             onClick = { lastOpenedCard = index; onOpenGroup(index) },
                             padding = 0.mpx,
                         ) { focused ->
@@ -670,20 +681,8 @@ internal fun AboutPage(vm: MoreCountsViewModel, entry: FocusRequester, onOpenLan
             modifier = Modifier.padding(top = 26.mpx).widthIn(max = 860.mpx))
         Text(stringResource(R.string.settings_contributions), style = stageText(16, 500), color = StageColors.Dim,
             modifier = Modifier.padding(top = 10.mpx, bottom = 24.mpx).widthIn(max = 860.mpx))
-        StageTile(Modifier.width(640.mpx)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(20.mpx), verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    painter = painterResource(R.drawable.telegram_qr),
-                    contentDescription = stringResource(R.string.settings_telegram_qr),
-                    modifier = Modifier.size(150.mpx).clip(RoundedCornerShape(14.mpx)).background(Color.White),
-                )
-                Column {
-                    Text(stringResource(R.string.settings_join_telegram), style = stageText(22, 800), color = StageColors.Text)
-                    Text(TELEGRAM_LINK, style = stageText(17, 500), color = accent, modifier = Modifier.padding(top = 4.mpx))
-                    Text(stringResource(R.string.more_about_scan), style = stageText(15.5f, 500), color = StageColors.Muted, modifier = Modifier.padding(top = 8.mpx))
-                }
-            }
-        }
+        Text(stringResource(R.string.channel_upstream_attribution), style = stageText(16, 500), color = StageColors.Dim,
+            modifier = Modifier.padding(top = 10.mpx).widthIn(max = 860.mpx))
         Row(Modifier.padding(top = 22.mpx), horizontalArrangement = Arrangement.spacedBy(10.mpx)) {
             // The link is for reading: a TV has no browser to open it in.
             Row(

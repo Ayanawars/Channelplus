@@ -1,0 +1,18 @@
+<resources>
+    <string name="tuner_recording_unsupported">La grabación del sintonizador no está disponible en esta versión.</string>
+
+    <string name="tuner_invalid_source">La fuente de antena no contiene un sintonizador válido</string>
+    <string name="tuner_missing">No se encuentra el sintonizador de esta televisión</string>
+    <string name="tuner_empty">No hay canales de antena visibles. Permite el acceso a las listas de TV y sintoniza los canales en los ajustes de la televisión.</string>
+    <string name="tuner_antenna_name">Antena / TDT</string>
+    <string name="tuner_channel_name">Canal %1$d</string>
+    <string name="tuner_unknown_programme">Sin información</string>
+    <string name="tuner_source_missing">No se encuentra la fuente de antena</string>
+    <string name="tuner_pause_unsupported">La pausa de TDT no está disponible en esta versión</string>
+    <string name="tuner_signal_missing">Sin señal de antena</string>
+    <string name="tuner_connection_failed">No se pudo conectar con el sintonizador</string>
+    <string name="tuner_disconnected">El sintonizador se ha desconectado</string>
+    <string name="tuner_parental_block">Canal bloqueado por el control parental de la televisión</string>
+    <string name="tuner_in_use">El sintonizador ya se está usando en otra ventana</string>
+    <string name="tuner_tune_failed">No se pudo sintonizar: %1$s</string>
+</resources>
