@@ -1,0 +1,13 @@
+<resources>
+    <string name="tuner_source_title">Antena / TDT</string>
+    <string name="tuner_source_description">Añade los canales y la guía del sintonizador de esta TV. Sintonízalos primero en los ajustes de la televisión.</string>
+    <string name="tuner_source_permission">Permite el acceso a las listas de TV. Si no aparece el diálogo, concede READ_TV_LISTINGS mediante ADB.</string>
+    <string name="tuner_source_missing">No se encuentra un sintonizador físico en este dispositivo.</string>
+
+    <string name="tdt_groups_select_all">Seleccionar todos</string>
+    <string name="tdt_groups_deselect_all">Deseleccionar todos</string>
+    <string name="tdt_groups_choose">Elegir grupos</string>
+    <string name="tdt_groups_finish">Terminar selección</string>
+    <string name="tdt_edit_channels">Modificar canales y grupos</string>
+    <string name="tdt_groups_help">Pulsa OK para marcar o desmarcar un grupo. Los cambios se guardan automáticamente. Abre el panel de acciones para editar sus canales.</string>
+</resources>
