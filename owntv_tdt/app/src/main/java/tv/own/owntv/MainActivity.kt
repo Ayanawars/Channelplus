@@ -265,6 +265,13 @@ open class MainActivity : ComponentActivity() {
             // emitted yet, and a loaded empty list can be a restore/recovery window. The shell stays
             // out of the composition until the list is Loaded and the gate decision is complete.
             val loadedProfileId = activeProfileId
+            val defaultProfileName = androidx.compose.ui.res.stringResource(R.string.tdt_app_name)
+            LaunchedEffect(profilesLoaded, loadedProfileId, profiles) {
+                if (profilesLoaded && loadedProfileId != null &&
+                    (loadedProfileId < 0L || profiles.none { it.id == loadedProfileId })) {
+                    viewModel.ensureStartupProfile(defaultProfileName)
+                }
+            }
             val activeProfileKnown = loadedProfileId != null &&
                 (loadedProfileId < 0L || profiles.any { it.id == loadedProfileId })
             // Authentication is profile-bound. Invalidate the old session before a changed active id
@@ -385,22 +392,8 @@ open class MainActivity : ComponentActivity() {
                                 onCancel = { gateSession.cancelAddingProfile() },
                                 modifier = Modifier.fillMaxSize(),
                             )
-                            // First run (no profile yet) → full onboarding.
-                            profile < 0L -> Onboarding(
-                                firstRun = true,
-                                onDone = { profileId -> gateSession.authenticateProfile(profileId) },
-                                onCancel = {},
-                                modifier = Modifier.fillMaxSize(),
-                            )
-                            // A loaded list that does not contain the persisted active id is also
-                            // recovery/onboarding, never permission to enter OwnTVShell. This covers
-                            // both an empty restore window and a stale id left by an interrupted restore.
-                            !activeProfileKnown -> Onboarding(
-                                firstRun = false,
-                                onDone = { profileId -> gateSession.authenticateProfile(profileId) },
-                                onCancel = {},
-                                modifier = Modifier.fillMaxSize(),
-                            )
+                            // Wait for the automatic default profile / stale-id recovery above.
+                            profile < 0L || !activeProfileKnown -> Unit
                             // Run 2+ (or a single locked profile): "Who's watching?" — choose a profile or add one.
                             // Also opens when the sidebar avatar is single-clicked (switchProfileRequested),
                             // which is the only way to switch when there's a single unpinned profile.
