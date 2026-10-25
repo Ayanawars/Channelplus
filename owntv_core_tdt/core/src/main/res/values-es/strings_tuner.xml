@@ -15,4 +15,5 @@
     <string name="tuner_parental_block">Canal bloqueado por el control parental de la televisión</string>
     <string name="tuner_in_use">El sintonizador ya se está usando en otra ventana</string>
     <string name="tuner_tune_failed">No se pudo sintonizar: %1$s</string>
+    <string name="tuner_empty_pluto">Pluto TV todavía no ha publicado canales en la guía de esta televisión. Completa la configuración de Pluto TV y vuelve a sincronizar.</string>
 </resources>
