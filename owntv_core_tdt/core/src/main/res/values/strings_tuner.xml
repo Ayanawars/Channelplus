@@ -15,4 +15,5 @@
     <string name="tuner_parental_block">Channel blocked by the television parental controls</string>
     <string name="tuner_in_use">The tuner is already in use in another window</string>
     <string name="tuner_tune_failed">Could not tune: %1$s</string>
+    <string name="tuner_empty_pluto">Pluto TV has not made any channels available to this TV yet. Complete Pluto TV input setup, then sync again.</string>
 </resources>
