@@ -1,5 +1,13 @@
 package tv.own.owntv.features.more
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import tv.own.owntv.ui.stage.StageFocus
+import tv.own.owntv.ui.theme.OwnTVTheme
 import androidx.compose.foundation.layout.size
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.rememberScrollState
@@ -80,6 +88,7 @@ private enum class MoreItem { SETTINGS, FAVORITES, HISTORY, BACKUP, LOCAL_SYNC, 
  * the sheet, Back again leaves More. Nothing opens full screen any more — Settings is the one door out,
  * through its group cards.
  */
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun MoreScreen(
     profileName: String,
@@ -155,26 +164,68 @@ fun MoreScreen(
                         Triple(MoreItem.SETTINGS, OwnTVIcon.SETTINGS, stringResource(R.string.common_nav_settings)),
                         Triple(MoreItem.FAVORITES, OwnTVIcon.FAVORITE, stringResource(R.string.content_category_favorites)),
                         Triple(MoreItem.HISTORY, OwnTVIcon.HISTORY, stringResource(R.string.content_category_history)),
-                        Triple(MoreItem.BACKUP, OwnTVIcon.DOWNLOADS, stringResource(R.string.settings_backup_restore)),
-                        Triple(MoreItem.LOCAL_SYNC, OwnTVIcon.PHONE, stringResource(R.string.local_sync_title)),
-                        Triple(MoreItem.ERROR_LOG, OwnTVIcon.WARNING, stringResource(R.string.settings_playback_error_log)),
-                        Triple(MoreItem.ABOUT, OwnTVIcon.INFO, stringResource(R.string.settings_about)),
+                        Triple(MoreItem.BACKUP, OwnTVIcon.DOWNLOADS, stringResource(R.string.more_backup_short)),
+                        Triple(MoreItem.LOCAL_SYNC, OwnTVIcon.PHONE, stringResource(R.string.more_sync_short)),
+                        Triple(MoreItem.ERROR_LOG, OwnTVIcon.WARNING, stringResource(R.string.more_diagnostics_short)),
                     )
                     Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(bottom = 24.mpx), verticalArrangement = Arrangement.spacedBy(18.mpx)) {
                         cards.chunked(3).forEach { row ->
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(18.mpx)) {
                                 row.forEach { (item, icon, label) ->
-                                    StageTile(
-                                        modifier = Modifier.weight(1f).height(140.mpx).focusRequester(itemFocus.getValue(item)).semantics { contentDescription = label },
-                                        onClick = { choose(item) },
-                                    ) { focused ->
-                                        Column(verticalArrangement = Arrangement.spacedBy(12.mpx)) {
-                                            OwnTVIcon(icon, StageColors.Text, Modifier.size(28.mpx))
-                                            Text(label, style = stageText(22, 700), color = StageColors.Text, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                    val description = stringResource(when (item) {
+                                        MoreItem.SETTINGS -> R.string.more_settings_desc
+                                        MoreItem.FAVORITES -> R.string.more_favorites_desc
+                                        MoreItem.HISTORY -> R.string.more_history_desc
+                                        MoreItem.BACKUP -> R.string.more_backup_desc
+                                        MoreItem.LOCAL_SYNC -> R.string.more_sync_desc
+                                        else -> R.string.more_diagnostics_desc
+                                    })
+                                    val color = when (item) {
+                                        MoreItem.FAVORITES, MoreItem.LOCAL_SYNC -> OwnTVTheme.colors.secondary
+                                        MoreItem.ERROR_LOG -> OwnTVTheme.colors.tertiary
+                                        else -> stageAccent.accent
+                                    }
+                                    val bring = remember(item) { BringIntoViewRequester() }
+                                    val scope = rememberCoroutineScope()
+                                    val shape = RoundedCornerShape(26.mpx)
+                                    StageSurface(
+                                        modifier = Modifier.weight(1f).height(182.mpx)
+                                            .focusRequester(itemFocus.getValue(item))
+                                            .bringIntoViewRequester(bring)
+                                            .onFocusChanged { if (it.hasFocus) scope.launch { bring.bringIntoView() } }
+                                            .background(OwnTVTheme.colors.surface.copy(alpha = .94f), shape)
+                                            .border(1.mpx, OwnTVTheme.colors.outline.copy(alpha = .45f), shape)
+                                            .semantics { contentDescription = "$label. $description" },
+                                        onClick = { choose(item) }, radius = 26.mpx, focusStyle = StageFocus.POSTER,
+                                    ) {
+                                        Row(Modifier.fillMaxWidth().padding(24.mpx), verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(18.mpx)) {
+                                            Box(Modifier.size(66.mpx).background(color.copy(alpha = .14f), CircleShape)
+                                                .border(1.mpx, color.copy(alpha = .5f), CircleShape), contentAlignment = Alignment.Center) {
+                                                OwnTVIcon(icon, color, Modifier.size(36.mpx))
+                                            }
+                                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.mpx)) {
+                                                Text(label, style = stageText(23, 700), color = StageColors.Text, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                                Text(description, style = stageText(17, 400), color = StageColors.Muted, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                            }
                                         }
                                     }
                                 }
                                 repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
+                            }
+                        }
+                        StageSurface(
+                            onClick = { choose(MoreItem.ABOUT) }, radius = 18.mpx, focusStyle = StageFocus.FX,
+                            modifier = Modifier.fillMaxWidth().height(72.mpx).focusRequester(itemFocus.getValue(MoreItem.ABOUT))
+                                .background(OwnTVTheme.colors.surface.copy(alpha = .94f), RoundedCornerShape(18.mpx)),
+                        ) {
+                            Row(Modifier.fillMaxWidth().padding(horizontal = 24.mpx), verticalAlignment = Alignment.CenterVertically) {
+                                Text(stringResource(R.string.app_name), style = stageText(23, 800), color = stageAccent.accent)
+                                Spacer(Modifier.weight(1f))
+                                Text(BuildConfig.VERSION_NAME, style = stageText(18, 400), color = StageColors.Muted)
+                                Spacer(Modifier.weight(1f))
+                                Text(stringResource(R.string.settings_about), style = stageText(19, 700), color = StageColors.Text)
+                                OwnTVIcon(OwnTVIcon.INFO, stageAccent.accent, Modifier.padding(start = 12.mpx).size(24.mpx))
                             }
                         }
                     }

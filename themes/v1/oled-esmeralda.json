@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "id": "oled-esmeralda",
+  "name": "OLED Esmeralda",
+  "version": 1,
+  "light": false,
+  "colors": {
+    "page": "#000000",
+    "surface": "#03100E",
+    "surfaceHigh": "#08211C",
+    "text": "#D1E9E2",
+    "muted": "#9FBDB4",
+    "accent": "#40E0CE",
+    "onAccent": "#002D25",
+    "secondary": "#47C99B",
+    "tertiary": "#73C6DA",
+    "focus": "#40E0CE",
+    "outline": "#24584D"
+  }
+}

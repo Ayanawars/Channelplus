@@ -899,7 +899,7 @@ fun OwnTVShell(
 
     // With Glass on, the shell's own base paints must be transparent so the background (rendered in
     // MainActivity behind this shell) shows through the gaps between and around panels. Solid otherwise.
-    val shellBase = if (LocalGlass.current.enabled) Color.Transparent else tv.own.owntv.ui.theme.LocalStagePalette.current.page
+    val shellBase = if (LocalGlass.current.enabled || tv.own.owntv.features.themes.LocalDownloadedTheme.current != null) Color.Transparent else tv.own.owntv.ui.theme.LocalStagePalette.current.page
 
     // Long-press Back (the second way in). Deliberately timed from the FIRST KeyDown rather than counted from
     // key repeats: several TVs re-fire KeyDown while a key is held, so a repeat-counting version fires

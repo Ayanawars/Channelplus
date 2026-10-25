@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "themes": [
+    {
+      "id": "cyberpunk",
+      "name": "Cyberpunk",
+      "version": 1,
+      "light": false,
+      "preview": [
+        "#070C1B",
+        "#FF4FE8",
+        "#22DFFF"
+      ],
+      "package": {
+        "url": "https://raw.githubusercontent.com/Ayanawars/Channelplus/codex/complete-import-channel-review/themes/v1/cyberpunk.json",
+        "bytes": 652,
+        "sha256": "44812c5f8ec4b13f792e03dabc34fc962cd0a1d0ca42ed29af137522d2f0db79"
+      },
+      "totalBytes": 242966
+    },
+    {
+      "id": "oled-esmeralda",
+      "name": "OLED Esmeralda",
+      "version": 1,
+      "light": false,
+      "preview": [
+        "#000000",
+        "#40E0CE",
+        "#47C99B"
+      ],
+      "package": {
+        "url": "https://raw.githubusercontent.com/Ayanawars/Channelplus/codex/complete-import-channel-review/themes/v1/oled-esmeralda.json",
+        "bytes": 407,
+        "sha256": "677b988173e43e7ff870c7b93093ca50e2e2472fc55abbbc5999faf7bf530077"
+      },
+      "totalBytes": 407
+    },
+    {
+      "id": "pastel",
+      "name": "Pastel",
+      "version": 1,
+      "light": true,
+      "preview": [
+        "#E7F4FC",
+        "#1768B2",
+        "#6F53A6"
+      ],
+      "package": {
+        "url": "https://raw.githubusercontent.com/Ayanawars/Channelplus/codex/complete-import-channel-review/themes/v1/pastel.json",
+        "bytes": 390,
+        "sha256": "dbf7fceb70a5f3b83467fc221fba7ff4c2b56869f49bb173664573c28c1a61ab"
+      },
+      "totalBytes": 390
+    }
+  ]
+}

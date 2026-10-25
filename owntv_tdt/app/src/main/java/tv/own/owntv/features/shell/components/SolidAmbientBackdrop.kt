@@ -29,7 +29,7 @@ fun SolidAmbientBackdrop(
     modifier: Modifier = Modifier,
 ) {
     val glass = LocalGlass.current
-    if (!glowEnabled || glass.enabled || tv.own.owntv.ui.theme.LocalStagePalette.current.isLight) return
+    if (tv.own.owntv.features.themes.LocalDownloadedTheme.current != null || !glowEnabled || glass.enabled || tv.own.owntv.ui.theme.LocalStagePalette.current.isLight) return
 
     val primary = tv.own.owntv.ui.theme.stageAccent.accent
     val transition = if (pulseEnabled) rememberInfiniteTransition(label = "solidAmbientPulse") else null

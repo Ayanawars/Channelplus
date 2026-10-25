@@ -360,7 +360,7 @@ open class MainActivity : ComponentActivity() {
                         base.fontScale * UiFontScale.factor(fontCustomization.sizePercent),
                     ),
                     LocalUiFontScaleFactor provides UiFontScale.factor(fontCustomization.sizePercent),
-                    LocalGlass provides glassConfig,
+                    LocalGlass provides (if (tv.own.owntv.features.themes.LocalDownloadedTheme.current != null) tv.own.owntv.core.theme.GlassConfig() else glassConfig),
                     LocalBlurredBackdrop provides blurred,
                     LocalBackground provides background,
                 ) {
@@ -379,7 +379,9 @@ open class MainActivity : ComponentActivity() {
                     ) {
                         // Background image sits behind everything when a path is set; otherwise the solid
                         // base color shows through and glass renders over that instead.
-                        if (background.showsPicture) BackgroundLayer(background, blurred)
+                        if (tv.own.owntv.features.themes.LocalDownloadedTheme.current != null) {
+                            tv.own.owntv.features.themes.ThemeBackdrop(Modifier.fillMaxSize())
+                        } else if (background.showsPicture) BackgroundLayer(background, blurred)
 
                         Box(modifier = Modifier.fillMaxSize()) {
                         val profile = activeProfileId
