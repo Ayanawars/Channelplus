@@ -858,13 +858,8 @@ fun OwnTVShell(
         if (openedSeries == null && searchReturn == MainSection.SERIES && selectedSection == MainSection.SERIES) returnToSearch()
     }
 
-    BackHandler {
-        when {
-            playerMode == PlayerMode.FULLSCREEN -> exitPlayer()
-            showAvatarPicker -> showAvatarPicker = false
-            showPlaylistPicker -> showPlaylistPicker = false
-            showExit -> showExit = false
-            railFocused -> {
+    val closeNavigation: () -> Unit = {
+
                 railFocused = false
                 railIdleHidden = true
                 railKeyAt = 0L
@@ -878,7 +873,16 @@ fun OwnTVShell(
                     else -> null
                 }
                 if (enter?.invoke() != true) runCatching { contentAreaFocus.requestFocus() }
-            }
+            
+    }
+
+    BackHandler {
+        when {
+            playerMode == PlayerMode.FULLSCREEN -> exitPlayer()
+            showAvatarPicker -> showAvatarPicker = false
+            showPlaylistPicker -> showPlaylistPicker = false
+            showExit -> showExit = false
+            railFocused -> closeNavigation()
             // Settings is reached through More now, so Back out of its root goes back there — one
             // level out, not two. `SettingsScreen` passes its own `onBack` for the same purpose, but
             // its root handler does not always win against this one, which left Back looking dead on
@@ -924,6 +928,11 @@ fun OwnTVShell(
     Box(
         modifier = modifier.fillMaxSize().background(shellBase)
             .onPreviewKeyEvent { e ->
+                // Close navigation before a child screen interprets Back as leaving its page.
+                if (e.key == Key.Back && railHasFocus && !showExit && !showAvatarPicker && !showPlaylistPicker && playerMode != PlayerMode.FULLSCREEN) {
+                    if (e.type == KeyEventType.KeyUp) closeNavigation()
+                    return@onPreviewKeyEvent true
+                }
                 if (e.type == KeyEventType.KeyDown) {
                     if (e.key == Key.DirectionLeft || e.key == Key.DirectionRight) railKeyAt = android.os.SystemClock.uptimeMillis()
                     // A key pressed on the rail is the user using it, however focus got there.
