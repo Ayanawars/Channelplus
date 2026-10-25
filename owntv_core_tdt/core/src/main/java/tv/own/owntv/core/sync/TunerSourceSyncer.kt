@@ -152,7 +152,7 @@ class TunerSourceSyncer(
                 val label = info.loadLabel(context).toString()
                 val isPlutoInput = info.serviceInfo.packageName == PLUTO_PACKAGE ||
                     label.contains(PLUTO_LABEL.substringBefore(' '), ignoreCase = true)
-                isPlutoInput && hasChannels(context, info.id)
+                isPlutoInput
             }.forEach { info ->
                 val label = info.loadLabel(context).toString().ifBlank { PLUTO_LABEL }
                 pluto[info.id] = Input(
