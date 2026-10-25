@@ -51,7 +51,7 @@ internal fun TunerSourceOption(onImport: (name: String, url: String) -> Unit) {
             choosing = false
             val input = inputs.firstOrNull { it.id == id }
             onImport(
-                if (TunerSourceSyncer.isPluto(input?.providerPackage)) input.name else title,
+                if (TunerSourceSyncer.isPluto(input?.providerPackage)) input?.name ?: title else title,
                 TunerSourceSyncer.sourceUrl(id, input?.providerPackage, input?.filterByOwner == true),
             )
         },
