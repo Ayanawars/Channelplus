@@ -15,7 +15,6 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-      - uses: android-actions/setup-android@v3
       - uses: gradle/actions/setup-gradle@v4
       - run: '"$ANDROID_HOME/cmdline-tools/16.0/bin/sdkmanager" "platforms;android-37" "build-tools;37.0.0"'
       - name: Create disposable CI signing key
