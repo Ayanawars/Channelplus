@@ -30,10 +30,10 @@ plugins {
 }
 
 android {
-    buildToolsVersion = "37.0.0"
+    buildToolsVersion = "36.0.0"
     namespace = "tv.own.owntv"
     compileSdk {
-        version = release(37)
+        version = release(36)
     }
 
     // Signing credentials AND local-only build switches, kept in a standalone properties file OUTSIDE

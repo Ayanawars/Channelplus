@@ -17,10 +17,10 @@ group = "tv.own.owntv"
 version = rootProject.extra["coreVersion"] as String
 
 android {
-    buildToolsVersion = "37.0.0"
+    buildToolsVersion = "36.0.0"
     namespace = "tv.own.owntv.core"
     compileSdk {
-        version = release(37)
+        version = release(36)
     }
 
     defaultConfig {
