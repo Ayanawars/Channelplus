@@ -19,7 +19,13 @@ jobs:
         with:
           packages: platform-tools
       - uses: gradle/actions/setup-gradle@v4
-      - run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - run: sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
+      - name: Save APK signing tool
+        run: cp "$ANDROID_HOME/build-tools/37.0.0/lib/apksigner.jar" owntv_tdt/app/apksigner.jar
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apk-signing-tool
+          path: owntv_tdt/app/apksigner.jar
       - name: Create disposable CI signing key
         run: keytool -genkeypair -keystore "$RUNNER_TEMP/ci.jks" -storepass android -keypass android -alias tunerprobe -keyalg RSA -validity 30 -dname 'CN=Channelplus CI'
       - name: Check and build
