@@ -1,0 +1,6 @@
+<resources>
+    <string name="tdt_permission_title">Allow access to TV channels</string>
+    <string name="tdt_permission_body">Channel + needs permission to read the channels already tuned on your TV. Open Permissions in the app settings and allow TV listings, then return and synchronize again. If your TV does not offer this permission, it cannot be granted from this screen.</string>
+    <string name="tdt_permission_settings">Open app settings</string>
+    <string name="tdt_permission_settings_unavailable">This TV cannot open the app permission settings.</string>
+</resources>

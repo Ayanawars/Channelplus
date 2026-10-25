@@ -35,8 +35,8 @@
 1	log	app/src/main/java/tv/own/owntv/MainActivity.kt	onNewIntent deepLinkHost=${intent.data?.host} deepLinkType=${pendingDeepLink?.javaClass?.simpleName ?: "none"}
 1	performance	app/src/main/java/tv/own/owntv/MainActivity.kt	profile-id-loaded
 1	performance	app/src/main/java/tv/own/owntv/MainActivity.kt	profiles-loaded
-1	compiler	app/src/main/java/tv/own/owntv/OwnTVApp.kt	DEPRECATION
 1	technical	app/src/main/java/tv/own/owntv/OwnTVApp.kt	Ayanawars/Channelplus
+1	compiler	app/src/main/java/tv/own/owntv/OwnTVApp.kt	DEPRECATION
 1	file-path	app/src/main/java/tv/own/owntv/OwnTVApp.kt	image_cache
 1	performance	app/src/main/java/tv/own/owntv/OwnTVApp.kt	koin-started
 3	empty	app/src/main/java/tv/own/owntv/core/i18n/LocalizedContent.kt	\0
@@ -590,6 +590,7 @@
 12	empty	app/src/main/java/tv/own/owntv/features/setup/SetupViewModel.kt	\0
 5	empty	app/src/main/java/tv/own/owntv/features/setup/SetupWizard.kt	\0
 2	technical	app/src/main/java/tv/own/owntv/features/setup/SetupWizard.kt	+
+1	protocol	app/src/main/java/tv/own/owntv/features/setup/TunerPermission.kt	package
 3	technical	app/src/main/java/tv/own/owntv/features/shell/OwnTVShell.kt	\0
 1	protocol	app/src/main/java/tv/own/owntv/features/shell/OwnTVShell.kt	ass
 1	performance	app/src/main/java/tv/own/owntv/features/shell/OwnTVShell.kt	epg-preload
