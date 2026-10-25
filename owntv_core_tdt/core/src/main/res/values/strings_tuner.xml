@@ -1,0 +1,18 @@
+<resources>
+    <string name="tuner_recording_unsupported">Recording from the built-in tuner is not available in this version.</string>
+
+    <string name="tuner_invalid_source">The antenna source does not contain a valid tuner</string>
+    <string name="tuner_missing">The tuner is unavailable on this television</string>
+    <string name="tuner_empty">No antenna channels are visible. Allow access to TV listings and tune channels in your television settings.</string>
+    <string name="tuner_antenna_name">Antenna / terrestrial TV</string>
+    <string name="tuner_channel_name">Channel %1$d</string>
+    <string name="tuner_unknown_programme">No programme information</string>
+    <string name="tuner_source_missing">The antenna source is unavailable</string>
+    <string name="tuner_pause_unsupported">Pausing terrestrial TV is unavailable in this version</string>
+    <string name="tuner_signal_missing">No antenna signal</string>
+    <string name="tuner_connection_failed">Could not connect to the tuner</string>
+    <string name="tuner_disconnected">The tuner disconnected</string>
+    <string name="tuner_parental_block">Channel blocked by the television parental controls</string>
+    <string name="tuner_in_use">The tuner is already in use in another window</string>
+    <string name="tuner_tune_failed">Could not tune: %1$s</string>
+</resources>

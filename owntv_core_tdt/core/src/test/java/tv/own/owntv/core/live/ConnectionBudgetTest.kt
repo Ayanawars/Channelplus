@@ -13,6 +13,16 @@ import tv.own.owntv.core.model.SourceType
  */
 class ConnectionBudgetTest {
 
+    @Test
+    fun `antenna may be watched but cannot be recorded through the HTTP recorder`() {
+        val antenna = source(1).copy(type = SourceType.M3U, url = "owntv-tuner://input?input=test%2FHW1")
+        assertEquals(StreamGrant.Allowed, connectionBudget(antenna, OpenStreams(), StreamPurpose.WATCHING))
+        assertEquals(StreamRefusal.TUNER_RECORDING_UNSUPPORTED,
+            refusal(connectionBudget(antenna, OpenStreams(), StreamPurpose.RECORDING)))
+        assertEquals(StreamRefusal.SINGLE_CONNECTION,
+            refusal(connectionBudget(antenna, OpenStreams(watching = 1), StreamPurpose.WATCHING)))
+    }
+
     private fun source(max: Int) = SourceEntity(
         id = 1,
         name = "Playlist",

@@ -194,6 +194,20 @@ class LiveTuneController(
         current = channel
         recall.onWatched(channel)
         _previewBlocked.value = false
+        if (tv.own.owntv.core.model.TifChannelUri.parse(channel.streamUrl) != null) {
+            // Antenna bypasses HTTP fallback, provider limits and local HTTP timeshift.
+            // Reuse the live pane's engine/surface path, whose implementation now owns TvView.
+            parkTimeshift()
+            if (engines.mpvHasStream) engines.mpvStopAndAwaitRelease()
+            if (!isCurrent(channel)) return
+            _liveOnExo.value = true
+            exoStalkerCmd = null
+            setReconnect(null, null)
+            if (engines.exoUrl == channel.streamUrl && !engines.exoFailed) engines.exoSetMuted(false)
+            else engines.exoPlay(channel.streamUrl, false, request(channel, source))
+            host.onEngineStarted()
+            return
+        }
         val setting = source?.liveEnginePreference
             ?.let { name -> EnginePreference.entries.firstOrNull { it.name == name } }
             ?: host.globalPreference()
@@ -439,6 +453,7 @@ class LiveTuneController(
      * copy cannot be made.
      */
     private suspend fun openTimeshift(channel: ChannelEntity, source: SourceEntity?, resolved: String?): Boolean {
+        if (tv.own.owntv.core.model.TifChannelUri.parse(channel.streamUrl) != null) return false
         val manager = host.timeshift ?: return false
         val key = timeshiftKey(channel)
         // The channel being left, parked by the manager with what was on screen — see [TimeshiftManager.open].

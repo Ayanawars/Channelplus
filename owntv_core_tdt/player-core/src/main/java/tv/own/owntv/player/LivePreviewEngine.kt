@@ -1238,6 +1238,7 @@ class LivePreviewEngine(
 
     private val listener = object : Player.Listener {
         override fun onPlaybackStateChanged(playbackState: Int) {
+            if (_tvInputActive.value) return
             logStateChange(playbackState)
             when (playbackState) {
                 Player.STATE_BUFFERING -> {
@@ -1336,7 +1337,7 @@ class LivePreviewEngine(
             }
         }
 
-        override fun onIsPlayingChanged(isPlaying: Boolean) { _isPlaying.value = isPlaying }
+        override fun onIsPlayingChanged(isPlaying: Boolean) { if (!_tvInputActive.value) _isPlaying.value = isPlaying }
 
         override fun onRenderedFirstFrame() { tune.firstFrameRendered = true }
 
@@ -1361,6 +1362,7 @@ class LivePreviewEngine(
         override fun onCues(cueGroup: androidx.media3.common.text.CueGroup) { _cues.value = cueGroup.cues }
 
         override fun onPlayerError(error: PlaybackException) {
+            if (_tvInputActive.value) return
             android.util.Log.w(LiveDiagnosticsLog.TAG, "ExoPlayer error: ${error.errorCodeName}", error)
             LiveDiagnosticsLog.event("player_error code=${error.errorCodeName} hasPlayed=${tune.hasPlayed}")
             // A decoder or audio-output failure while tunneled is the tunnel's; a network one is not.
@@ -1593,6 +1595,20 @@ class LivePreviewEngine(
         recreateSurface()
     }
 
+    private val _tvInputActive = MutableStateFlow(false)
+    val tvInputActive: StateFlow<Boolean> = _tvInputActive.asStateFlow()
+    private val tvInput = TifPlayback(context) { available, failure ->
+        if (_tvInputActive.value) {
+            _isPlaying.value = available
+            _buffering.value = !available && failure == null
+            _error.value = failure?.let { PlaybackFailure.Raw(it) }
+            _state.value = if (failure != null) State.ERROR else if (available) State.PLAYING else State.LOADING
+            if (available) { tune.hasPlayed = true; tune.everRendered = true }
+        }
+    }
+    fun attachTvInputView(view: android.media.tv.TvView) = tvInput.attach(view)
+    fun detachTvInputView(view: android.media.tv.TvView) = tvInput.detach(view)
+
     /** [prerollSecsOverride] = the tuned channel's playlist "Pre-buffer" override in
      *  seconds; null follows the global setting. */
     fun play(
@@ -1616,6 +1632,26 @@ class LivePreviewEngine(
         directSource: String? = null,
     ) {
         LiveDiagnosticsLog.event("play() engine=$engineId url=${HttpClient.redactUrl(url)} muted=$muted")
+        val antenna = tv.own.owntv.core.model.TifChannelUri.parse(url)
+        if (antenna != null) {
+            stop()
+            tune = TuneState(playStartedMs = android.os.SystemClock.elapsedRealtime())
+            currentUrl = url
+            lastTunedUrl = url
+            prerollOverrideSecs = null; this.liveBufferOverride = null
+            tunedUserAgent = null; tunedPrerollSecs = null; tunedHttpHeaders = null
+            tunedLiveBufferOverride = null; tunedDrmConfig = null; tunedManifestType = null; tunedDirectSource = null
+            _currentMeta.value = meta
+            this.muted = muted
+            _volume.value = if (muted) 0 else defaultVolume
+            _error.value = null; _errorInfo.value = null
+            _isPlaying.value = false; _buffering.value = true; _state.value = State.LOADING
+            _tvInputActive.value = true
+            tvInput.setVolume(if (muted) 0f else _volume.value.coerceAtMost(100) / 100f)
+            tvInput.play(antenna)
+            return
+        }
+        if (_tvInputActive.value) { tvInput.stop(); _tvInputActive.value = false }
         // THE reset. Everything a new channel must not inherit from the previous one lives in
         // [TuneState], so forgetting it is one assignment that cannot be partially done.
         tune = TuneState(playStartedMs = android.os.SystemClock.elapsedRealtime())
@@ -1742,6 +1778,7 @@ class LivePreviewEngine(
      * position to preserve, so this is just "open the same channel again".
      */
     private fun rebuildForSettingChange() {
+        if (_tvInputActive.value) return
         val url = currentUrl ?: return
         val meta = _currentMeta.value
         val ua = currentUa
@@ -1869,6 +1906,10 @@ class LivePreviewEngine(
      *  passthrough (AC3/E-AC3/DTS 5.1) bitstream. [force] re-sends the track parameters even when the
      *  desired state is unchanged — needed right after a (re)built player, whose parameters are fresh. */
     private fun applyMute(force: Boolean = false) {
+        if (_tvInputActive.value) {
+            tvInput.setVolume(if (muted) 0f else _volume.value.coerceAtMost(100) / 100f)
+            return
+        }
         val p = player ?: return
         p.volume = if (muted) 0f else 1f
         val disable = muted && tune.hasVideoTrack
@@ -1941,6 +1982,10 @@ class LivePreviewEngine(
     /** Stop playback and free the decoder/connection (e.g. before mpv takes over for fullscreen). Keeps the
      *  ExoPlayer instance alive for the next preview. */
     fun stop() {
+        tvInput.stop()
+        _tvInputActive.value = false
+        _isPlaying.value = false
+        _error.value = null; _errorInfo.value = null
         LiveDiagnosticsLog.event("stop() — intentional")
         tune.stoppingIntentionally = true
         currentUrl = null
@@ -1996,6 +2041,8 @@ class LivePreviewEngine(
     }
 
     fun release() {
+        tvInput.stop()
+        _tvInputActive.value = false
         LiveDiagnosticsLog.event("release() — intentional")
         releaseLoudness()
         tune.stoppingIntentionally = true
@@ -2720,6 +2767,10 @@ class LivePreviewEngine(
 
     // --- PlaybackEngine controls (full-screen HUD) ---
     override fun togglePlayPause() {
+        if (_tvInputActive.value) {
+            android.widget.Toast.makeText(context, context.getString(tv.own.owntv.core.R.string.tuner_pause_unsupported), android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
         val p = player ?: return
         if (p.isPlaying) p.pause() else p.play()
     }
@@ -2730,7 +2781,7 @@ class LivePreviewEngine(
         // ExoPlayer itself can't amplify past unity (and a gain audio-processor broke the audio sink), so
         // 100–150% rides on the platform LoudnessEnhancer instead — same range as mpv, so a quiet channel
         // can be lifted without leaving Live TV.
-        val v = (_volume.value + delta).coerceIn(0, MAX_VOLUME)
+        val v = (_volume.value + delta).coerceIn(0, if (_tvInputActive.value) 100 else MAX_VOLUME)
         _volume.value = v
         muted = v == 0
         if (v > 0) preMuteVolume = null // turned up by hand: that level is the one to come back to now
@@ -2822,6 +2873,12 @@ class LivePreviewEngine(
         setMuted(!muted)
     }
     override fun retry() {
+        if (_tvInputActive.value) {
+            _error.value = null; _errorInfo.value = null
+            _state.value = State.LOADING; _buffering.value = true
+            tvInput.retry()
+            return
+        }
         val url = currentUrl ?: return
         // Replay the identity this channel was tuned with — HUD Retry used to re-open with the URL only,
         // so a channel needing a Referer/UA played on first open and 403'd the moment you pressed Retry.

@@ -1961,6 +1961,7 @@
 1	technical	core/src/main/java/tv/own/owntv/core/launcher/LauncherRecommendationPlanner.kt	episode:${show.sourceId}:${show.remoteId ?: show.name}:${episode.remoteId ?: "${episode.seasonNumber}-${episode.episodeNumber}"}
 1	technical	core/src/main/java/tv/own/owntv/core/launcher/LauncherRecommendationPlanner.kt	live:${channel.sourceId}:${channel.remoteId ?: channel.name}
 1	technical	core/src/main/java/tv/own/owntv/core/launcher/LauncherRecommendationPlanner.kt	movie:${movie.sourceId}:${movie.remoteId ?: movie.name}
+1	protocol	core/src/main/java/tv/own/owntv/core/live/ConnectionBudget.kt	owntv-tuner://
 1	log	core/src/main/java/tv/own/owntv/core/live/ConnectionLimits.kt	ConnectionLimits
 1	log	core/src/main/java/tv/own/owntv/core/live/ConnectionLimits.kt	measured source ${source.id}: $result
 1	log	core/src/main/java/tv/own/owntv/core/live/ConnectionLimits.kt	no playable channels for source ${source.id}
@@ -2198,6 +2199,12 @@
 2	json	core/src/main/java/tv/own/owntv/core/model/HomeRow.kt	order
 2	preference-key	core/src/main/java/tv/own/owntv/core/model/HomeRow.kt	recentLiveMode
 2	json	core/src/main/java/tv/own/owntv/core/model/HomeRow.kt	trendingStyle
+2	protocol	core/src/main/java/tv/own/owntv/core/model/TifChannelUri.kt	UTF-8
+1	protocol	core/src/main/java/tv/own/owntv/core/model/TifChannelUri.kt	channel
+1	protocol	core/src/main/java/tv/own/owntv/core/model/TifChannelUri.kt	id
+1	protocol	core/src/main/java/tv/own/owntv/core/model/TifChannelUri.kt	input
+1	protocol	core/src/main/java/tv/own/owntv/core/model/TifChannelUri.kt	owntv-tif
+1	protocol	core/src/main/java/tv/own/owntv/core/model/TifChannelUri.kt	owntv-tif://channel?input=${URLEncoder.encode(inputId, "UTF-8")}&id=$channelId
 1	log	core/src/main/java/tv/own/owntv/core/network/BoundedDns.kt	${HttpClient.redactHost(hostname)}: no DNS answer in time
 1	log	core/src/main/java/tv/own/owntv/core/network/BoundedDns.kt	dns ${HttpClient.redactHost(hostname)} failed (${failure.javaClass.simpleName}) — using its last known addresses
 1	technical	core/src/main/java/tv/own/owntv/core/network/BoundedDns.kt	owntv-dns
@@ -4613,6 +4620,19 @@
 1	log	core/src/main/java/tv/own/owntv/core/sync/SyncSupport.kt	refreshCategories upsert sourceId=${s.id} type=$type rows=${entities.size}
 1	log	core/src/main/java/tv/own/owntv/core/sync/SyncSupport.kt	skippedDuplicates=$skippedDuplicates elapsedMs=${SystemClock.elapsedRealtime() - chunkRunStart}
 1	log	core/src/main/java/tv/own/owntv/core/sync/SyncSupport.kt	totalSkipped=$skippedDuplicates totalUnique=${total[0]} filterMs=$filterMs elapsedMs=${SystemClock.elapsedRealtime() - chunkRunStart}
+1	protocol	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	/HW
+1	protocol	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	ASC
+1	log	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	EPG unavailable for channel ${station.id}: ${e.javaClass.simpleName}
+1	log	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	TunerSource
+1	protocol	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	android.permission.READ_TV_LISTINGS
+1	protocol	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	antenna
+4	protocol	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	input
+1	protocol	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	owntv-tuner
+1	protocol	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	owntv-tuner://
+1	protocol	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	tif:$input:${ch.id}
+1	protocol	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	tif:$input:${station.id}
+1	protocol	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	tif:${ch.id}
+1	protocol	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	tif:${it.id}
 1	log	core/src/main/java/tv/own/owntv/core/sync/XtreamSyncer.kt	$label backfill incomplete succeeded=${backfill.succeededCategoryRemoteIds.size}/${backfill.attempted} — prune skipped
 1	log	core/src/main/java/tv/own/owntv/core/sync/XtreamSyncer.kt	$label bulk end sourceId=${s.id} complete=$done unique=${total[0]} ms=${SystemClock.elapsedRealtime() - bulkStart}
 1	log	core/src/main/java/tv/own/owntv/core/sync/XtreamSyncer.kt	$label bulk fetch failed (${e.message}) — falling back to per-category requests
@@ -5131,6 +5151,7 @@
 1	json	core/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	tag_name
 1	log	core/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	truncated: got $copied of $total bytes
 1	uri	core/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	tv.own.owntv.UPDATE_INSTALL_STATUS
+1	protocol	core/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	tv.own.owntv.tdt
 1	log	core/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	unparseable APK (${apk.length()} bytes)
 1	log	core/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	update check failed: ${error.message}
 1	log	core/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	update download failed: ${error.message}

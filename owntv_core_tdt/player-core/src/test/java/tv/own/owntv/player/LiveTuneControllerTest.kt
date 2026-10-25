@@ -120,6 +120,24 @@ class LiveTuneControllerTest {
         LiveTuneController(backgroundScope, engines, host)
 
     @Test
+    fun `antenna bypasses mpv preference and HTTP fallback watches`() = runTest {
+        val engines = FakeEngines().apply { mpvHasStream = true }
+        val host = FakeHost(this).apply { preference = EnginePreference.MPV_FIRST; budgetSecs = 1 }
+        val controller = controller(engines, host)
+        val antenna = channel(42).copy(streamUrl = tv.own.owntv.core.model.TifChannelUri(
+            "com.tcl.tvinput/.TDTVInputService/HW1413742848", 42).encode())
+        controller.tune(antenna)
+        runCurrent()
+        advanceTimeBy(30_000)
+        assertTrue(controller.liveOnExo.value)
+        assertEquals(listOf("exo:${antenna.streamUrl}"), engines.log)
+        assertFalse(engines.mpvHasStream)
+        assertTrue(host.events.isEmpty())
+        assertEquals(null, engines.exoWatch)
+        controller.stop()
+    }
+
+    @Test
     fun `a newer tune supersedes one still waiting out the decoder release`() = runTest {
         val engines = FakeEngines().apply { exoUrl = "http://preview.invalid/x" }
         val host = FakeHost(this).apply { preference = EnginePreference.MPV_FIRST }
