@@ -60,7 +60,7 @@ fun ThemeCatalogDialog(onDismiss: () -> Unit) {
                     Column(Modifier.width(240.mpx).height(112.mpx)
                         .background(Color(preview[0]), RoundedCornerShape(14.mpx))
                         .border(1.mpx, Color(preview[1]), RoundedCornerShape(14.mpx)).padding(14.mpx)) {
-                        Text("Channel +", color = Color(preview[1]), style = stageText(18, 700))
+                        Text(stringResource(R.string.app_name), color = Color(preview[1]), style = stageText(18, 700))
                         Row(Modifier.padding(top = 12.mpx), horizontalArrangement = Arrangement.spacedBy(8.mpx)) {
                             repeat(3) { Box(Modifier.weight(1f).height(30.mpx).background(Color(preview[2]).copy(alpha = .45f), RoundedCornerShape(5.mpx))) }
                         }

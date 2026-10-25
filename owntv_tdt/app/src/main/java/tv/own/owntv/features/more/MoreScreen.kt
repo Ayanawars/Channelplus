@@ -194,8 +194,7 @@ fun MoreScreen(
                                             .bringIntoViewRequester(bring)
                                             .onFocusChanged { if (it.hasFocus) scope.launch { bring.bringIntoView() } }
                                             .background(OwnTVTheme.colors.surface.copy(alpha = .94f), shape)
-                                            .border(1.mpx, OwnTVTheme.colors.outline.copy(alpha = .45f), shape)
-                                            .semantics { contentDescription = "$label. $description" },
+                                            .border(1.mpx, OwnTVTheme.colors.outline.copy(alpha = .45f), shape),
                                         onClick = { choose(item) }, radius = 26.mpx, focusStyle = StageFocus.POSTER,
                                     ) {
                                         Row(Modifier.fillMaxWidth().padding(24.mpx), verticalAlignment = Alignment.CenterVertically,
