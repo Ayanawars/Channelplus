@@ -149,7 +149,7 @@ fun MoreScreen(
             val setEntry: (() -> Boolean) -> Unit = { pageEntry = it }
             when (selected) {
                 null -> Column(Modifier.fillMaxSize()) {
-                    PageHead(stringResource(R.string.common_nav_more)) {}
+                    Text(stringResource(R.string.common_nav_more), style = stageText(34, 800), color = StageColors.Text, modifier = Modifier.padding(bottom = 20.mpx))
                     ProfileRow(profileName, playlistLabel, playlists, avatarId, avatarPath, onSwitchProfile, onPickAvatar)
                     val cards = listOf(
                         Triple(MoreItem.SETTINGS, OwnTVIcon.SETTINGS, stringResource(R.string.common_nav_settings)),
