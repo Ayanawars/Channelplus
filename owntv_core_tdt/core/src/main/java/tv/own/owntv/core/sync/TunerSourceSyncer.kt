@@ -39,7 +39,7 @@ class TunerSourceSyncer(
         check(manager?.tvInputList?.any { it.id == input } == true) { context.getString(tv.own.owntv.core.R.string.tuner_missing) }
         val stations = readStations(input, ownerFilter)
         // A denied/filtered read must never erase the previous working list.
-        check(stations.isNotEmpty()) { context.getString(tv.own.owntv.core.R.string.tuner_empty) }
+        check(stations.isNotEmpty()) { emptyChannelError(sourceProvider(sourceUri)) }
         val categoryKey = if (provider == PLUTO_PACKAGE) "pluto:$input" else "antenna"
         val categoryName = if (provider == PLUTO_PACKAGE) PLUTO_LABEL else context.getString(tv.own.owntv.core.R.string.tuner_antenna_name)
         var category = categories.findByRemoteIds(source.id, MediaType.LIVE, listOf(categoryKey)).firstOrNull()
@@ -95,7 +95,7 @@ class TunerSourceSyncer(
         val input = sourceUri.getQueryParameter("input") ?: error(context.getString(tv.own.owntv.core.R.string.tuner_missing))
         val ownerFilter = if (sourceUri.getQueryParameter("ownerFilter") == "1") sourceProvider(sourceUri) else null
         val stations = readStations(input, ownerFilter)
-        check(stations.isNotEmpty()) { context.getString(tv.own.owntv.core.R.string.tuner_empty) }
+        check(stations.isNotEmpty()) { emptyChannelError(sourceProvider(sourceUri)) }
         val now = System.currentTimeMillis()
         var count = 0
         for (station in stations) {
@@ -126,6 +126,11 @@ class TunerSourceSyncer(
         programmes.chunked(200).forEach { dao.upsertProgrammes(it) }
         return programmes.size
     }
+
+    private fun emptyChannelError(provider: String?): String = context.getString(
+        if (provider == PLUTO_PACKAGE) tv.own.owntv.core.R.string.tuner_empty_pluto
+        else tv.own.owntv.core.R.string.tuner_empty,
+    )
 
     companion object {
         const val READ_PERMISSION = "android.permission.READ_TV_LISTINGS"
@@ -196,9 +201,15 @@ class TunerSourceSyncer(
             } ?: false
         }.getOrDefault(false)
 
-        private fun hasChannels(context: Context, inputId: String): Boolean = runCatching {
+        fun hasChannels(context: Context, inputId: String): Boolean = runCatching {
             context.contentResolver.query(TvContract.buildChannelsUriForInput(inputId),
                 arrayOf(TvContract.Channels._ID), null, null, null)?.use { it.moveToFirst() } ?: false
         }.getOrDefault(false)
+        fun createSetupIntent(context: Context, inputId: String): android.content.Intent? {
+            val info = context.getSystemService(TvInputManager::class.java)?.tvInputList
+                ?.firstOrNull { it.id == inputId } ?: return null
+            return runCatching { info.createSetupIntent() }.getOrNull()
+                ?: runCatching { info.createSettingsIntent() }.getOrNull()
+        }
     }
 }
