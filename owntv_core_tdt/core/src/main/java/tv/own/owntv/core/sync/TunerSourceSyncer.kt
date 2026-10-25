@@ -148,9 +148,20 @@ class TunerSourceSyncer(
             val hardware = available.filter { it.type == TvInputInfo.TYPE_TUNER && it.id.contains("/HW") }
                 .map { Input(it.id, it.loadLabel(context).toString()) }
             val pluto = linkedMapOf<String, Input>()
-            available.filter { it.serviceInfo.packageName == PLUTO_PACKAGE }
-                .filter { info -> hasChannels(context, info.id) }
-                .forEach { info -> pluto[info.id] = Input(info.id, info.loadLabel(context).toString(), PLUTO_PACKAGE) }
+            available.filter { info ->
+                val label = info.loadLabel(context).toString()
+                val isPlutoInput = info.serviceInfo.packageName == PLUTO_PACKAGE ||
+                    label.contains(PLUTO_LABEL.substringBefore(' '), ignoreCase = true)
+                isPlutoInput && hasChannels(context, info.id)
+            }.forEach { info ->
+                val label = info.loadLabel(context).toString().ifBlank { PLUTO_LABEL }
+                pluto[info.id] = Input(
+                    info.id,
+                    label,
+                    PLUTO_PACKAGE,
+                    filterByOwner = hasPlutoOwnedChannels(context, info.id),
+                )
+            }
 
             val projection = arrayOf(TvContract.Channels.COLUMN_INPUT_ID, TvContract.Channels.COLUMN_PACKAGE_NAME,
                 TvContract.Channels.COLUMN_SERVICE_TYPE)
@@ -161,12 +172,29 @@ class TunerSourceSyncer(
                     while (cursor.moveToNext()) {
                         val inputId = cursor.getString(0) ?: continue
                         if (inputId !in availableIds || cursor.getString(2) == TvContract.Channels.SERVICE_TYPE_AUDIO) continue
-                        pluto.putIfAbsent(inputId, Input(inputId, PLUTO_LABEL, PLUTO_PACKAGE, filterByOwner = true))
+                        val existing = pluto[inputId]
+                        pluto[inputId] = if (existing != null) {
+                            existing.copy(filterByOwner = true)
+                        } else {
+                            Input(inputId, PLUTO_LABEL, PLUTO_PACKAGE, filterByOwner = true)
+                        }
                     }
                 }
             }
             return hardware + pluto.values
         }
+
+        private fun hasPlutoOwnedChannels(context: Context, inputId: String): Boolean = runCatching {
+            val projection = arrayOf(TvContract.Channels.COLUMN_PACKAGE_NAME, TvContract.Channels.COLUMN_SERVICE_TYPE)
+            context.contentResolver.query(TvContract.buildChannelsUriForInput(inputId), projection, null, null, null)?.use { cursor ->
+                while (cursor.moveToNext()) {
+                    if (cursor.getString(0) == PLUTO_PACKAGE && cursor.getString(1) != TvContract.Channels.SERVICE_TYPE_AUDIO) {
+                        return@use true
+                    }
+                }
+                false
+            } ?: false
+        }.getOrDefault(false)
 
         private fun hasChannels(context: Context, inputId: String): Boolean = runCatching {
             context.contentResolver.query(TvContract.buildChannelsUriForInput(inputId),
