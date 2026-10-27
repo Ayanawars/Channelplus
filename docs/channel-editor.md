@@ -1,0 +1,20 @@
+# Channel editor — local first version
+
+Entry points: Settings → Customize → Live TV → Channel editor; and the Live category-items toolbar reached through a source's Modify channels and groups action. The existing customization PIN gate remains in front of these entries. The initial source filter follows the source entry point; Sources → All profile sources exposes every source linked to this profile, regardless of the current playback playlist filter. TDT, M3U, Xtream and other imported source types share the same editor.
+
+OK toggles arbitrary rows. Hold OK to anchor a range, then OK on its end; Back cancels. Select all/invert operates on the filtered results. Changing source or search clears selection. The draft lists individual source versions, including hidden channels, with their original/current names and source label.
+
+Actions: set name; remove/add literal prefix or suffix; cut N Unicode code points from beginning/end; literal case-insensitive find/replace (blank replacement removes); collapse repeated spaces; restore provider names; hide/show. Blank name results are rejected. Move arbitrary selections to the start/end, to a 1-based final position, one step up/down, or before/after another row; the block retains its previous relative order. A–Z/Z–A sorts selected slots. Filtered-out rows retain their slots. Positions refer to the editor's filtered raw-channel list, including hidden rows and versions, and do not modify numbers used by the remote.
+
+Changes are a local draft until Save → Review → Save. Review includes the first eight changes with before/after names, original/new global positions and visibility, plus total affected rows. Undo/redo cover name/order/visibility together (30 undo snapshots); leaving a dirty draft offers discard/cancel. Saving resets the draft baseline. Renames and visibility use existing stable customization keys; provider rows and tuner configuration remain unchanged. The current session is limited to 20,000 channels across the profile; a larger result is refused, never silently truncated.
+
+Order persists through the existing content_order backup/resync mechanism. A new all-channels context is read by Live TV paging and the all-channel player lists. Reordering also saves each affected provider folder's relative order; favorites/custom categories retain their own independent order. The EPG retains its existing separate sort modes. Existing logo, EPG, group and favorites tools remain in their existing screens; this iteration does not add bulk channel-number changes, permanent deletion, logo editing or a new group/EPG assignment flow.
+
+Profile/source/catalogue changes are checked before saving and refuse stale drafts. Unrelated customization keys are merged, and overlapping conflicting names/visibility are rejected. Room commits global/folder orders together, and DataStore commits touched names/visibility together. There is no transaction spanning Room and DataStore: if saving fails between them, the error explicitly reports that some changes may be saved and keeps the draft for retry. No new database schema/migration, network metadata provider, credentials change or GitHub publication.
+
+Validation:
+- `python tools/channelplus/check_channel_editor.py`: passed; executes the actual new SQL against SQLite (order, source/profile/media/context isolation, bounds), checks ES/EN resources, placeholders and string references.
+- `git diff --check`: passed.
+- Eight Kotlin domain tests added for disjoint selection, filtered/source-safe movement, reverse ranges, undo/redo branching, rejected empty names, restore, Unicode cuts, boundary matching and selected-slot sorting.
+- JVM tests and Kotlin/Android compilation attempted but could not start: wrapper Gradle 9.7.1 is absent and its download fails with Network is unreachable. No APK or device test is claimed.
+- Translation inventory has no new unclassified editor literals; the whole-project check still flags the pre-existing `picons` literal in SettingsScreen.kt. The baseline was not expanded to hide it.

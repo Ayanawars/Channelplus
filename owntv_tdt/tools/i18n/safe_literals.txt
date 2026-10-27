@@ -40,6 +40,8 @@
 1	file-path	app/src/main/java/tv/own/owntv/OwnTVApp.kt	image_cache
 1	performance	app/src/main/java/tv/own/owntv/OwnTVApp.kt	koin-started
 3	empty	app/src/main/java/tv/own/owntv/core/i18n/LocalizedContent.kt	\0
+2	empty	app/src/main/java/tv/own/owntv/features/customize/ChannelEditorScreen.kt	\0
+1	empty	app/src/main/java/tv/own/owntv/features/customize/ChannelEditorViewModel.kt	\0
 1	empty	app/src/main/java/tv/own/owntv/features/customize/CustomizeItemsScreen.kt	\0
 1	assertion	app/src/main/java/tv/own/owntv/features/customize/CustomizeItemsViewModel.kt	EPISODE not applicable
 2	assertion	app/src/main/java/tv/own/owntv/features/customize/CustomizeItemsViewModel.kt	EPISODE not applicable to category items
@@ -110,6 +112,7 @@
 1	technical	app/src/main/java/tv/own/owntv/features/live/CatchupJumpDialog.kt	exact
 1	technical	app/src/main/java/tv/own/owntv/features/live/CatchupManualTimeDialog.kt	:
 1	technical	app/src/main/java/tv/own/owntv/features/live/CatchupManualTimeDialog.kt	EEEMMMd
+1	technical	app/src/main/java/tv/own/owntv/features/live/LiveChannelDrawer.kt	Mbps
 3	technical	app/src/main/java/tv/own/owntv/features/live/LiveScreen.kt	\0
 1	technical	app/src/main/java/tv/own/owntv/features/live/LiveScreen.kt	+
 1	technical	app/src/main/java/tv/own/owntv/features/live/LiveScreen.kt	EEE
@@ -609,7 +612,7 @@
 2	technical	app/src/main/java/tv/own/owntv/features/shell/components/GlassEffectPage.kt	—
 1	technical	app/src/main/java/tv/own/owntv/features/shell/components/GlassEffectPage.kt	◀ ▶
 1	empty	app/src/main/java/tv/own/owntv/features/shell/components/MediaDetailsScreen.kt	\0
-20	empty	app/src/main/java/tv/own/owntv/features/shell/components/SettingsScreen.kt	\0
+21	empty	app/src/main/java/tv/own/owntv/features/shell/components/SettingsScreen.kt	\0
 2	technical	app/src/main/java/tv/own/owntv/features/shell/components/SettingsScreen.kt	#%06X
 1	technical	app/src/main/java/tv/own/owntv/features/shell/components/SettingsScreen.kt	#F5B400
 1	technical	app/src/main/java/tv/own/owntv/features/shell/components/SettingsScreen.kt	#FFFFFF
@@ -657,10 +660,12 @@
 1	technical	app/src/main/java/tv/own/owntv/features/shell/components/SettingsScreen.kt	https://
 2	technical	app/src/main/java/tv/own/owntv/features/shell/components/SettingsScreen.kt	jpeg
 2	technical	app/src/main/java/tv/own/owntv/features/shell/components/SettingsScreen.kt	jpg
+1	technical	app/src/main/java/tv/own/owntv/features/shell/components/SettingsScreen.kt	live_hud_size
 2	technical	app/src/main/java/tv/own/owntv/features/shell/components/SettingsScreen.kt	live_layout
 2	technical	app/src/main/java/tv/own/owntv/features/shell/components/SettingsScreen.kt	live_opens_in
 1	protocol	app/src/main/java/tv/own/owntv/features/shell/components/SettingsScreen.kt	mpv
 2	technical	app/src/main/java/tv/own/owntv/features/shell/components/SettingsScreen.kt	navigation
+1	technical	app/src/main/java/tv/own/owntv/features/shell/components/SettingsScreen.kt	picons
 2	technical	app/src/main/java/tv/own/owntv/features/shell/components/SettingsScreen.kt	png
 2	technical	app/src/main/java/tv/own/owntv/features/shell/components/SettingsScreen.kt	popup_size
 1	technical	app/src/main/java/tv/own/owntv/features/shell/components/SettingsScreen.kt	quick_autoplay
@@ -937,6 +942,7 @@
 1	log	app/src/main/java/tv/own/owntv/player/FrameRateController.kt	AFR: video ${fps}fps matches no mode -> display default
 1	compiler	app/src/main/java/tv/own/owntv/player/FrameRateController.kt	DEPRECATION
 1	log	app/src/main/java/tv/own/owntv/player/FrameRateController.kt	FrameRate
+1	technical	app/src/main/java/tv/own/owntv/player/LivePlayerFooter.kt	#
 1	empty	app/src/main/java/tv/own/owntv/player/MiniPlayer.kt	\0
 1	technical	app/src/main/java/tv/own/owntv/player/MiniPlayer.kt	miniControls
 1	technical	app/src/main/java/tv/own/owntv/player/PlayerClock.kt	EEEdMMM

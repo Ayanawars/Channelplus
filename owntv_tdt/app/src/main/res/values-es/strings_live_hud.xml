@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources><string name="live_hud_size_title">Tamaño de interfaz del reproductor de TV</string><string name="live_hud_size_description">Ajusta textos, iconos y espacios del reproductor en directo. Predeterminado: 70 %. No cambia el tamaño del vídeo.</string><string name="live_hud_timeline_hint">Izquierda/derecha: retroceder o avanzar. OK: pausar o reanudar. Abajo: opciones.</string><string name="live_hud_pause">Pausar</string><string name="live_hud_resume">Reanudar</string></resources>

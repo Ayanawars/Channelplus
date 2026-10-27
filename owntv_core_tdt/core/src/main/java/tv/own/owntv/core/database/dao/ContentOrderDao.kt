@@ -34,6 +34,12 @@ interface ContentOrderDao {
         if (rows.isNotEmpty()) insertAll(rows)
     }
 
+    /** Commit a global reorder and the affected provider folders together. */
+    @Transaction
+    suspend fun replaceContexts(profileId: Long, type: MediaType, contexts: Map<String, List<ContentOrderEntity>>) {
+        contexts.forEach { (key, rows) -> replaceContext(profileId, type, key, rows) }
+    }
+
     /** Everything, for Backup & Restore / re-sync snapshotting. */
     /** Does this row already exist? The dry run before a sync counts what is genuinely new. */
     @Query("SELECT EXISTS(SELECT 1 FROM content_order WHERE profileId = :profileId AND mediaType = :type AND contextKey = :contextKey AND itemId = :itemId)")

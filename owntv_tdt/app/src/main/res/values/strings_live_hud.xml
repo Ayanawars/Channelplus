@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources><string name="live_hud_size_title">Live TV player interface size</string><string name="live_hud_size_description">Adjust text, icons and spacing in the live player. Default: 70%. Does not resize the video.</string><string name="live_hud_timeline_hint">Left/right: seek. OK: pause or resume. Down: options.</string><string name="live_hud_pause">Pause</string><string name="live_hud_resume">Resume</string></resources>

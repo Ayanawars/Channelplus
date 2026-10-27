@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -66,6 +67,7 @@ import tv.own.owntv.ui.stage.StageSwitch
 import tv.own.owntv.ui.stage.StageTag
 import tv.own.owntv.ui.stage.stageGlass
 import tv.own.owntv.ui.theme.StageColors
+import tv.own.owntv.ui.theme.StageAccent
 import tv.own.owntv.ui.theme.StageRadii
 import tv.own.owntv.ui.theme.mpx
 import tv.own.owntv.ui.theme.stageAccent
@@ -247,6 +249,13 @@ fun StageSettingsPage(
     showSearch: Boolean = true,
     rows: @Composable ColumnScope.() -> Unit = {},
 ) {
+    val navigation = LocalSettingsNavigation.current
+    if (navigation != null) {
+        SettingsListPage(group, count, searchQuery, onSearchQuery, scroll, modifier,
+            searchFocus, rowsFocus, panel, parents, tools, searchAutoEdit, onSearchActivate,
+            toolbar, list, showSearch, panelTop, navigation, rows)
+        return
+    }
     val searching = searchQuery.isNotBlank()
     androidx.compose.runtime.LaunchedEffect(searching) { if (searching) panel.help = null }
     // Popups opened from this page are labelled with its path, "SETTINGS · PLAYER".
@@ -639,6 +648,8 @@ fun StageSettingRow(
     val panel = LocalSettingsPanel.current
     var longAt by remember { mutableLongStateOf(0L) }
     val self = remember { FocusRequester() }
+    val modern = LocalSettingsNavigation.current != null
+    val rowAccent = settingsRowAccent()
     StageSurface(
         onClick = {
             if (android.os.SystemClock.uptimeMillis() - longAt > 800) {
@@ -647,17 +658,23 @@ fun StageSettingRow(
                 onClick()
             }
         },
-        radius = StageRadii.Row,
-        focusStyle = StageFocus.FX,
+        radius = if (modern) 12.mpx else StageRadii.Row,
+        focusStyle = if (modern) StageFocus.FILLED else StageFocus.FX,
+        accent = rowAccent,
         enabled = enabled,
         // A span member, or the row whose actions the panel is showing while focus is in them.
         // …or the row whose choices are open in the panel.
         idle = if (marked || keepPanel || (panel?.editor != null && panel.opener === self)) Modifier.background(a.accent.copy(alpha = 0.14f), RoundedCornerShape(StageRadii.Row)) else Modifier,
         onLongClick = onLongClick?.let { l -> { longAt = android.os.SystemClock.uptimeMillis(); l() } },
         modifier = modifier
+            .drawBehind {
+                if (modern) drawLine(Color.White.copy(alpha = 0.09f),
+                    androidx.compose.ui.geometry.Offset(22.mpx.toPx(), size.height),
+                    androidx.compose.ui.geometry.Offset(size.width - 22.mpx.toPx(), size.height))
+            }
             .focusRequester(self)
             .fillMaxWidth()
-            .height(84.mpx)
+            .heightIn(min = if (modern) 96.mpx else 84.mpx)
             .then(
                 if (onStep != null) {
                     Modifier.onPreviewKeyEvent { e ->
@@ -675,60 +692,76 @@ fun StageSettingRow(
         // While focused the panel follows this row, value changes included.
         if ((focused || keepPanel) && panel != null) androidx.compose.runtime.SideEffect { panel.help = help }
         Row(
-            Modifier.fillMaxWidth().padding(horizontal = 22.mpx),
+            Modifier.fillMaxWidth().padding(horizontal = 22.mpx, vertical = 14.mpx),
             horizontalArrangement = Arrangement.spacedBy(18.mpx),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            OwnTVIcon(icon, StageColors.Muted, Modifier.size(24.mpx))
+            if (!modern) OwnTVIcon(icon, StageColors.Muted, Modifier.size(24.mpx))
             Column(Modifier.weight(1f)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.mpx), verticalAlignment = Alignment.CenterVertically) {
-                    Text(title, style = stageText(21, 700), color = if (enabled) StageColors.Text else StageColors.Dim, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                    Text(title, style = stageText(if (modern) 25 else 21, 700), color = if (modern && focused) rowAccent.onAccent else if (enabled) StageColors.Text else StageColors.Dim, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
                     if (pinned) Box(Modifier.size(7.mpx).background(a.accent, CircleShape))
                 }
                 if (!desc.isNullOrBlank()) {
                     Text(
-                        desc, style = stageText(15.5f, 500),
-                        color = if (focused) FocusedDesc else StageColors.Muted,
-                        maxLines = 1, overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(top = 3.mpx),
+                        desc, style = stageText(if (modern) 18f else 15.5f, 500),
+                        color = if (modern && focused) rowAccent.onAccent.copy(alpha = 0.75f) else if (focused) FocusedDesc else StageColors.Muted,
+                        maxLines = if (modern) 2 else 1, overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(top = 4.mpx),
                     )
                 }
             }
-            if (value != null) SettingValueView(value)
+            if (value != null) Box(Modifier.widthIn(max = if (modern) 360.mpx else 440.mpx)) {
+                SettingValueView(value, if (modern && focused) rowAccent.onAccent else null)
+            }
+
         }
     }
 }
 
+@Composable
+private fun settingsRowAccent(): StageAccent =
+    if (LocalSettingsNavigation.current != null && !LocalStagePalette.current.isLight)
+        StageAccent(Color(0xFFF4EBD8), Color(0xFF18202C), Color(0xFFF4EBD8)) else stageAccent
+
 private val FocusedDesc: Color @Composable get() = StageColors.FxLine
 
 @Composable
-private fun SettingValueView(value: SettingValue) {
+private fun SettingValueView(value: SettingValue, focusedInk: Color? = null) {
     val a = stageAccent
     val valueStyle = stageText(18, 700)
-    Row(horizontalArrangement = Arrangement.spacedBy(10.mpx), verticalAlignment = Alignment.CenterVertically) {
-        when (value) {
-            is SettingValue.Switch -> StageSwitch(value.on)
-            is SettingValue.Choice -> {
-                Text(value.text, style = valueStyle, color = a.accent, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-                OwnTVIcon(OwnTVIcon.CHEVRON_DOWN, StageColors.Muted, Modifier.size(20.mpx))
-            }
-            is SettingValue.Opens -> {
-                if (!value.text.isNullOrBlank()) {
-                    Text(value.text, style = valueStyle, color = a.accent, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+    val palette = LocalStagePalette.current
+    val valuePalette = if (focusedInk != null) palette.copy(
+        text = focusedInk, muted = focusedInk.copy(alpha = 0.72f), dim = focusedInk.copy(alpha = 0.6f),
+        ink = focusedInk, fxText = focusedInk, fxLine = focusedInk.copy(alpha = 0.75f),
+        segmentOn = focusedInk.copy(alpha = 0.12f),
+    ) else palette
+    CompositionLocalProvider(LocalStagePalette provides valuePalette) {
+        Row(horizontalArrangement = Arrangement.spacedBy(10.mpx), verticalAlignment = Alignment.CenterVertically) {
+            when (value) {
+                is SettingValue.Switch -> StageSwitch(value.on)
+                is SettingValue.Choice -> {
+                    Text(value.text, style = valueStyle, color = focusedInk ?: a.accent, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                    OwnTVIcon(OwnTVIcon.CHEVRON_DOWN, focusedInk ?: StageColors.Muted, Modifier.size(20.mpx))
                 }
-                OwnTVIcon(OwnTVIcon.CHEVRON, StageColors.Muted, Modifier.size(20.mpx))
-            }
-            is SettingValue.Stepper -> StageStepper(value.text)
-            is SettingValue.Segmented -> SegmentedDisplay(value.options, value.selected)
-            is SettingValue.Saved -> {
-                Text(value.text, style = valueStyle, color = a.accent, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                if (value.any) {
-                    Text("·", style = valueStyle, color = a.accent, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.offset(x = (-4).mpx))
-                    Text(stringResource(R.string.common_reset), style = valueStyle, color = StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                is SettingValue.Opens -> {
+                    if (!value.text.isNullOrBlank()) {
+                        Text(value.text, style = valueStyle, color = focusedInk ?: a.accent, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                    }
+                    OwnTVIcon(OwnTVIcon.CHEVRON, focusedInk ?: StageColors.Muted, Modifier.size(20.mpx))
                 }
+                is SettingValue.Stepper -> StageStepper(value.text)
+                is SettingValue.Segmented -> SegmentedDisplay(value.options, value.selected)
+                is SettingValue.Saved -> {
+                    Text(value.text, style = valueStyle, color = focusedInk ?: a.accent, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    if (value.any) {
+                        Text("·", style = valueStyle, color = focusedInk ?: a.accent, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.offset(x = (-4).mpx))
+                        Text(stringResource(R.string.common_reset), style = valueStyle, color = focusedInk ?: StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
+                }
+                is SettingValue.Action -> Text(value.text, style = valueStyle, color = focusedInk ?: StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                is SettingValue.Custom -> value.content()
             }
-            is SettingValue.Action -> Text(value.text, style = valueStyle, color = StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            is SettingValue.Custom -> value.content()
         }
     }
 }
@@ -794,25 +827,28 @@ fun StageSettingsNote(title: String, body: String?) {
  */
 @Composable
 fun StageSearchResultRow(icon: OwnTVIcon, path: String, title: String, value: String?, onClick: () -> Unit) {
+    val modern = LocalSettingsNavigation.current != null
+    val accent = settingsRowAccent()
     StageSurface(
         onClick = onClick,
         radius = StageRadii.Row,
-        focusStyle = StageFocus.FX,
+        focusStyle = if (modern) StageFocus.FILLED else StageFocus.FX,
+        accent = accent,
         modifier = Modifier.fillMaxWidth().height(84.mpx),
-    ) { _ ->
+    ) { focused ->
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 22.mpx),
             horizontalArrangement = Arrangement.spacedBy(18.mpx),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            OwnTVIcon(icon, StageColors.Muted, Modifier.size(24.mpx))
+            OwnTVIcon(icon, if (modern && focused) accent.onAccent else StageColors.Muted, Modifier.size(24.mpx))
             Column(Modifier.weight(1f)) {
-                Text(path, style = stageText(15.5f, 500), color = StageColors.Dim, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(bottom = 3.mpx))
-                Text(title, style = stageText(21, 700), color = StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(path, style = stageText(15.5f, 500), color = if (modern && focused) accent.onAccent.copy(alpha = 0.7f) else StageColors.Dim, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(bottom = 3.mpx))
+                Text(title, style = stageText(21, 700), color = if (modern && focused) accent.onAccent else StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             Row(horizontalArrangement = Arrangement.spacedBy(10.mpx), verticalAlignment = Alignment.CenterVertically) {
-                if (!value.isNullOrBlank()) Text(value, style = stageText(18, 600), color = StageColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                OwnTVIcon(OwnTVIcon.CHEVRON, StageColors.Muted, Modifier.size(20.mpx))
+                if (!value.isNullOrBlank()) Text(value, style = stageText(18, 600), color = if (modern && focused) accent.onAccent else StageColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                OwnTVIcon(OwnTVIcon.CHEVRON, if (modern && focused) accent.onAccent else StageColors.Muted, Modifier.size(20.mpx))
             }
         }
     }
@@ -915,6 +951,8 @@ fun StageFieldRow(
     submitHint: Pair<String, String>? = null,
 ) {
     val a = stageAccent
+    val modern = LocalSettingsNavigation.current != null
+    val accent = settingsRowAccent()
     val panel = LocalSettingsPanel.current
     var editing by remember { mutableStateOf(false) }
     var shown by remember { mutableStateOf(false) }
@@ -944,12 +982,13 @@ fun StageFieldRow(
     StageSurface(
         onClick = { editing = true },
         radius = StageRadii.Row,
-        focusStyle = StageFocus.FX,
+        focusStyle = if (modern) StageFocus.FILLED else StageFocus.FX,
+        accent = accent,
         // While the keyboard is up the field holds focus, so the row keeps its focused look itself.
         highlighted = editing,
         modifier = modifier
             .fillMaxWidth()
-            .height(84.mpx)
+            .heightIn(min = if (modern) 96.mpx else 84.mpx)
             .focusRequester(rowFocus)
             .then(
                 if (password) Modifier.onPreviewKeyEvent { e ->
@@ -968,16 +1007,16 @@ fun StageFieldRow(
         if ((focused || editing) && panel != null && help != null) androidx.compose.runtime.SideEffect { panel.help = help.copy(hints = hints) }
         val lit = focused || editing
         Row(
-            Modifier.fillMaxWidth().padding(horizontal = 22.mpx),
+            Modifier.fillMaxWidth().padding(horizontal = 22.mpx, vertical = 14.mpx),
             horizontalArrangement = Arrangement.spacedBy(18.mpx),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            OwnTVIcon(icon, StageColors.Muted, Modifier.size(24.mpx))
+            if (!modern) OwnTVIcon(icon, StageColors.Muted, Modifier.size(24.mpx))
             Column(Modifier.weight(1f)) {
-                Text(label, style = stageText(21, 700), color = StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(label, style = stageText(if (modern) 25 else 21, 700), color = if (modern && lit) accent.onAccent else StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Box(Modifier.padding(top = 3.mpx)) {
                     if (value.isEmpty() && !editing) {
-                        Text(placeholder, style = stageText(15.5f, 500), color = StageColors.Dim, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(placeholder, style = stageText(15.5f, 500), color = if (modern && lit) accent.onAccent.copy(alpha = 0.65f) else StageColors.Dim, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                     androidx.compose.foundation.text.BasicTextField(
                         value = value,
@@ -994,7 +1033,7 @@ fun StageFieldRow(
                                     true
                                 } else false
                             },
-                        textStyle = stageText(15.5f, 500).copy(color = if (focused || editing) FocusedDesc else StageColors.Text),
+                        textStyle = stageText(15.5f, 500).copy(color = if (modern && lit) accent.onAccent else if (focused || editing) FocusedDesc else StageColors.Text),
                         singleLine = true,
                         cursorBrush = androidx.compose.ui.graphics.SolidColor(a.accent),
                         // A password row gets the password keyboard: the text one auto-corrects and
@@ -1014,7 +1053,7 @@ fun StageFieldRow(
             if (password && lit && !editing && panel == null) {
                 Text("▶ " + stringResource(if (shown) R.string.common_hide else R.string.common_show), style = stageText(18, 700), color = StageColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
-            if (lit && !editing) Text(stringResource(R.string.common_edit), style = stageText(18, 700), color = a.accent, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (lit && !editing) Text(stringResource(R.string.common_edit), style = stageText(18, 700), color = if (modern && lit) accent.onAccent else a.accent, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }
@@ -1085,3 +1124,100 @@ fun SpanHelpBlock() {
 /** " · " between two parts of a line (the eyebrow format with both parts empty, so it is localised). */
 @Composable
 fun dotSeparator(): String = stringResource(R.string.settings_breadcrumb_eyebrow, "", "")
+
+/** Wide list settings, sharing the same category rail on root and detail pages. */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun SettingsListPage(
+    group: String,
+    count: String,
+    query: String,
+    onQueryChange: (String) -> Unit,
+    scroll: ScrollState,
+    modifier: Modifier,
+    searchFocus: FocusRequester,
+    rowsFocus: FocusRequester,
+    panel: SettingsPanelState,
+    parents: List<String>,
+    tools: (@Composable RowScope.() -> Unit)?,
+    searchAutoEdit: Boolean,
+    onSearchActivate: (() -> Unit)?,
+    toolbar: (@Composable RowScope.() -> Unit)?,
+    list: (@Composable (Modifier) -> Unit)?,
+    showSearch: Boolean,
+    panelTop: (@Composable ColumnScope.() -> Unit)?,
+    navigation: SettingsNavigation,
+    rows: @Composable ColumnScope.() -> Unit,
+) {
+    androidx.compose.runtime.LaunchedEffect(group, query.isNotBlank()) { panel.help = null }
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
+    val eyebrow = stringResource(R.string.settings_breadcrumb_eyebrow,
+        parents.lastOrNull() ?: stringResource(R.string.common_nav_settings), group).uppercase(locale)
+    CompositionLocalProvider(LocalSettingsPanel provides panel, tv.own.owntv.ui.stage.LocalPopupEyebrow provides eyebrow) {
+        Row(modifier.fillMaxSize().padding(start = 54.mpx, end = 56.mpx, top = 128.mpx, bottom = 36.mpx),
+            horizontalArrangement = Arrangement.spacedBy(36.mpx)) {
+            Box(Modifier.width(350.mpx).fillMaxHeight()) { navigation.sidebar() }
+            Box(Modifier.width(1.mpx).fillMaxHeight().background(StageColors.Muted.copy(alpha = 0.2f)))
+            Column(Modifier.weight(1f).fillMaxHeight()) {
+                Row(Modifier.fillMaxWidth().padding(bottom = 24.mpx), verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(20.mpx)) {
+                    Column(Modifier.weight(1f)) {
+                        if (parents.isNotEmpty()) Text(parents.last(), style = stageText(16, 500), color = StageColors.Muted,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(bottom = 5.mpx))
+                        Text(group, style = stageText(40, 800), color = StageColors.Text,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(count, style = stageText(17, 500), color = StageColors.Muted,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 5.mpx))
+                    }
+                    if (tools != null) Row(horizontalArrangement = Arrangement.spacedBy(8.mpx), content = tools)
+                    if (showSearch) StageSearchField(
+                        query = query, onQueryChange = onQueryChange,
+                        placeholder = stringResource(R.string.more_settings_search),
+                        modifier = Modifier.width(330.mpx).focusRequester(searchFocus)
+                            .focusProperties { left = navigation.categoryFocus },
+                        height = 50.mpx, radius = 12.mpx, horizontalPadding = 16.mpx,
+                        autoEdit = searchAutoEdit, onActivate = onSearchActivate,
+                    )
+                }
+                if (toolbar != null) Row(Modifier.fillMaxWidth().padding(bottom = 14.mpx),
+                    horizontalArrangement = Arrangement.spacedBy(8.mpx), verticalAlignment = Alignment.CenterVertically,
+                    content = toolbar)
+                val help = panel.help
+                val editor = panel.editor
+                // Keep functional panels (source actions, previews and editors); plain help lives below the list.
+                val showPanel = editor != null || help?.extra != null || help?.footer != null || panelTop != null
+                Row(Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(26.mpx)) {
+                    Box(Modifier.weight(1f).fillMaxHeight()) {
+                        val listModifier = Modifier.fillMaxSize().focusRequester(navigation.contentFocus)
+                            .focusRequester(rowsFocus).focusProperties { left = navigation.categoryFocus }.focusGroup()
+                        if (list != null) list(listModifier)
+                        else CompositionLocalProvider(LocalBringIntoViewSpec provides edgeScrollSpec) {
+                            Column(listModifier.verticalScroll(scroll).padding(bottom = 24.mpx),
+                                verticalArrangement = Arrangement.spacedBy(2.mpx), content = rows)
+                        }
+                    }
+                    if (showPanel) Column(Modifier.width(490.mpx).fillMaxHeight()
+                        .verticalScroll(androidx.compose.foundation.rememberScrollState())
+                        .stageGlass(16.mpx).padding(22.mpx)) {
+                        if (editor != null) SettingPanelEditor(editor, help,
+                            onClosed = { panel.opener?.let { runCatching { it.requestFocus() } } })
+                        else {
+                            if (panelTop != null && help?.extra == null) panelTop()
+                            if (help != null) SettingPanelBody(help)
+                        }
+                    }
+                }
+                Box(Modifier.fillMaxWidth().height(1.mpx).background(StageColors.Muted.copy(alpha = 0.18f)))
+                Box(Modifier.fillMaxWidth().height(68.mpx).padding(top = 12.mpx)) {
+                    if (!showPanel && !help?.text.isNullOrBlank()) Text(help?.text.orEmpty(),
+                        style = stageText(17, 500), color = StageColors.Muted,
+                        maxLines = 2, overflow = TextOverflow.Ellipsis)
+                }
+                StageKeyHints(listOf(
+                    stringResource(R.string.common_ok) to stringResource(R.string.settings_menu_select),
+                    stringResource(R.string.common_back) to stringResource(R.string.settings_menu_return),
+                ), Modifier.padding(top = 16.mpx), textSize = 16)
+            }
+        }
+    }
+}

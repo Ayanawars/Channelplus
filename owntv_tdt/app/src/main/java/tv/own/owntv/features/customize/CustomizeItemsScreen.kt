@@ -94,6 +94,12 @@ fun CustomizeItemsScreen(
         }
     }
 
+    var channelEditorOpen by remember { mutableStateOf(false) }
+    if (channelEditorOpen) {
+        ChannelEditorScreen(initialSource = ctx?.sourceIds?.singleOrNull(), onBack = { channelEditorOpen = false }, modifier = modifier)
+        return
+    }
+
     if (selectedCategory == null) return
 
     val items = vm.items.collectAsLazyPagingItems()
@@ -167,6 +173,11 @@ fun CustomizeItemsScreen(
         modifier = modifier,
         handleBack = false,
         toolbar = {
+            if (isLive) tv.own.owntv.ui.stage.StageTool(
+                stringResource(R.string.ce_title), onClick = { channelEditorOpen = true },
+                icon = OwnTVIcon.PENCIL, boxed = true,
+            )
+
             // Bulk rename — Movies/Series only: rename the WHOLE category, optionally with the ✨ Auto
             // cleanup preset applied immediately. Live renames go per row or via span.
             if (!isLive) {

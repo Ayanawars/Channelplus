@@ -13,7 +13,7 @@ enum class MetadataType { MOVIE, TV, EPISODE }
 
 /**
  * A slim TMDB search hit — enough to pick a match and show a poster. Full details (cast, rating, genres,
- * imdb_id, backdrop) are fetched lazily on the detail screen in a later phase.
+ * backdrop) are fetched lazily on the detail screen in a later phase.
  */
 data class MetadataSearchResult(
     val tmdbId: Int,
@@ -164,11 +164,10 @@ data class MetadataConfig(
 
 /**
  * Full movie details (TMDB `/movie/{id}?append_to_response=credits,external_ids`). Everything IPTV rarely
- * carries — imdb_id (Trakt), backdrop, genres, cast, rating — plus the fields already in the search hit.
+ * carries — backdrop, genres, cast, rating — plus the fields already in the search hit.
  */
 data class MovieDetails(
     val tmdbId: Int,
-    val imdbId: String?,
     val title: String,
     val year: Int?,
     val overview: String?,
@@ -183,6 +182,8 @@ data class MovieDetails(
     val logoPath: String?,
     /** TMDB `original_language` (ISO 639-1, e.g. "ko"): what "Original language" audio plays. */
     val originalLanguage: String? = null,
+    /** TheTVDB series identifier from TMDB external_ids; never a rating. */
+    val tvdbId: Int? = null,
 )
 
 /** Per-episode TMDB details (`/tv/{id}/season/{n}/episode/{m}`). Its own still, plot, air date, rating. */

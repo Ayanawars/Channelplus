@@ -121,7 +121,7 @@ private const val TRACK_POLL_TRIES = 20
  *  Counted from the stall, which itself only starts once the buffer (~10s) has run dry. */
 private const val RECONNECT_NOTICE_AFTER_MS = 10_000L
 
-internal enum class HudDialog { NONE, AUDIO, SUBS, SPEED, ZOOM, QUALITY, VOLUME, JUMP_BACK, SLEEP_TIMER }
+internal enum class HudDialog { NONE, AUDIO, SUBS, SPEED, ZOOM, QUALITY, VOLUME, JUMP_BACK, SLEEP_TIMER, CHANNEL_VERSION }
 
 /** What the top-left channel OSD shows for direct tune: the digits being typed, the channel a number
  *  resolved to, or a failure message. All three render as the same card as the channel OSD. */
@@ -135,6 +135,11 @@ private sealed interface TuneOsd {
 fun PlayerHud(
     player: PlaybackEngine,
     onBack: () -> Unit,
+    channelVersions: List<tv.own.owntv.core.database.entity.ChannelEntity> = emptyList(),
+    channelVersionSourceNames: Map<Long, String> = emptyMap(),
+    automaticVersion: Boolean = true,
+    selectedVersionId: Long? = null,
+    onSelectChannelVersion: ((Long?) -> Unit)? = null,
     onPip: (() -> Unit)? = null,
     // Switch to audio-only mode (stops video decode, surfaces the top-bar now-playing bar). Null hides it.
     onAudioMode: (() -> Unit)? = null,
@@ -204,9 +209,8 @@ fun PlayerHud(
     // (no item context). [favorite] = current state — fills the star teal when true.
     favorite: Boolean = false,
     onToggleFavorite: (() -> Unit)? = null,
-    // Live guide card (Before / Now playing / Next for the playing channel) — supplied by the shell
-    // (the EPG data lives in LiveViewModel, not the player). Rendered on the right edge whenever the
-    // controls are visible, like the top-bar channel card; informational only, never focusable.
+    // Programme title, progress, synopsis and next emission supplied by the shell.
+    // Rendered in the compact live footer; informational only, never focusable.
     liveEpgCard: (@Composable () -> Unit)? = null,
     // Now/next lines for the channel-change banner (the playing channel's guide). Null = name only.
     zapGuide: (@Composable () -> Unit)? = null,
@@ -290,7 +294,8 @@ fun PlayerHud(
     // Used only by "Report this stream", which writes the current readout into the playback log.
     val reportContext = androidx.compose.ui.platform.LocalContext.current
     var wakeTick by remember { mutableIntStateOf(0) }
-    val forceShow = error != null || dialog != HudDialog.NONE
+    var liveToolsExpanded by remember(isLive, directTuneContextKey) { mutableStateOf(false) }
+    val forceShow = error != null || dialog != HudDialog.NONE || (isLive && liveToolsExpanded)
     // First Back hides the controls (instead of leaving the channel); with the controls already hidden
     // this handler is disabled, so Back falls through to the shell, which exits the player. Also disabled
     // while an error/dialog is up (a dialog handles its own Back; an error should exit).
@@ -570,6 +575,11 @@ fun PlayerHud(
                 // de facto TV convention (Live Channels, YouTube TV, Pluto TV). All of these keys move
                 // the same way; there is deliberately no split between CH+ and D-pad Up. Wrapping is
                 // intended: CH-/Down from the first channel lands on the last, and vice versa.
+                isLive && controlsVisible && !inert && dialog == HudDialog.NONE && error == null && e.key == Key.DirectionUp -> {
+                    wakeTick++
+                    runCatching { seekFocus.requestFocus() }
+                    true
+                }
                 canZap && e.key == Key.MediaNext -> { zap(1); true }
                 canZap && e.key == Key.MediaPrevious -> { zap(-1); true }
                 canZap && isLive && !controlsVisible && e.key == Key.DirectionUp -> { zap(1); true }
@@ -661,14 +671,14 @@ fun PlayerHud(
             // the inner edge. A pure gradient faded out exactly where the chips and the Now/Next text sit,
             // so those washed out on bright scenes; a hard-edged band would instead draw a visible seam
             // across the picture. The colour stops give the panel first, then the feather.
-            Box(Modifier.align(Alignment.TopStart).fillMaxWidth().height(210.dp)
+            Box(Modifier.align(Alignment.TopStart).fillMaxWidth().height(if (isLive) 90.dp else 210.dp)
                 .gradientWash(
                     vertical = true,
                     0.0f to hudShade(0.72f),
                     0.5f to hudShade(0.68f),
                     1.0f to Color.Transparent,
                 ))
-            Box(Modifier.align(Alignment.BottomStart).fillMaxWidth().height(260.dp)
+            Box(Modifier.align(Alignment.BottomStart).fillMaxWidth().height(if (isLive) 180.dp else 260.dp)
                 .gradientWash(
                     vertical = true,
                     0.0f to Color.Transparent,
@@ -676,11 +686,10 @@ fun PlayerHud(
                     1.0f to hudShade(0.78f),
                 ))
 
-            // The active engine (MPV/EXO) leads the mini chips so users can always tell which player is on.
-            // One unified strip: back · logo · chips-over-channel-name · Now/Next guide. The channel name
-            // used to be drawn twice (here and in a floating card below), with the guide stranded on the
-            // right edge — that space belongs to the history list now.
-            TopBar(
+            // Live keeps the picture clear; VOD retains its existing title and transport layout.
+            if (isLive) LiveHudSize {
+                LivePlayerTopBar(watchingMs = watchingWallMs?.invoke(), modifier = Modifier.align(Alignment.TopStart))
+            } else TopBar(
                 player, isLive, listOfNotNull(engineChip) + streamChips.ifEmpty { listOfNotNull(videoRes) }, duration, onBack,
                 modifier = Modifier.align(Alignment.TopStart),
                 below = matchLine,
@@ -695,12 +704,21 @@ fun PlayerHud(
             // Hide the transport (play/seek/prev/next) and bottom bar while an error is up — the error
             // overlay owns the screen with its own Retry, so the play/rewind/forward must not show behind it.
             if (error == null) {
-                CenterControls(player, nav, isPlaying, isLive, onRewindLive, onForwardLive, timeshiftOffset, playFocus, modifier = Modifier.align(Alignment.Center))
+                if (!isLive) CenterControls(player, nav, isPlaying, isLive, onRewindLive, onForwardLive, timeshiftOffset, playFocus, modifier = Modifier.align(Alignment.Center))
 
                 val reportDuration = duration.takeIf { it > 0 }?.let { formatTime(it) }
                 val reportSavedMessage = stringResource(R.string.player_report_saved)
 
                 BottomBar(
+                    primaryFocus = if (isLive) playFocus else null,
+                    toolsExpanded = liveToolsExpanded,
+                    onToolsExpandedChange = { liveToolsExpanded = it },
+                    liveInfo = liveEpgCard,
+                    liveMatch = matchLine,
+                    channelVersionLabel = channelVersions.firstOrNull { it.id == selectedVersionId }?.let { channel ->
+                        val source = stringResource(if (tv.own.owntv.core.live.ChannelVariants.isTdt(channel)) R.string.player_channel_version_tdt else R.string.player_channel_version_iptv)
+                        listOfNotNull(source, tv.own.owntv.core.live.ChannelVariants.qualityLabel(channel)).joinToString(stringResource(R.string.content_metadata_separator))
+                    },
                     seekFocus = seekFocus,
                     player = player, isLive = isLive, position = { position.value }, duration = duration,
                     volume = volume, audioCount = audioCount, subCount = subCount, zoomMode = zoomMode,
@@ -711,6 +729,8 @@ fun PlayerHud(
                     onOpenJumpBack = if (onJumpBack != null) { { dialog = HudDialog.JUMP_BACK } } else null,
                     onPreviousChannel = onPreviousChannel,
                     onOtherChannels = onOtherChannels, otherChannelsCount = otherChannelsCount,
+                    onChannelVersion = if (onSelectChannelVersion != null && channelVersions.isNotEmpty())
+                        ({ dialog = HudDialog.CHANNEL_VERSION }) else null,
                     compatMode = compatMode, onToggleCompatMode = toggleCompat,
                     vodOnExo = vodOnExo, onToggleVodEngine = toggleVod,
                     onInfo = { showInfo = !showInfo }, infoOn = showInfo,
@@ -963,6 +983,11 @@ fun PlayerHud(
                 )
             }
         }
+        HudDialog.CHANNEL_VERSION -> ChannelVersionDialog(
+            versions = channelVersions, sourceNames = channelVersionSourceNames, automatic = automaticVersion, selectedId = selectedVersionId,
+            onSelect = { onSelectChannelVersion?.invoke(it); dialog = HudDialog.NONE },
+            onDismiss = { dialog = HudDialog.NONE },
+        )
         HudDialog.NONE -> Unit
     }
 }

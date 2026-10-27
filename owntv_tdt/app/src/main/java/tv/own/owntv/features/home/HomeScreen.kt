@@ -1,5 +1,6 @@
 package tv.own.owntv.features.home
 
+import tv.own.owntv.core.epg.displayLogoUrl
 import tv.own.owntv.ui.theme.stageTone
 import tv.own.owntv.ui.stage.backdropLeftWash
 import android.graphics.SurfaceTexture
@@ -1043,7 +1044,7 @@ private fun KeepWatchingRow(
                 val still = when (item) {
                     is HeroItem.MovieHero -> homeStill(meta?.backdropUrl, item.movie.backdropUrl, item.movie.posterUrl, null)
                     is HeroItem.SeriesHero -> homeStill(meta?.backdropUrl, item.series.backdropUrl, item.series.posterUrl, null)
-                    is HeroItem.LiveHero -> homeStill(null, null, null, item.channel.logoUrl)
+                    is HeroItem.LiveHero -> homeStill(null, null, null, item.channel.displayLogoUrl)
                 }
                 StageStill(
                     title = when (item) {

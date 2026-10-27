@@ -282,7 +282,7 @@ private val MainSection.stageIcon: OwnTVIcon
         MainSection.MOVIES -> OwnTVIcon.MOVIES
         MainSection.SERIES -> OwnTVIcon.SERIES
         MainSection.DOWNLOADS -> OwnTVIcon.DOWNLOADS
-        MainSection.MORE, MainSection.SETTINGS -> OwnTVIcon.TILES
+        MainSection.MORE, MainSection.SETTINGS -> OwnTVIcon.GEAR
     }
 
 /** `.edge`: 7 × 150 at the screen edge, accent, glowing 22 px at 80% and 60 px at 35%, 90% opaque. */

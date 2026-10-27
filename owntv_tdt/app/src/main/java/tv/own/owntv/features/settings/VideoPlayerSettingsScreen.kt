@@ -974,6 +974,14 @@ internal fun VideoPlayerGroupRows(
         )
                     }
                     SECTION_LIVE -> {
+        val hudSize by vm.liveHudSizePercent.collectAsStateWithLifecycle()
+        StageSettingRow(
+            icon = OwnTVIcon.ZOOM, title = stringResource(R.string.live_hud_size_title),
+            desc = stringResource(R.string.live_hud_size_description),
+            value = SettingValue.Stepper(stringResource(R.string.common_percent, hudSize)),
+            onStep = { vm.setLiveHudSizePercent(hudSize + it * 5) },
+            onClick = { vm.setLiveHudSizePercent(if (hudSize >= 120) 50 else hudSize + 5) },
+        )
         KeyedSettingRow(
             quickKey = "vp_channel_numbers",
             icon = OwnTVIcon.LIVE_TV,

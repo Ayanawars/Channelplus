@@ -4,8 +4,8 @@ import tv.own.owntv.R
 import tv.own.owntv.features.settings.VideoGroup
 
 /**
- * The twelve Settings groups, in the order of More › Settings' cards — a card's index is the
- * group it opens. [video] marks the five groups whose rows are the Video player's.
+ * Stable Settings group identities for search and saved navigation. The sidebar chooses its own
+ * display order without changing these ordinals. [video] marks the five groups whose rows are the Video player's.
  */
 internal enum class SettingsGroup(val titleRes: Int, val video: VideoGroup? = null) {
     QUICK(R.string.settings_group_quick),

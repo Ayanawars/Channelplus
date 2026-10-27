@@ -1597,15 +1597,27 @@ class LivePreviewEngine(
 
     private val _tvInputActive = MutableStateFlow(false)
     val tvInputActive: StateFlow<Boolean> = _tvInputActive.asStateFlow()
-    private val tvInput = TifPlayback(context) { available, failure ->
+    private var tifVideoAvailable = false
+    private var tifPaused = false
+    private val tvInput = TifPlayback(context, state = { available, failure ->
         if (_tvInputActive.value) {
-            _isPlaying.value = available
-            _buffering.value = !available && failure == null
+            tifVideoAvailable = available
+            _isPlaying.value = available && !tifPaused
+            _buffering.value = !available && failure == null && !tifPaused
             _error.value = failure?.let { PlaybackFailure.Raw(it) }
             _state.value = if (failure != null) State.ERROR else if (available) State.PLAYING else State.LOADING
             if (available) { tune.hasPlayed = true; tune.everRendered = true }
         }
-    }
+    }, onTimeshift = { shift ->
+        tifPaused = shift.paused
+        if (_tvInputActive.value) {
+            _isPlaying.value = tifVideoAvailable && !shift.paused
+            if (shift.paused) _buffering.value = false
+        }
+    })
+    val tunerTimeshift: StateFlow<TunerTimeshiftState> = tvInput.timeshift
+    fun seekTunerBy(deltaSec: Int): Boolean = _tvInputActive.value && tvInput.seekBy(deltaSec)
+    fun goToTunerLive(): Boolean = _tvInputActive.value && tvInput.goLive()
     fun attachTvInputView(view: android.media.tv.TvView) = tvInput.attach(view)
     fun detachTvInputView(view: android.media.tv.TvView) = tvInput.detach(view)
 
@@ -1646,6 +1658,7 @@ class LivePreviewEngine(
             _volume.value = if (muted) 0 else defaultVolume
             _error.value = null; _errorInfo.value = null
             _isPlaying.value = false; _buffering.value = true; _state.value = State.LOADING
+            tifVideoAvailable = false; tifPaused = false
             _tvInputActive.value = true
             tvInput.setVolume(if (muted) 0f else _volume.value.coerceAtMost(100) / 100f)
             tvInput.play(antenna)
@@ -2768,7 +2781,8 @@ class LivePreviewEngine(
     // --- PlaybackEngine controls (full-screen HUD) ---
     override fun togglePlayPause() {
         if (_tvInputActive.value) {
-            android.widget.Toast.makeText(context, context.getString(tv.own.owntv.core.R.string.tuner_pause_unsupported), android.widget.Toast.LENGTH_SHORT).show()
+            if (!tvInput.togglePause()) android.widget.Toast.makeText(context,
+                context.getString(tv.own.owntv.core.R.string.tuner_pause_unsupported), android.widget.Toast.LENGTH_SHORT).show()
             return
         }
         val p = player ?: return

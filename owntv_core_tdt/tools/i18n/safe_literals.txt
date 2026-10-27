@@ -473,6 +473,8 @@
 1	sql	core/src/main/java/tv/own/owntv/core/content/SearchReader.kt	$it*
 1	technical	core/src/main/java/tv/own/owntv/core/content/SearchReader.kt	[^\\p{L}\\p{Nd}]+
 1	empty	core/src/main/java/tv/own/owntv/core/customize/BulkRenameSession.kt	\0
+1	empty	core/src/main/java/tv/own/owntv/core/customize/ChannelEditorDraft.kt	\0
+1	regex	core/src/main/java/tv/own/owntv/core/customize/ChannelEditorDraft.kt	\\s+
 1	empty	core/src/main/java/tv/own/owntv/core/customize/CustomizationStore.kt	\0
 1	technical	core/src/main/java/tv/own/owntv/core/customize/CustomizationStore.kt	${c.sourceId}:${c.remoteId ?: c.name}
 1	technical	core/src/main/java/tv/own/owntv/core/customize/CustomizationStore.kt	${ch.sourceId}:${ch.remoteId ?: ch.name}
@@ -921,10 +923,12 @@
 4	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	INNER JOIN favorites f ON f.itemId = c.id AND f.mediaType = 'LIVE'
 4	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	INNER JOIN watch_history h ON h.itemId = c.id AND h.mediaType = 'LIVE'
 2	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	LEFT JOIN categories cat ON c.categoryId = cat.id
-5	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	LEFT JOIN content_order o ON o.itemId = c.id AND o.profileId = :profileId AND o.mediaType = 'LIVE' AND o.contextKey = :contextKey
+7	sql	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	LEFT JOIN content_order o ON o.itemId = c.id AND o.profileId = :profileId AND o.mediaType = 'LIVE' AND o.contextKey = :contextKey
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	ORDER BY (CASE WHEN o.position IS NULL THEN 1 ELSE 0 END), o.position, c.name
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	ORDER BY (CASE WHEN o.position IS NULL THEN 1 ELSE 0 END), o.position, c.sortOrder, c.name
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	ORDER BY (CASE WHEN o.position IS NULL THEN 1 ELSE 0 END), o.position, c.sortOrder, c.name LIMIT :limit
+1	sql	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	ORDER BY (CASE WHEN o.position IS NULL THEN 1 ELSE 0 END), o.position, c.sourceId, c.sortOrder, c.name, c.id
+1	sql	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	ORDER BY (CASE WHEN o.position IS NULL THEN 1 ELSE 0 END), o.position, c.sourceId, c.sortOrder, c.name, c.id LIMIT :limit
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	ORDER BY (CASE WHEN o.position IS NULL THEN 1 ELSE 0 END), o.position, f.addedAt DESC
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	ORDER BY (CASE WHEN o.position IS NULL THEN 1 ELSE 0 END), o.position, f.addedAt DESC LIMIT :limit
 2	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	ORDER BY c.name ASC LIMIT :limit
@@ -957,6 +961,7 @@
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE sourceId IN (:sourceIds) ORDER BY name ASC
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE sourceId IN (:sourceIds) ORDER BY sourceId ASC, sortOrder ASC, name ASC
 2	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE sourceId IN (:sourceIds) ORDER BY sourceId ASC, sortOrder ASC, name ASC LIMIT :limit
+1	sql	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE sourceId IN (:sourceIds) ORDER BY sourceId, sortOrder, id
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT COALESCE(MAX(catchupDays), 0) FROM channels WHERE sourceId IN (:sourceIds) AND catchup = 1
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT COUNT(*) FROM channels WHERE categoryId = :categoryId
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT COUNT(*) FROM channels WHERE sourceId = :sourceId
@@ -967,7 +972,7 @@
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT DISTINCT LOWER(TRIM(epgChannelId)) FROM channels
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT DISTINCT LOWER(TRIM(epgChannelId)) FROM channels WHERE epgChannelId IS NOT NULL AND epgChannelId != ''
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT DISTINCT epgChannelId FROM epg_programmes WHERE sourceId IN (:sourceIds)
-9	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT c.* FROM channels c
+11	sql	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT c.* FROM channels c
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT c.* FROM channels c INNER JOIN favorites f ON f.itemId = c.id AND f.mediaType = 'LIVE'
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT c.* FROM channels c INNER JOIN watch_history h ON h.itemId = c.id AND h.mediaType = 'LIVE'
 2	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT c.*, cat.name AS categoryName FROM channels c
@@ -981,7 +986,7 @@
 1	sql	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	UPDATE channels SET sortOrder = :sortOrder WHERE id = :id
 1	sql	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	UPDATE channels SET sortOrder = sortOrder + :delta WHERE sourceId = :sourceId AND sortOrder BETWEEN :fromSortOrder AND :toSortOrder
 3	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	WHERE c.categoryId = :categoryId
-1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	WHERE c.sourceId IN (:sourceIds)
+3	sql	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	WHERE c.sourceId IN (:sourceIds)
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	WHERE c.sourceId IN (:sourceIds) AND c.name LIKE '%' || :query || '%'
 2	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	WHERE f.profileId = :profileId AND c.sourceId IN (:sourceIds)
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	WHERE f.profileId = :profileId AND c.sourceId IN (:sourceIds) AND c.name LIKE '%' || :query || '%' ORDER BY f.addedAt DESC
@@ -1599,6 +1604,7 @@
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/entity/TvProviderEntities.kt	surface
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/entity/TvProviderEntities.kt	tv_provider_programs
 1	sql	core/src/main/java/tv/own/owntv/core/database/entity/UserDataEntities.kt	-1
+1	technical	core/src/main/java/tv/own/owntv/core/database/entity/UserDataEntities.kt	__all_channels__
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/entity/UserDataEntities.kt	__fav__
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/entity/UserDataEntities.kt	contentKey
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/entity/UserDataEntities.kt	content_order
@@ -1915,6 +1921,34 @@
 1	log	core/src/main/java/tv/own/owntv/core/epg/GuideCandidates.kt	namedLimitHit=${named.size >= limit} programmeLimitHit=${withProgrammes.size >= limit}
 1	log	core/src/main/java/tv/own/owntv/core/epg/GuideCandidates.kt	queryMs=${queriedAt - startedAt} totalMs=${SystemClock.elapsedRealtime() - startedAt}
 1	log	core/src/main/java/tv/own/owntv/core/epg/GuideCandidates.kt	rankMs=${SystemClock.elapsedRealtime() - startedAt}
+4	empty	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	\0
+1	regex	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	(?:fullhd|fhd|uhd|hd|sd|4k|1080p|720p)$
+1	regex	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	(?:transparent|color)/[a-f0-9]{24}\\.png
+1	technical	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	+
+1	regex	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	[^a-z0-9]+
+1	regex	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	\\p{M}+
+1	regex	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	^(?:\\[es]|es[|:]|espana[|:])\\s*
+1	regex	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	^m\\s*\\+\\s*
+1	technical	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	clan
+1	technical	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	clantve
+1	uri	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	file:///android_asset/picons/$it
+1	technical	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	lcampeon
+1	technical	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	lcampeones
+3	technical	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	ligacampeones
+1	technical	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	ligadecampeones
+1	technical	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	movistar
+1	technical	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	movistarellasv
+2	technical	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	movistarellasvamos
+1	technical	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	natgeograph
+1	technical	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	natgeographic
+1	technical	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	natgeowild
+2	technical	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	nationalgeographic
+2	technical	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	nationalgeographicwild
+1	technical	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	ngwild
+1	technical	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	plus
+1	technical	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	tdp
+1	technical	core/src/main/java/tv/own/owntv/core/epg/PiconCatalog.kt	teledeporte
+1	file-path	core/src/main/java/tv/own/owntv/core/epg/PiconStore.kt	picons/catalog.tsv
 1	protocol	core/src/main/java/tv/own/owntv/core/home/HomeFeed.kt	${snapshot.mediaType.name}:${snapshot.tmdbId}
 1	protocol	core/src/main/java/tv/own/owntv/core/home/HomeFeed.kt	1080p FHD
 1	protocol	core/src/main/java/tv/own/owntv/core/home/HomeFeed.kt	4K
@@ -1961,6 +1995,31 @@
 1	technical	core/src/main/java/tv/own/owntv/core/launcher/LauncherRecommendationPlanner.kt	episode:${show.sourceId}:${show.remoteId ?: show.name}:${episode.remoteId ?: "${episode.seasonNumber}-${episode.episodeNumber}"}
 1	technical	core/src/main/java/tv/own/owntv/core/launcher/LauncherRecommendationPlanner.kt	live:${channel.sourceId}:${channel.remoteId ?: channel.name}
 1	technical	core/src/main/java/tv/own/owntv/core/launcher/LauncherRecommendationPlanner.kt	movie:${movie.sourceId}:${movie.remoteId ?: movie.name}
+9	empty	core/src/main/java/tv/own/owntv/core/live/ChannelVariants.kt	\0
+1	technical	core/src/main/java/tv/own/owntv/core/live/ChannelVariants.kt	$country:$name
+1	technical	core/src/main/java/tv/own/owntv/core/live/ChannelVariants.kt	${parsed.country}| $display
+1	regex	core/src/main/java/tv/own/owntv/core/live/ChannelVariants.kt	(?i)(?<![\\p{L}\\p{N}])(4K|UHD|FHD|FULL[ -]?HD|1080[PI]?|720[PI]?|HD|SD|2160[PI]?)(?![\\p{L}\\p{N}])
+1	regex	core/src/main/java/tv/own/owntv/core/live/ChannelVariants.kt	(?i)(?<![\\p{L}\\p{N}])(TDT|IPTV)(?![\\p{L}\\p{N}])
+1	technical	core/src/main/java/tv/own/owntv/core/live/ChannelVariants.kt	-
+1	technical	core/src/main/java/tv/own/owntv/core/live/ChannelVariants.kt	1080
+1	technical	core/src/main/java/tv/own/owntv/core/live/ChannelVariants.kt	1080I
+1	technical	core/src/main/java/tv/own/owntv/core/live/ChannelVariants.kt	1080P
+1	technical	core/src/main/java/tv/own/owntv/core/live/ChannelVariants.kt	2160
+1	technical	core/src/main/java/tv/own/owntv/core/live/ChannelVariants.kt	2160I
+1	technical	core/src/main/java/tv/own/owntv/core/live/ChannelVariants.kt	2160P
+1	technical	core/src/main/java/tv/own/owntv/core/live/ChannelVariants.kt	4K
+1	technical	core/src/main/java/tv/own/owntv/core/live/ChannelVariants.kt	720
+1	technical	core/src/main/java/tv/own/owntv/core/live/ChannelVariants.kt	720I
+1	technical	core/src/main/java/tv/own/owntv/core/live/ChannelVariants.kt	720P
+2	technical	core/src/main/java/tv/own/owntv/core/live/ChannelVariants.kt	ES
+2	technical	core/src/main/java/tv/own/owntv/core/live/ChannelVariants.kt	ESP
+4	technical	core/src/main/java/tv/own/owntv/core/live/ChannelVariants.kt	FHD
+1	technical	core/src/main/java/tv/own/owntv/core/live/ChannelVariants.kt	FULLHD
+4	technical	core/src/main/java/tv/own/owntv/core/live/ChannelVariants.kt	HD
+4	technical	core/src/main/java/tv/own/owntv/core/live/ChannelVariants.kt	SD
+4	technical	core/src/main/java/tv/own/owntv/core/live/ChannelVariants.kt	UHD
+1	regex	core/src/main/java/tv/own/owntv/core/live/ChannelVariants.kt	[\\s\\[\\](){}|_-]+
+1	regex	core/src/main/java/tv/own/owntv/core/live/ChannelVariants.kt	\\p{M}+
 1	protocol	core/src/main/java/tv/own/owntv/core/live/ConnectionBudget.kt	owntv-tuner://
 1	log	core/src/main/java/tv/own/owntv/core/live/ConnectionLimits.kt	ConnectionLimits
 1	log	core/src/main/java/tv/own/owntv/core/live/ConnectionLimits.kt	measured source ${source.id}: $result
@@ -2040,6 +2099,77 @@
 1	preference-key	core/src/main/java/tv/own/owntv/core/menu/ContentMenus.kt	schedule_record
 2	preference-key	core/src/main/java/tv/own/owntv/core/menu/ContentMenus.kt	set_tmdb_name
 3	preference-key	core/src/main/java/tv/own/owntv/core/menu/ContentMenus.kt	tmdb_details
+2	empty	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	\0
+1	protocol	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	.svg
+1	uri	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	/artwork/types
+1	uri	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	/login
+1	uri	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	/series/$id/extended
+1	uri	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	/series/$id/translations/$iso3
+1	protocol	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	Authorization
+1	protocol	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	Bearer $bearer
+1	protocol	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	N/A
+1	regex	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	[a-zA-Z0-9-]+
+1	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	apikey
+1	mime	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	application/json
+1	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	artworks
+1	protocol	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	clearlogo
+4	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	data
+1	locale	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	en
+2	locale	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	eng
+2	url	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	https://
+1	url	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	https://api4.thetvdb.com/v4
+1	url	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	https://thetvdb.com/series/$it
+2	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	id
+2	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	image
+1	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	language
+1	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	name
+2	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	null
+2	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	overview
+1	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	pin
+1	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	slug
+1	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	token
+1	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	type
+1	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataClient.kt	width
+3	empty	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	\0
+1	technical	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	%02x
+1	technical	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	SHA-256
+2	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	artwork
+2	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	baseOverview
+1	protocol	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	cine
+3	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	data
+1	locale	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	en
+3	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	expires
+1	file-path	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	external-title-metadata
+1	protocol	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	film
+2	url	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	https://
+1	url	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	https://thetvdb.com/series/
+2	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	logoUrl
+1	protocol	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	movie
+2	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	overview
+1	protocol	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	pelicula
+1	protocol	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	película
+2	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	posterUrl
+1	protocol	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	serie
+1	protocol	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	series
+2	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	title
+2	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	tmdb
+2	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	tmdbRating
+2	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	tvdb
+2	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	tvdbLoaded
+2	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	type
+2	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	url
+1	technical	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRepository.kt	|
+2	empty	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRules.kt	\0
+1	regex	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRules.kt	(?i)\\s+(?:[ST]\\d+(?:\\s*[E:]\\s*\\d+)?|(?:cap[ií]tulo|episodio)\\s*\\d+).*$
+1	regex	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataRules.kt	(?i)^(?:cine|pel[ií]cula|cinema|movie)\\s*:\\s*
+2	empty	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataStore.kt	\0
+1	technical	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataStore.kt	AES/GCM/NoPadding
+1	technical	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataStore.kt	AndroidKeyStore
+1	technical	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataStore.kt	channelplus_external_metadata
+2	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataStore.kt	enabled
+1	file-path	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataStore.kt	external-metadata.sealed
+2	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataStore.kt	pin
+2	json	core/src/main/java/tv/own/owntv/core/metadata/ExternalMetadataStore.kt	tvdb
 1	empty	core/src/main/java/tv/own/owntv/core/metadata/HeadlineTitle.kt	\0
 1	regex	core/src/main/java/tv/own/owntv/core/metadata/HeadlineTitle.kt	^\\s*\\|?\\s*[A-Z0-9+]{1,8}\\s*\\|\\s*
 3	url	core/src/main/java/tv/own/owntv/core/metadata/MetadataImages.kt	${TmdbProvider.IMAGE_BASE}/$size${it.ensureLeadingSlash()}
@@ -2129,7 +2259,7 @@
 2	uri	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	en,null
 1	json	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	episode_number
 1	json	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	episodes
-2	json	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	external_ids
+1	json	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	external_ids
 1	json	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	file_path
 2	json	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	first_air_date
 2	json	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	genres
@@ -2139,13 +2269,12 @@
 1	url	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	https://tmdb.owntv.me
 3	json	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	id
 1	json	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	images
-3	json	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	imdb_id
 2	json	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	iso_639_1
 1	json	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	key
 1	json	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	logos
 1	protocol	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	movie
 6	json	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	name
-16	json	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	null
+13	json	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	null
 1	json	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	official
 2	json	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	original_language
 1	technical	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	original_name
@@ -2164,6 +2293,7 @@
 1	json	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	still_path
 2	json	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	title
 1	protocol	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	tv
+1	json	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	tvdb_id
 1	json	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	type
 1	json	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	videos
 3	json	core/src/main/java/tv/own/owntv/core/metadata/TmdbProvider.kt	vote_average
@@ -2199,8 +2329,11 @@
 2	json	core/src/main/java/tv/own/owntv/core/model/HomeRow.kt	order
 2	preference-key	core/src/main/java/tv/own/owntv/core/model/HomeRow.kt	recentLiveMode
 2	json	core/src/main/java/tv/own/owntv/core/model/HomeRow.kt	trendingStyle
+1	empty	core/src/main/java/tv/own/owntv/core/model/TifChannelUri.kt	\0
+1	uri	core/src/main/java/tv/own/owntv/core/model/TifChannelUri.kt	&height=$it
 2	protocol	core/src/main/java/tv/own/owntv/core/model/TifChannelUri.kt	UTF-8
 1	protocol	core/src/main/java/tv/own/owntv/core/model/TifChannelUri.kt	channel
+1	uri	core/src/main/java/tv/own/owntv/core/model/TifChannelUri.kt	height
 1	protocol	core/src/main/java/tv/own/owntv/core/model/TifChannelUri.kt	id
 1	protocol	core/src/main/java/tv/own/owntv/core/model/TifChannelUri.kt	input
 1	protocol	core/src/main/java/tv/own/owntv/core/model/TifChannelUri.kt	owntv-tif
@@ -2972,6 +3105,7 @@
 1	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	last_series_category
 1	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	last_update_check_at
 1	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	live_engine
+1	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	live_hud_size_percent
 1	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	live_latency_custom_secs
 1	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	live_latency_mode
 1	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	live_layout
@@ -3028,6 +3162,7 @@
 1	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	panel_w_series_preview
 1	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	phone_nav_hide_on_scroll
 1	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	phone_nav_labels
+1	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	picon_style
 1	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	pip_enabled
 1	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	pip_on_back
 1	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	pip_size
@@ -4268,7 +4403,6 @@
 1	log	core/src/main/java/tv/own/owntv/core/stalker/StalkerClient.kt	portal response is not JSON (got $got): ${redactForLog(peeking.head())}
 1	protocol	core/src/main/java/tv/own/owntv/core/stalker/StalkerClient.kt	poster
 1	protocol	core/src/main/java/tv/own/owntv/core/stalker/StalkerClient.kt	rating
-1	protocol	core/src/main/java/tv/own/owntv/core/stalker/StalkerClient.kt	rating_imdb
 1	protocol	core/src/main/java/tv/own/owntv/core/stalker/StalkerClient.kt	screenshot_uri
 1	protocol	core/src/main/java/tv/own/owntv/core/stalker/StalkerClient.kt	series
 2	protocol	core/src/main/java/tv/own/owntv/core/stalker/StalkerClient.kt	start_timestamp
@@ -4627,6 +4761,15 @@
 1	log	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	EPG unavailable for channel ${station.id}: ${e.javaClass.simpleName}
 1	technical	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	Pluto TV
 1	log	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	TunerSource
+1	technical	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	VIDEO_FORMAT_1080I
+1	technical	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	VIDEO_FORMAT_1080P
+1	technical	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	VIDEO_FORMAT_2160P
+1	technical	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	VIDEO_FORMAT_4320P
+1	technical	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	VIDEO_FORMAT_480I
+1	technical	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	VIDEO_FORMAT_480P
+1	technical	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	VIDEO_FORMAT_576I
+1	technical	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	VIDEO_FORMAT_576P
+1	technical	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	VIDEO_FORMAT_720P
 1	protocol	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	android.permission.READ_TV_LISTINGS
 1	protocol	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	antenna
 4	protocol	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	input

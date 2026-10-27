@@ -959,7 +959,7 @@ class EpgViewModel(
                     }
                     else -> sorted.filter { it.id in memberIds.orEmpty() }
                 }
-            }
+            }.let(tv.own.owntv.core.live.ChannelVariants::collapse)
         }
         val stored = epgDao.countForSources(ids)
 

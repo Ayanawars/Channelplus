@@ -1,0 +1,4 @@
+<resources>
+    <string name="player_options_open">Opciones de reproducción</string>
+    <string name="player_options_close">Ocultar opciones</string>
+</resources>

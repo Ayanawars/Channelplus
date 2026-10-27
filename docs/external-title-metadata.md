@@ -1,0 +1,11 @@
+# TMDB and TheTVDB — current local integration
+
+TMDB identifies live programmes and VOD titles and supplies ratings, cast, summaries and artwork. Optional TheTVDB v4 enrichment adds series information and transparent ClearLogo artwork. Settings → Metadata → TheTVDB has a project key, optional subscriber PIN, enable/disable, save and connection test. Empty keys keep TMDB-only operation; Provider-only mode prevents enrichment.
+
+IMDb/OMDb integration has been removed from the current source: no HTTP client, key field, rating badge, link, identifier parsing or result/cache payload remains. TheTVDB configuration survives upgrades; loading old encrypted settings rewrites unsupported credential fields away. Cache identity version 3 prevents reuse of old enrichment entries. The nullable legacy Room column is retained solely for database compatibility and is never populated by new metadata fetches. Historical database migrations and older APK build records describe their original versions.
+
+The live HUD retains the left programme poster, central guide information/ratings/synopsis/progress and right transparent title logo. TheTVDB ClearLogo is preferred for supported series, with TMDB logo fallback; square Icons/posters never occupy the logo slot. Missing/failed artwork collapses without placeholders. Artwork follows HUD visibility and size settings. Video and timeshift controls retain their existing ownership.
+
+Live searches are debounced and require a confident unambiguous title/year/type match. The bounded disposable cache retains positive details for seven days, explicit misses for six hours and partial failures for five minutes. Keys are scoped by language, maturity and configuration fingerprint. Keystore credentials stay local; HTTP errors never expose credentials or provider bodies.
+
+Validation for the removal: app/core translation inventories, XML parsing, resource-reference checks, text-overflow scan and git diff whitespace checks. Five existing pure matching/rating-rule tests remain after retiring three obsolete provider-specific tests. No compilation, new APK or device test was performed for this removal. Channelplus-5.2.9-test.apk was built before this change and retains its original contents.

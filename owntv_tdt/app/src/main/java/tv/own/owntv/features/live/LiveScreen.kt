@@ -527,7 +527,7 @@ fun LiveScreen(
     val categoriesModifier = Modifier
         .onFocusChanged {
             railPaneFocused = it.hasFocus
-            if (it.hasFocus && previewEnabled) vm.stopPreview()
+            if (it.hasFocus && previewEnabled && separate) vm.stopPreview()
             // The sheet closes when focus leaves it (◀ to the rail) — not while its own menus are open,
             // and not on the "unfocused" report every node gets when it first attaches.
             if (it.hasFocus) sheetHadFocus = true
@@ -565,6 +565,7 @@ fun LiveScreen(
     val panelOn by settingsVm.panelWidthEnabled.getValue(PanelSection.LIVE).collectAsStateWithLifecycle()
     val stageSaved by settingsVm.liveStageWidths.collectAsStateWithLifecycle()
     val stageWidths = stageSaved.takeIf { panelOn && !separate }
+    val cinematic = !separate && lockedKey == null
     BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
@@ -575,7 +576,7 @@ fun LiveScreen(
         fun fx(px: Int) = screenW * (px / 1920f)
         val margin = fx(64)
         val row = screenW - margin * 2
-        val previewShown = if (separate) panelShares?.preview != 0 else stageWidths?.preview != 0
+        val previewShown = cinematic || if (separate) panelShares?.preview != 0 else stageWidths?.preview != 0
         val liveHints = listOf(
             stringResource(R.string.common_ok) to stringResource(R.string.content_key_watch),
             "◀" to stringResource(R.string.content_category_browser_title),
@@ -604,8 +605,17 @@ fun LiveScreen(
             listW = if (separate) fx(620) else fx(846)
             stageW = if (separate) fx(766) else fx(912)
         }
-        val listX = if (separate) margin + colW + gapCat else margin
-        val listWidth = if (previewShown) listW else row - (listX - margin)
+        val listX = if (separate) margin + colW + gapCat else if (cinematic) fx(32) else margin
+        val listWidth = if (cinematic) fx(550) else if (previewShown) listW else row - (listX - margin)
+
+        if (cinematic) {
+            LiveDrawerBackdrop(vm.previewEngine, previewChannel, effectivePreview, previewBlockedSingleSession)
+            Box(Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Brush.horizontalGradient(
+                0f to androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.96f),
+                0.29f to androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.90f),
+                0.43f to androidx.compose.ui.graphics.Color.Transparent,
+            )))
+        }
 
         if (separate) {
             LiveCategories(
@@ -643,7 +653,12 @@ fun LiveScreen(
                 .fillMaxSize()
                 .then(if (categoriesOpen) Modifier.graphicsLayer { alpha = 0.4f } else Modifier),
         ) {
-            LiveHeader(
+            if (cinematic) {
+                Column(Modifier.padding(start = fx(48), top = 34.mpx).width(listWidth)) {
+                    Text(stringResource(R.string.tdt_app_name), style = tv.own.owntv.ui.theme.stageText(34, 700), color = androidx.compose.ui.graphics.Color.White)
+                    Text(headerLabel, style = tv.own.owntv.ui.theme.stageText(23, 600), color = androidx.compose.ui.graphics.Color.White, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                }
+            } else LiveHeader(
                 category = headerLabel,
                 count = count,
                 showChevron = !separate && lockedKey == null,
@@ -652,7 +667,7 @@ fun LiveScreen(
             // Header tools + channel list: one focus group.
             Column(
                 modifier = Modifier
-                    .padding(start = listX, top = 118.mpx)
+                    .padding(start = listX, top = if (cinematic) 132.mpx else 118.mpx, bottom = if (cinematic) 28.mpx else 0.mpx)
                     .width(listWidth)
                     .fillMaxHeight()
                     .onFocusChanged { channelPaneFocused = it.hasFocus }
@@ -712,6 +727,12 @@ fun LiveScreen(
                     }
                     .focusGroup(),
             ) {
+                if (cinematic && lockedKey == null) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.mpx)) {
+                        tv.own.owntv.ui.stage.StageTool(text = headerLabel, icon = OwnTVIcon.CHEVRON_LEFT, onClick = { categoriesOpen = true })
+                        tv.own.owntv.ui.stage.StageTool(text = null, icon = OwnTVIcon.FAVORITE, onClick = { vm.select(if (selectedKey == LiveKey.Favorites) LiveKey.All else LiveKey.Favorites) })
+                    }
+                }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.mpx),
@@ -728,7 +749,7 @@ fun LiveScreen(
                             .weight(1f, fill = false)
                             .width(if (separate) listWidth * (230f / 620f) else listWidth * (456f / 846f))
                             .focusRequester(listSearchFocus)
-                            .onFocusChanged { if (it.hasFocus && previewEnabled) vm.stopPreview() }
+                            .onFocusChanged { if (it.hasFocus && previewEnabled && !cinematic) vm.stopPreview() }
                             // ◀ Categories from the search field too, as from the rows (not while typing — a search that found nothing here may be in another category).
                             .onPreviewKeyEvent { e ->
                                 if (e.type == androidx.compose.ui.input.key.KeyEventType.KeyDown &&
@@ -747,12 +768,12 @@ fun LiveScreen(
                         onClick = vm::toggleSort,
                     )
                     tv.own.owntv.ui.stage.StageTool(
-                        text = stringResource(R.string.content_live_guide_view),
+                        text = if (cinematic) null else stringResource(R.string.content_live_guide_view),
                         icon = OwnTVIcon.GRID,
                         onClick = onOpenGuide,
                     )
                 }
-                Spacer(Modifier.height(20.mpx))
+                Spacer(Modifier.height(if (cinematic) 12.mpx else 20.mpx))
                 if (channels.itemCount == 0) {
                     Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
                         Text(
@@ -772,7 +793,7 @@ fun LiveScreen(
                     androidx.compose.runtime.CompositionLocalProvider(androidx.compose.foundation.gestures.LocalBringIntoViewSpec provides edgeScrollSpec) {
                     LazyColumn(
                         state = effectiveListState,
-                        verticalArrangement = Arrangement.spacedBy(8.mpx),
+                        verticalArrangement = Arrangement.spacedBy(if (cinematic) 2.mpx else 8.mpx),
                         modifier = Modifier.fillMaxWidth().weight(1f).layout { measurable, constraints ->
                             val extra = glowRoom.roundToPx()
                             val placeable = measurable.measure(
@@ -800,6 +821,7 @@ fun LiveScreen(
                                 val parsed = remember(channel.name) { ProviderTags.parse(channel.name) }
                                 LiveStageRow(
                                     channel = channel,
+                                    compact = cinematic,
                                     name = parsed,
                                     // The channel under the cursor answers from the preview itself, so the row
                                     // and the stage beside it can never disagree.
@@ -860,14 +882,21 @@ fun LiveScreen(
             }
 
             // Under the preview, bottom right, so the list runs down to the bottom edge.
-            if (lockedKey == null && previewShown) {
+            if (lockedKey == null && previewShown && !cinematic) {
                 tv.own.owntv.ui.stage.StageKeyHints(
                     liveHints,
                     modifier = Modifier.align(Alignment.BottomEnd).padding(end = margin, bottom = 40.mpx),
                 )
             }
 
-            if (previewShown) {
+            if (cinematic) {
+                LiveDrawerProgramme(
+                    channel = previewChannel, nowNext = nowNext, previewEngine = vm.previewEngine,
+                    scheduleFocus = scheduleFocus, onBackToList = { focusCurrentRow() },
+                    onOpenProgramme = { p -> previewChannel?.let { openProgramme = it to p } },
+                    modifier = Modifier.align(Alignment.BottomStart).padding(start = fx(620), end = fx(70), bottom = 44.mpx),
+                )
+            } else if (previewShown) {
                 LiveStagePane(
                     channel = previewChannel,
                     channelName = previewChannel?.let { ProviderTags.parse(it.name).name },

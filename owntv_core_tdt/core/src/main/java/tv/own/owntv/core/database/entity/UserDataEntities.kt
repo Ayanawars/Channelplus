@@ -103,6 +103,7 @@ data class ContentOrderEntity(
     companion object {
         /** Sentinel [contextKey] for the per-section Favorites list. */
         const val FAV_CONTEXT = "__fav__"
+        const val ALL_CHANNELS_CONTEXT = "__all_channels__"
     }
 }
 

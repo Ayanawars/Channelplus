@@ -1,0 +1,7 @@
+<resources>
+    <string name="picons_title">Logos de canales (picons)</string>
+    <string name="picons_description">Elige los logos Transparente o Color de Jungle Team. Los canales sin picon equivalente conservan su logo actual. Incluidos en la app y disponibles sin conexión.</string>
+    <string name="picons_original">Logos originales</string>
+    <string name="picons_transparent">Transparente</string>
+    <string name="picons_color">Color</string>
+</resources>

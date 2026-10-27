@@ -83,6 +83,10 @@ interface ChannelDao {
     @Query("SELECT * FROM channels WHERE sourceId IN (:sourceIds) ORDER BY sourceId ASC, sortOrder ASC, name ASC LIMIT :limit")
     suspend fun allForSources(sourceIds: List<Long>, limit: Int): List<ChannelEntity>
 
+    /** Reactive variant catalogue scoped to this profile's enabled sources. */
+    @Query("SELECT * FROM channels WHERE sourceId IN (:sourceIds) ORDER BY sourceId, sortOrder, id")
+    fun observeVariantChannels(sourceIds: List<Long>): Flow<List<ChannelEntity>>
+
     /** Distinct normalised (lower+trim) tvg-ids across ALL channels — the set of EPG ids the user's
      *  channels actually reference, used to filter the bulk EPG sync down from the whole feed. */
     @Query("SELECT DISTINCT LOWER(TRIM(epgChannelId)) FROM channels WHERE epgChannelId IS NOT NULL AND epgChannelId != ''")
@@ -306,6 +310,22 @@ interface ChannelDao {
      *  channel-list fallback for a channel that has no category of its own. */
     @Query("SELECT * FROM channels WHERE sourceId IN (:sourceIds) ORDER BY sourceId ASC, sortOrder ASC, name ASC LIMIT :limit")
     suspend fun snapshotAll(sourceIds: List<Long>, limit: Int): List<ChannelEntity>
+
+    @Query(
+        "SELECT c.* FROM channels c " +
+            "LEFT JOIN content_order o ON o.itemId = c.id AND o.profileId = :profileId AND o.mediaType = 'LIVE' AND o.contextKey = :contextKey " +
+            "WHERE c.sourceId IN (:sourceIds) " +
+            "ORDER BY (CASE WHEN o.position IS NULL THEN 1 ELSE 0 END), o.position, c.sourceId, c.sortOrder, c.name, c.id"
+    )
+    fun pagingAllManual(sourceIds: List<Long>, profileId: Long, contextKey: String): PagingSource<Int, ChannelEntity>
+
+    @Query(
+        "SELECT c.* FROM channels c " +
+            "LEFT JOIN content_order o ON o.itemId = c.id AND o.profileId = :profileId AND o.mediaType = 'LIVE' AND o.contextKey = :contextKey " +
+            "WHERE c.sourceId IN (:sourceIds) " +
+            "ORDER BY (CASE WHEN o.position IS NULL THEN 1 ELSE 0 END), o.position, c.sourceId, c.sortOrder, c.name, c.id LIMIT :limit"
+    )
+    suspend fun snapshotAllManual(sourceIds: List<Long>, profileId: Long, contextKey: String, limit: Int): List<ChannelEntity>
 
     /** Bounded snapshot of the Catch-up rail in provider order — the in-player category sheet's pick. */
     @Query("SELECT * FROM channels WHERE sourceId IN (:sourceIds) AND catchup = 1 ORDER BY sourceId ASC, sortOrder ASC, name ASC LIMIT :limit")

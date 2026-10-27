@@ -201,7 +201,7 @@ class MetadataRepository(
         val details = provider.tvDetails(tmdbId)
         val entity = when {
             details != null -> MetadataCacheEntity(
-                key = tvCacheKey(tmdbId, lang), tmdbId = tmdbId, imdbId = details.imdbId, type = TYPE_TV,
+                key = tvCacheKey(tmdbId, lang), tmdbId = tmdbId, imdbId = null, type = TYPE_TV,
                 title = details.title, year = details.year ?: fallback?.year,
                 overview = details.overview ?: fallback?.overview,
                 posterPath = details.posterPath ?: fallback?.posterPath,
@@ -622,7 +622,7 @@ class MetadataRepository(
             details != null -> MetadataCacheEntity(
                 key = cacheKey(tmdbId, lang),
                 tmdbId = tmdbId,
-                imdbId = details.imdbId,
+                imdbId = null,
                 type = TYPE_MOVIE,
                 title = details.title,
                 year = details.year ?: fallback?.year,

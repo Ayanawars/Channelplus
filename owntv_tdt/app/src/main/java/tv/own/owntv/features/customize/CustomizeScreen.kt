@@ -78,6 +78,7 @@ fun CustomizeScreen(onBack: () -> Unit, modifier: Modifier = Modifier,
         vm.setSourceScope(sourceId)
         onDispose { vm.setSourceScope(null) }
     }
+    var channelEditorOpen by remember(sourceId) { mutableStateOf(false) }
     var choosingGroups by remember(sourceId) { mutableStateOf(false) }
     val bulkFocus = remember { FocusRequester() }
     var openedInitialChannels by remember(sourceId) { mutableStateOf(false) }
@@ -191,6 +192,11 @@ fun CustomizeScreen(onBack: () -> Unit, modifier: Modifier = Modifier,
         return
     }
 
+    if (channelEditorOpen) {
+        ChannelEditorScreen(initialSource = sourceId, onBack = { channelEditorOpen = false }, modifier = modifier)
+        return
+    }
+
     LaunchedEffect(Unit) {
         vm.setVisibilityFilter(CustomizeVisibilityFilter.ALL)
         kotlinx.coroutines.delay(60)
@@ -234,6 +240,11 @@ fun CustomizeScreen(onBack: () -> Unit, modifier: Modifier = Modifier,
         modifier = modifier,
         handleBack = false,
         toolbar = {
+            if (section == MediaType.LIVE) tv.own.owntv.ui.stage.StageTool(
+                stringResource(R.string.ce_title), onClick = { channelEditorOpen = true },
+                icon = OwnTVIcon.PENCIL, boxed = true,
+            )
+
             tv.own.owntv.ui.stage.StageSegmented(
                 options = listOf(stringResource(R.string.settings_live_tv), stringResource(R.string.settings_movies), stringResource(R.string.settings_series)),
                 selected = when (section) { MediaType.LIVE -> 0; MediaType.MOVIE -> 1; else -> 2 },

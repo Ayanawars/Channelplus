@@ -32,7 +32,7 @@ jobs:
         working-directory: owntv_tdt
         env:
           CHANNELPLUS_TEST_KEYSTORE: ${{ runner.temp }}/ci.jks
-        run: ./gradlew :app:testStandardDebugUnitTest :app:assembleStandardDebug --no-daemon
+        run: ./gradlew :app:testStandardDebugUnitTest :owntv_core_tdt:core:testDebugUnitTest :owntv_core_tdt:player-core:testDebugUnitTest :app:assembleStandardDebug --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g -Dfile.encoding=UTF-8" -Pkotlin.daemon.jvmargs=-Xmx3g
       - uses: actions/upload-artifact@v4
         with:
           name: Channelplus-CI-test-only

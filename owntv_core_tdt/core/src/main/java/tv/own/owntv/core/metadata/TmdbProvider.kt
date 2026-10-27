@@ -239,10 +239,9 @@ class TmdbProvider(
             (0 until arr.length()).mapNotNull { arr.optJSONObject(it)?.optString("name")?.takeIf { n -> n.isNotBlank() } }
         }.orEmpty()
         val cast = parseCast(o)
-        val imdb = o.optJSONObject("external_ids")?.optString("imdb_id")?.takeIf { it.isNotBlank() && it != "null" }
         return MovieDetails(
             tmdbId = id,
-            imdbId = imdb,
+            tvdbId = o.optJSONObject("external_ids")?.optInt("tvdb_id", 0)?.takeIf { it > 0 },
             title = o.optString("name").ifBlank { "?" },
             year = o.optString("first_air_date").take(4).toIntOrNull(),
             overview = o.optString("overview").takeIf { it.isNotBlank() },
@@ -265,11 +264,8 @@ class TmdbProvider(
             (0 until arr.length()).mapNotNull { arr.optJSONObject(it)?.optString("name")?.takeIf { n -> n.isNotBlank() } }
         }.orEmpty()
         val cast = parseCast(o)
-        val imdb = o.optJSONObject("external_ids")?.optString("imdb_id")?.takeIf { it.isNotBlank() && it != "null" }
-            ?: o.optString("imdb_id").takeIf { it.isNotBlank() && it != "null" }
         return MovieDetails(
             tmdbId = id,
-            imdbId = imdb,
             title = o.optString("title").ifBlank { "?" },
             year = o.optString("release_date").take(4).toIntOrNull(),
             overview = o.optString("overview").takeIf { it.isNotBlank() },

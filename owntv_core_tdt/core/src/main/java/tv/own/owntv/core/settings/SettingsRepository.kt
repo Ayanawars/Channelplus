@@ -498,6 +498,7 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         val VOD_GRID_COLUMNS = intPreferencesKey("vod_grid_columns")
         val VOD_VIEW_MODE = stringPreferencesKey("vod_view_mode")
         val VOD_LAYOUT = stringPreferencesKey("vod_layout")
+        val LIVE_HUD_SIZE = intPreferencesKey("live_hud_size_percent")
         val LIVE_LAYOUT = stringPreferencesKey("live_layout")
         val LIVE_VIEW = stringPreferencesKey("live_view")
         val REMINDER_MODE = stringPreferencesKey("reminder_mode")
@@ -564,6 +565,7 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         val NAV_MENU_MODE = stringPreferencesKey("nav_menu_mode")
         // Chosen flip-card icon colour (AppIcon.name). What the launcher shows is AppIconSwitcher.applied.
         val APP_ICON = stringPreferencesKey("app_icon")
+        val PICON_STYLE = stringPreferencesKey("picon_style")
         val NAV_MENU_HIDDEN = stringSetPreferencesKey("nav_menu_hidden")
         // Stage navigation (TV): where the rail sits (NavStyle.name), what it shows (NavSize.name), its
         // length (NavLength.name), and how long the floating rail waits before hiding.
@@ -1193,6 +1195,14 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         context.dataStore.edit { it[Keys.APP_ICON] = icon.name }
     }
 
+    val piconStyle: Flow<tv.own.owntv.core.epg.PiconStyle> = prefsFlow {
+        tv.own.owntv.core.epg.PiconStyle.fromStored(it[Keys.PICON_STYLE])
+    }
+
+    suspend fun setPiconStyle(style: tv.own.owntv.core.epg.PiconStyle) {
+        context.dataStore.edit { it[Keys.PICON_STYLE] = style.name }
+    }
+
     /** Names of the `MainSection` browse items the user has hidden (STATIC mode). */
     val navMenuHidden: Flow<Set<String>> = prefsFlow { it[Keys.NAV_MENU_HIDDEN] ?: emptySet() }
 
@@ -1375,6 +1385,13 @@ class SettingsRepository(private val context: Context, private val localeStore: 
      * Live TV layout. STAGE (default for everyone, updates included) opens the categories as a sheet
      * with Left; SEPARATE keeps a category column on screen beside the channel list and preview.
      */
+    val liveHudSizePercent: Flow<Int> = prefsFlow { prefs ->
+        (prefs[Keys.LIVE_HUD_SIZE] ?: 70).coerceIn(50, 120)
+    }
+    suspend fun setLiveHudSizePercent(percent: Int) {
+        context.dataStore.edit { it[Keys.LIVE_HUD_SIZE] = percent.coerceIn(50, 120) }
+    }
+
     enum class LiveLayout { STAGE, SEPARATE }
     val liveLayout: Flow<LiveLayout> = prefsFlow { prefs ->
         prefs[Keys.LIVE_LAYOUT]?.let { runCatching { LiveLayout.valueOf(it) }.getOrNull() } ?: LiveLayout.STAGE
@@ -3089,6 +3106,7 @@ class SettingsRepository(private val context: Context, private val localeStore: 
             Keys.NAV_STYLE, Keys.NAV_SIZE, Keys.NAV_LENGTH, Keys.NAV_WIDEN,
             // The chosen icon colour. After a restore the app compares it with the applied icon and offers a restart.
             Keys.APP_ICON,
+            Keys.PICON_STYLE,
             // Docked mini-player position rides with settings backup (size is an int key, see backupIntKeys).
             Keys.MINI_PLAYER_POSITION,
             // Live TV latency preset (custom seconds is an int key, see backupIntKeys).
@@ -3121,7 +3139,7 @@ class SettingsRepository(private val context: Context, private val localeStore: 
             Keys.NAV_MENU_HIDDEN,
             Keys.REMOTE_SHORTCUT_BINDINGS,
         )
-        val ints = listOf(Keys.GUIDE_DAYS_TO_KEEP, Keys.FOCUS_HIGHLIGHT_WIDTH, Keys.DEFAULT_VOLUME, Keys.SEEK_STEP_SEC, Keys.LIVE_REWIND_STEP_SEC, Keys.UI_ZOOM_PCT, Keys.FONT_SIZE_PCT, Keys.AUDIO_DELAY_MS, Keys.CATCHUP_OFFSET_MIN, Keys.EPG_OFFSET_MIN, Keys.PROXY_PORT, Keys.DNS_PORT, Keys.CH_NAV_UP_SKIP, Keys.CH_NAV_DOWN_SKIP, Keys.MINI_PLAYER_SIZE_PCT, Keys.LIVE_LATENCY_CUSTOM_SECS, Keys.LIVE_PREROLL_SECS, Keys.LIVE_TUNE_TIMEOUT_SECS, Keys.GLASS_SCOPE, Keys.GLASS_ALPHA, Keys.BG_DIM, Keys.BG_BLUR, Keys.SUB_BG_OPACITY,
+        val ints = listOf(Keys.LIVE_HUD_SIZE, Keys.GUIDE_DAYS_TO_KEEP, Keys.FOCUS_HIGHLIGHT_WIDTH, Keys.DEFAULT_VOLUME, Keys.SEEK_STEP_SEC, Keys.LIVE_REWIND_STEP_SEC, Keys.UI_ZOOM_PCT, Keys.FONT_SIZE_PCT, Keys.AUDIO_DELAY_MS, Keys.CATCHUP_OFFSET_MIN, Keys.EPG_OFFSET_MIN, Keys.PROXY_PORT, Keys.DNS_PORT, Keys.CH_NAV_UP_SKIP, Keys.CH_NAV_DOWN_SKIP, Keys.MINI_PLAYER_SIZE_PCT, Keys.LIVE_LATENCY_CUSTOM_SECS, Keys.LIVE_PREROLL_SECS, Keys.LIVE_TUNE_TIMEOUT_SECS, Keys.GLASS_SCOPE, Keys.GLASS_ALPHA, Keys.BG_DIM, Keys.BG_BLUR, Keys.SUB_BG_OPACITY,
             Keys.PANEL_W_LIVE_CAT, Keys.PANEL_W_LIVE_LIST, Keys.PANEL_W_LIVE_PREVIEW,
             Keys.LIVE_STAGE_SHEET, Keys.LIVE_STAGE_LIST, Keys.LIVE_STAGE_PREVIEW,
             Keys.PANEL_W_MOVIES_CAT, Keys.PANEL_W_MOVIES_LIST, Keys.PANEL_W_MOVIES_PREVIEW,

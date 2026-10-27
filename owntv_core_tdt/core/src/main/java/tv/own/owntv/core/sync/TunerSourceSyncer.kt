@@ -27,7 +27,7 @@ class TunerSourceSyncer(
         val providerPackage: String? = null,
         val filterByOwner: Boolean = false,
     )
-    private data class Station(val id: Long, val name: String, val number: Int?)
+    private data class Station(val id: Long, val name: String, val number: Int?, val videoHeight: Int?)
 
     suspend fun sync(source: SourceEntity) {
         val sourceUri = Uri.parse(source.url)
@@ -55,7 +55,7 @@ class TunerSourceSyncer(
             ChannelEntity(id = old[key]?.id ?: 0, sourceId = source.id, categoryId = categoryId,
                 name = ch.name, number = ch.number, remoteId = key, sortOrder = order,
                 logoUrl = TvContract.buildChannelLogoUri(ch.id).toString(),
-                epgChannelId = "tif:$input:${ch.id}", streamUrl = TifChannelUri(input, ch.id).encode())
+                epgChannelId = "tif:$input:${ch.id}", streamUrl = TifChannelUri(input, ch.id, ch.videoHeight).encode())
         }
         currentCoroutineContext().ensureActive()
         rows.filter { it.id != 0L }.chunked(200).forEach { channels.updateAll(it) }
@@ -77,14 +77,23 @@ class TunerSourceSyncer(
     private suspend fun readStations(input: String, ownerFilter: String? = null): List<Station> {
         val columns = arrayOf(TvContract.Channels._ID, TvContract.Channels.COLUMN_DISPLAY_NAME,
             TvContract.Channels.COLUMN_DISPLAY_NUMBER, TvContract.Channels.COLUMN_SERVICE_TYPE,
-            TvContract.Channels.COLUMN_PACKAGE_NAME)
+            TvContract.Channels.COLUMN_PACKAGE_NAME, TvContract.Channels.COLUMN_VIDEO_FORMAT)
         val stations = ArrayList<Station>()
         context.contentResolver.query(TvContract.buildChannelsUriForInput(input), columns, null, null, null)?.use { c ->
             while (c.moveToNext()) {
                 currentCoroutineContext().ensureActive()
                 if (c.getString(3) == TvContract.Channels.SERVICE_TYPE_AUDIO) continue
                 if (ownerFilter != null && c.getString(4) != ownerFilter) continue
-                stations += Station(c.getLong(0), c.getString(1) ?: context.getString(tv.own.owntv.core.R.string.tuner_channel_name, c.getLong(0)), c.getString(2)?.toIntOrNull())
+                stations += Station(c.getLong(0), c.getString(1) ?: context.getString(tv.own.owntv.core.R.string.tuner_channel_name, c.getLong(0)), c.getString(2)?.toIntOrNull(),
+                    when (c.getString(5)) {
+                        "VIDEO_FORMAT_4320P" -> 4320
+                        "VIDEO_FORMAT_2160P" -> 2160
+                        "VIDEO_FORMAT_1080P", "VIDEO_FORMAT_1080I" -> 1080
+                        "VIDEO_FORMAT_720P" -> 720
+                        "VIDEO_FORMAT_576P", "VIDEO_FORMAT_576I" -> 576
+                        "VIDEO_FORMAT_480P", "VIDEO_FORMAT_480I" -> 480
+                        else -> null
+                    })
             }
         }
         return stations
@@ -152,7 +161,7 @@ class TunerSourceSyncer(
                 val label = info.loadLabel(context).toString()
                 val isPlutoInput = info.serviceInfo.packageName == PLUTO_PACKAGE ||
                     label.contains(PLUTO_LABEL.substringBefore(' '), ignoreCase = true)
-                isPlutoInput && hasChannels(context, info.id)
+                isPlutoInput
             }.forEach { info ->
                 val label = info.loadLabel(context).toString().ifBlank { PLUTO_LABEL }
                 pluto[info.id] = Input(

@@ -86,7 +86,7 @@ private enum class MoreItem { SETTINGS, FAVORITES, HISTORY, BACKUP, LOCAL_SYNC, 
  * More: the glass section sheet, topped by the profile, and one page on the right
  * for the item chosen with OK. Two layers, never three: ▲ ▼ move focus, OK selects the item (focus stays), ▶ enters the page, Back returns to
  * the sheet, Back again leaves More. Nothing opens full screen any more — Settings is the one door out,
- * through its group cards.
+ * through its category menu.
  */
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
@@ -105,7 +105,7 @@ fun MoreScreen(
     onOpenSeries: (Long) -> Unit,
     onChildFocused: () -> Unit,
     onEntryHook: (((() -> Boolean)?) -> Unit)? = null,
-    /** Back from Settings: land on the Settings page's first card instead of the rail. */
+    /** Back from Settings: return to its entry in the More hub. */
     restoreFocus: Boolean = false,
     onRestored: () -> Unit = {},
     modifier: Modifier = Modifier,
@@ -122,7 +122,12 @@ fun MoreScreen(
     val enterPage: () -> Boolean = { if (selected == null) runCatching { itemFocus.getValue(hubItem).requestFocus() }.getOrDefault(false) else pageEntry?.invoke() ?: runCatching { pageTarget.requestFocus() }.getOrDefault(false) }
     val backToSheet: () -> Unit = { hubItem = selected ?: MoreItem.SETTINGS; selected = null; pageEntry = null }
     // The hub opens one full-width page; Back returns focus to the card that opened it.
-    val choose: (MoreItem) -> Unit = { item -> if (item != selected) { selected = item; pageEntry = null } }
+    val choose: (MoreItem) -> Unit = { item ->
+        if (item == MoreItem.SETTINGS) {
+            hubItem = item
+            onOpenSettings(null, false)
+        } else if (item != selected) { selected = item; pageEntry = null }
+    }
 
     // The rail enters the hub or the currently open page.
     DisposableEffect(onEntryHook) {
@@ -139,12 +144,16 @@ fun MoreScreen(
     // Composed before the page, so a page's own Back (a step popup, a dialog) still wins over it.
     BackHandler(enabled = pageFocused && selected != null) { backToSheet() }
     LaunchedEffect(selected) {
+        if (selected == MoreItem.SETTINGS) {
+            selected = null
+            onOpenSettings(null, false)
+            return@LaunchedEffect
+        }
         withFrameNanos { }
         enterPage()
     }
 
     val playlists by vm.playlistCount.collectAsStateWithLifecycle()
-    val pinned by settingsVm.quickPinnedKeys.collectAsStateWithLifecycle()
     var logVersion by remember { mutableIntStateOf(0) }
 
     Box(modifier.fillMaxSize().onFocusChanged { if (it.hasFocus) onChildFocused() }) {
@@ -219,7 +228,7 @@ fun MoreScreen(
                                 .background(OwnTVTheme.colors.surface.copy(alpha = .94f), RoundedCornerShape(18.mpx)),
                         ) {
                             Row(Modifier.fillMaxWidth().padding(horizontal = 24.mpx), verticalAlignment = Alignment.CenterVertically) {
-                                Text(stringResource(R.string.app_name), style = stageText(23, 800), color = stageAccent.accent)
+                                Text(stringResource(R.string.channel_brand_name), style = stageText(23, 800), color = stageAccent.accent)
                                 Spacer(Modifier.weight(1f))
                                 Text(BuildConfig.VERSION_NAME, style = stageText(18, 400), color = StageColors.Muted)
                                 Spacer(Modifier.weight(1f))
@@ -230,11 +239,7 @@ fun MoreScreen(
                     }
                 }
 
-                MoreItem.SETTINGS -> SettingsPage(
-                    entry = pageTarget, pinned = pinned.size,
-                    onOpenGroup = { onOpenSettings(it, false) },
-                    onSearch = { onOpenSettings(null, true) },
-                )
+                MoreItem.SETTINGS -> Unit
                 MoreItem.FAVORITES -> FavouritesPage(
                     vm = vm, setEntry = setEntry,
                     onPlayChannel = onPlayChannel, onPlayMovie = { onPlayMovie(it, 0L) }, onOpenSeries = onOpenSeries,
@@ -247,7 +252,7 @@ fun MoreScreen(
                 MoreItem.BACKUP -> BackupScreen(entry = pageTarget, modifier = Modifier.fillMaxSize())
                 MoreItem.LOCAL_SYNC -> LocalSyncScreen(entry = pageTarget, modifier = Modifier.fillMaxSize())
                 MoreItem.ERROR_LOG -> ErrorLogPage(setEntry = setEntry, onCountChanged = { logVersion++ })
-                MoreItem.ABOUT -> AboutPage(vm = vm, entry = pageTarget, onOpenLanguage = { onOpenSettings(8, false) })
+                MoreItem.ABOUT -> AboutPage(vm = vm, entry = pageTarget, onOpenLanguage = { onOpenSettings(tv.own.owntv.features.shell.components.SettingsGroup.APP.ordinal, false) })
                 MoreItem.DEVELOPER -> Box(Modifier.focusRequester(pageTarget).focusGroup()) { DeveloperScreen(onBack = backToSheet) }
             }
         }

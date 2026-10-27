@@ -1637,9 +1637,16 @@ fun OwnTVShell(
                         }
                     }
                 }
+                val channelVersions by liveVm.channelVersions.collectAsStateWithLifecycle()
+                val automaticVersion by liveVm.automaticVersion.collectAsStateWithLifecycle()
                 PlayerHud(
                     player = if (liveOnExo) liveVm.previewEngine else mpvEngine, // HUD drives the active engine
                     onBack = exitPlayer,
+                    channelVersions = if (isTunedLive) channelVersions else emptyList(),
+                    channelVersionSourceNames = channelVersions.associate { it.sourceId to liveVm.sourceOf(it)?.name.orEmpty() },
+                    automaticVersion = automaticVersion,
+                    selectedVersionId = previewChannel?.id,
+                    onSelectChannelVersion = if (isTunedLive && timeshiftOffsetState.value == null) liveVm::selectChannelVersion else null,
                     onPip = dockPlayer, // PiP/dock works for live on either engine now
                     onAudioMode = toAudioMode,
                     // The channel-list overlay draws ABOVE the HUD; while it's open the HUD goes inert so
@@ -1696,7 +1703,8 @@ fun OwnTVShell(
                     // toggle's other position is not a compatibility choice but a guaranteed failure.
                     // A copy saved on this device is the exception: the other engine re-opens the same copy
                     // at the same moment, so the rewind survives the switch.
-                    onToggleCompatMode = if (isTunedLive && (!timeshifted || onLocalCopy) && previewChannel?.drmConfig == null) liveVm::toggleForceMpv else null,
+                    onToggleCompatMode = if (isTunedLive && (!timeshifted || onLocalCopy) && previewChannel?.drmConfig == null &&
+                        previewChannel?.streamUrl?.let { tv.own.owntv.core.model.TifChannelUri.parse(it) } == null) liveVm::toggleForceMpv else null,
                     // VOD engine toggle (movies/series only — live and catch-up channels keep their own
                     // engine handling above): flip the current item between mpv and ExoPlayer.
                     vodOnExo = if (!isLiveStream && !isTunedLive) vodExoActive else null,
@@ -1726,25 +1734,10 @@ fun OwnTVShell(
                             val epg by liveVm.nowNext.collectAsStateWithLifecycle()
                             val archiveEpg by liveVm.archiveNowNext.collectAsStateWithLifecycle()
                             val watching by liveVm.watchingWallMs.collectAsStateWithLifecycle()
-                            // Stacked: what was on air at the replayed moment, then what is on air now.
-                            // The live row is dimmed while an archive plays — it is context, not the
-                            // thing being watched — and returns to full strength back at the live edge.
-                            androidx.compose.foundation.layout.Column(
-                                horizontalAlignment = androidx.compose.ui.Alignment.End,
-                                verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(7.dp),
-                            ) {
-                                if (watching != null) {
-                                    tv.own.owntv.features.shell.components.LiveEpgCard(
-                                        epg = archiveEpg,
-                                        variant = tv.own.owntv.features.shell.components.EpgCardVariant.ARCHIVE,
-                                        atMs = watching,
-                                    )
-                                }
-                                tv.own.owntv.features.shell.components.LiveEpgCard(
-                                    epg = epg,
-                                    modifier = if (watching == null) Modifier else Modifier.alpha(0.55f),
-                                )
-                            }
+                            tv.own.owntv.player.LiveProgrammeInfo(
+                                epg = if (watching != null) archiveEpg else epg,
+                                atMs = watching,
+                            )
                         }
                     } else null,
                     matchLine = matchSession?.takeIf { sportsConfig.scoreInInfoBar }?.let { s ->
@@ -1861,7 +1854,9 @@ fun OwnTVShell(
                         // hold a single channel, so this renders for any non-empty list.
                         tv.own.owntv.features.shell.components.ChannelListOverlay(
                             channels = zapChannels,
-                            currentId = previewChannel?.id,
+                            currentId = zapChannels.firstOrNull { ch -> previewChannel?.let {
+                                tv.own.owntv.core.live.ChannelVariants.key(ch) == tv.own.owntv.core.live.ChannelVariants.key(it)
+                            } == true }?.id ?: previewChannel?.id,
                             nowPlaying = overlayNowPlaying,
                             nowProgrammes = overlayProgrammes,
                             favoriteIds = overlayFavoriteIds,

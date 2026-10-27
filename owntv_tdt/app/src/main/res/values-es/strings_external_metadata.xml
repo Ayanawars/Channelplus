@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="external_metadata_title">TheTVDB</string>
+    <string name="external_metadata_summary">Valoraciones e información adicional para programas en directo, películas y series.</string>
+    <string name="external_metadata_description">Utiliza TMDB para identificar el título, obtener sus valoraciones e imágenes y TheTVDB para ampliar la información de series. Si hay dudas sobre el título en directo, conserva la guía. El modo Solo proveedor desactiva estas consultas.</string>
+    <string name="external_metadata_enabled">Mostrar metadatos adicionales</string>
+    <string name="external_tvdb_key">Clave API del proyecto TheTVDB v4</string>
+    <string name="external_tvdb_pin">PIN de suscriptor de TheTVDB (si se requiere)</string>
+    <string name="external_metadata_credentials_help">TheTVDB requiere una clave API del proyecto; las claves con suscripción también requieren un PIN de suscriptor. Deja la clave vacía para utilizar solo TMDB. Las credenciales se guardan en esta TV.</string>
+    <string name="external_metadata_save">Guardar</string>
+    <string name="external_metadata_save_test">Guardar y comprobar</string>
+    <string name="external_metadata_testing">Comprobando los servicios configurados…</string>
+    <string name="external_metadata_save_failed">No se ha podido guardar o comprobar la configuración.</string>
+    <string name="external_metadata_saved">Configuración guardada.</string>
+    <string name="external_metadata_ok">Conectado</string>
+    <string name="external_metadata_failed">Error de conexión o credenciales</string>
+    <string name="external_metadata_unconfigured">Sin configurar</string>
+    <string name="external_metadata_test_result">TheTVDB: %1$s</string>
+    <string name="external_tmdb_rating">TMDB %1$.1f/10</string>
+    <string name="external_tvdb_source">TheTVDB</string>
+</resources>

@@ -1,0 +1,7 @@
+# Cinematic channel list — local changes
+
+The standard Live TV list now places a single full-size preview surface behind a dark left drawer. Rows use transparent logo tiles, one optional channel number, channel name and current programme, with an ivory focus fill. Programme identity, live stream facts, start/end times, progress, synopsis and next programme appear over a bottom gradient to the right. Missing EPG data leaves channel identity visible.
+
+The existing search, sorting, category sheet, favourites, paging, long-OK context menu and OK-to-fullscreen flow are retained. Search/category focus no longer stops the background preview in this layout. The separate-panels setting, pinned lists, player HUD and TV Guide retain their existing presentation. Existing preview enablement and tuner single-session restrictions remain respected. There is one preview surface owner in the cinematic layout, including native TDT playback.
+
+Validated without compiling: translation literal inventory, bounded-text overflow check, new XML parse, string references and git diff whitespace checks. No Gradle or APK compilation was run, no device validation was performed and no GitHub push/release was made. Device verification is still needed for native tuner compositing, focus restoration and transitions into/out of fullscreen. The screenshot mockup is the design reference; no generated image is used as runtime UI.
