@@ -1,7 +1,9 @@
 <resources>
     <string name="picons_title">Channel logos (picons)</string>
-    <string name="picons_description">Choose Jungle Team’s Transparent or Color logos. Channels without a matching picon keep their existing logo. Included in the app and available offline.</string>
+    <string name="picons_description">Choose Wikimedia SVG, Transparent or Color logos. Channels without a matching logo keep their source logo. Included in the app and available offline.</string>
     <string name="picons_original">Original logos</string>
     <string name="picons_transparent">Transparent</string>
     <string name="picons_color">Color</string>
+    <string name="picons_wikimedia">Wikimedia (SVG)</string>
+    <string name="picons_wikimedia_attribution">Channel SVG logos: Wikimedia Commons. Per-file authors, sources and licenses are included with the artwork.</string>
 </resources>

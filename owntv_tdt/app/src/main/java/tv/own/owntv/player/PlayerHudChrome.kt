@@ -49,6 +49,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import tv.own.owntv.core.epg.PiconStore
 import tv.own.owntv.R
 import tv.own.owntv.core.player.PlayerControl
 import tv.own.owntv.core.player.ControlCluster
@@ -166,12 +171,16 @@ internal fun TopBar(
 /** The channel logo tile, falling back to the first letters of the channel name. */
 @Composable
 internal fun ChannelLogo(logoUrl: String?, title: String?, size: Int, modifier: Modifier = Modifier) {
-    Box(
-        modifier.size(size.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFF004F46)),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (!logoUrl.isNullOrBlank()) AsyncImage(model = logoUrl, contentDescription = null, modifier = Modifier.fillMaxSize())
-        else Text((title ?: "?").take(3).uppercase(), style = tv.own.owntv.ui.theme.stageText(22, 700), color = Color(0xFF6FF8E4), fontWeight = FontWeight.Bold)
+    val url = title?.let(PiconStore::iconFor) ?: logoUrl
+    val context = LocalContext.current
+    val request = remember(url, context) { ImageRequest.Builder(context).data(url).crossfade(false).build() }
+    var failed by remember(url) { mutableStateOf(false) }
+    // Original logo canvas only: no colored tile, clipping or adaptive background plate.
+    Box(modifier.width((size * 1.5f).dp).height(size.dp), contentAlignment = Alignment.Center) {
+        if (!url.isNullOrBlank() && !failed) AsyncImage(model = request, contentDescription = null,
+            contentScale = ContentScale.Fit, onError = { failed = true }, modifier = Modifier.fillMaxSize())
+        else Text((title ?: "?").take(3).uppercase(), style = tv.own.owntv.ui.theme.stageText(22, 700),
+            color = hudInk, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -189,10 +198,7 @@ internal fun ChannelOsdCard(
         modifier = modifier.widthIn(max = if (guide != null) 420.dp else 340.dp).clip(RoundedCornerShape(14.dp)).background(hudShade(0.55f)).padding(14.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Box(Modifier.size(44.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFF004F46)), contentAlignment = Alignment.Center) {
-            if (!logoUrl.isNullOrBlank()) AsyncImage(model = logoUrl, contentDescription = null, modifier = Modifier.fillMaxSize())
-            else Text((title ?: "?").take(3).uppercase(), style = tv.own.owntv.ui.theme.stageText(22, 700), color = Color(0xFF6FF8E4), fontWeight = FontWeight.Bold)
-        }
+        ChannelLogo(logoUrl, title, 60)
         Column {
             Text(title ?: "", style = tv.own.owntv.ui.theme.stageText(25, 500), color = hudInk, maxLines = 1, overflow = TextOverflow.Ellipsis)
             subtitle?.takeIf { it.isNotBlank() }?.let {

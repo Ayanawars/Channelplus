@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 23.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" [
+	<!ENTITY ns_extend "http://ns.adobe.com/Extensibility/1.0/">
+	<!ENTITY ns_ai "http://ns.adobe.com/AdobeIllustrator/10.0/">
+	<!ENTITY ns_graphs "http://ns.adobe.com/Graphs/1.0/">
+	<!ENTITY ns_vars "http://ns.adobe.com/Variables/1.0/">
+	<!ENTITY ns_imrep "http://ns.adobe.com/ImageReplacement/1.0/">
+	<!ENTITY ns_sfw "http://ns.adobe.com/SaveForWeb/1.0/">
+	<!ENTITY ns_custom "http://ns.adobe.com/GenericCustomNamespace/1.0/">
+	<!ENTITY ns_adobe_xpath "http://ns.adobe.com/XPath/1.0/">
+]>
+<svg version="1.1" id="Layer_1" xmlns:x="&ns_extend;" xmlns:i="&ns_ai;" xmlns:graph="&ns_graphs;"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 112.1 111.9"
+	 style="enable-background:new 0 0 112.1 111.9;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:url(#SVGID_1_);}
+	.st1{fill:#FFFFFF;}
+	.st2{opacity:0.65;fill:url(#SVGID_2_);enable-background:new    ;}
+</style>
+<metadata>
+	<sfw  xmlns="&ns_sfw;">
+		<slices></slices>
+		<sliceSourceBounds  bottomLeftOrigin="true" height="111.9" width="112.1" x="66.4" y="24.3"></sliceSourceBounds>
+	</sfw>
+</metadata>
+<g>
+	
+		<linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="-212.454" y1="-397.4235" x2="-159.438" y2="-397.4235" gradientTransform="matrix(1 0 0 -1 271.5 -371.977)">
+		<stop  offset="0" style="stop-color:#80C461"/>
+		<stop  offset="1" style="stop-color:#4BB649"/>
+	</linearGradient>
+	<polygon class="st0" points="106.4,50.9 112.1,0 59,3.5 	"/>
+	<polygon class="st1" points="98.9,4.6 95,4.6 86.3,10.1 87,15.4 92.3,12.3 92.3,28.1 88,28.1 88,32.5 89.3,33.8 103.1,33.8 
+		103.1,28.1 98.9,28.1 	"/>
+	
+		<linearGradient id="SVGID_2_" gradientUnits="userSpaceOnUse" x1="-259.843" y1="-427.0035" x2="-165.441" y2="-427.0035" gradientTransform="matrix(1 0 0 -1 271.5 -371.977)">
+		<stop  offset="0" style="stop-color:#80C461"/>
+		<stop  offset="1" style="stop-color:#4BB649"/>
+	</linearGradient>
+	<path class="st2" d="M55.8,3.7L23.5,5.9L11.7,88.6l88.6,17.7l5.8-52.3L55.8,3.7z"/>
+	<g>
+		<path class="st1" d="M55.5,68.3c-2.3,7.5-9.4,7.2-9.4,7.2c-5.4,0-9.7-4.4-9.7-9.7c0-5.4,4.4-9.7,9.7-9.7c0,0,7.1-0.3,9.4,7.2
+			l9-4.1c-5.3-13.3-18.4-12.8-18.4-12.8c-10.8,0-19.5,8.7-19.5,19.5c0,10.7,8.7,19.5,19.5,19.5c0,0,13.1,0.5,18.4-12.8L55.5,68.3z"
+			/>
+		<path class="st1" d="M51,41.7v-22h-9.7v22C46.1,40.5,51,41.7,51,41.7z"/>
+		<path class="st1" d="M41.2,89.9v22H51v-22C46.1,91,41.2,89.9,41.2,89.9z"/>
+		<path class="st1" d="M22,60.9H0v9.7h22C20.9,65.8,22,60.9,22,60.9z"/>
+		<path class="st1" d="M70.2,60.9c1.2,4.9,0,9.7,0,9.7h22v-9.7H70.2z"/>
+		<path class="st1" d="M66.6,52.2l15.6-15.6l-6.9-6.9L59.7,45.3C64,47.9,66.6,52.2,66.6,52.2z"/>
+		<path class="st1" d="M25.6,79.4L10.1,94.9l6.9,6.9l15.6-15.6C28.3,83.6,25.6,79.4,25.6,79.4z"/>
+		<path class="st1" d="M32.5,45.3L16.9,29.7l-6.9,6.9l15.6,15.6C28.3,47.9,32.5,45.3,32.5,45.3z"/>
+		<path class="st1" d="M59.7,86.2l15.6,15.6l6.9-6.9L66.6,79.4C64,83.6,59.7,86.2,59.7,86.2z"/>
+	</g>
+</g>
+</svg>

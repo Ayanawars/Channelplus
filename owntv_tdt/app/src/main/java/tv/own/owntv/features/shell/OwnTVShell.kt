@@ -1639,6 +1639,9 @@ fun OwnTVShell(
                 }
                 val channelVersions by liveVm.channelVersions.collectAsStateWithLifecycle()
                 val automaticVersion by liveVm.automaticVersion.collectAsStateWithLifecycle()
+                tv.own.owntv.player.LiveProgrammeArtworkHost(
+                    liveVm.nowNext, liveVm.archiveNowNext, liveVm.watchingWallMs, enabled = isLiveChannel,
+                ) {
                 PlayerHud(
                     player = if (liveOnExo) liveVm.previewEngine else mpvEngine, // HUD drives the active engine
                     onBack = exitPlayer,
@@ -1748,6 +1751,7 @@ fun OwnTVShell(
                     onToastOk = goalToast?.let { a -> { switchToMatch(a.match) } },
                     modifier = Modifier.fillMaxSize(),
                 )
+                }
                 goalToast?.let { a ->
                     tv.own.owntv.features.sports.GoalToast(a, Modifier.align(androidx.compose.ui.Alignment.TopEnd).padding(top = 45.mpx, end = 60.mpx))
                 }

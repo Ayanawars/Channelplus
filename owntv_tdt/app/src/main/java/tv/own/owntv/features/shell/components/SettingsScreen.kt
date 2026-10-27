@@ -1653,6 +1653,7 @@ private fun piconStyleLabel(style: tv.own.owntv.core.epg.PiconStyle): String = s
     tv.own.owntv.core.epg.PiconStyle.ORIGINAL -> R.string.picons_original
     tv.own.owntv.core.epg.PiconStyle.TRANSPARENT -> R.string.picons_transparent
     tv.own.owntv.core.epg.PiconStyle.COLOR -> R.string.picons_color
+    tv.own.owntv.core.epg.PiconStyle.WIKIMEDIA -> R.string.picons_wikimedia
 })
 
 @Composable

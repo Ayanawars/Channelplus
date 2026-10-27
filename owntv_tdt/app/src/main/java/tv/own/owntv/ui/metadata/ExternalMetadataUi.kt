@@ -19,7 +19,9 @@ import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.owntv.ui.theme.mpx
 import tv.own.owntv.ui.theme.stageText
 
-/** Disposing or changing the programme cancels its lookup; the new title never inherits old badges. */
+private val artworkCache = ProgrammeArtworkCache<List<Any?>>()
+
+/** Cached values are scoped by programme, provider configuration and profile. */
 @Composable
 fun rememberExternalMetadata(
     title: String?, details: EpgDetails? = null, tmdbId: Int? = null, type: MetadataType? = null,
@@ -30,16 +32,21 @@ fun rememberExternalMetadata(
     val metadata by settings.metadataConfigFlow.collectAsStateWithLifecycle(initialValue = MetadataConfig())
     // The profile participates in the effect key so a kid-profile change cancels stale requests.
     val profile by settings.activeProfileId.collectAsStateWithLifecycle(initialValue = 0L)
-    val identity = listOf(title, details, tmdbId, type, config, metadata, profile)
+    val identity = listOf(title, details?.year, details?.categories, details?.episode, tmdbId, type, config, metadata, profile)
     // key() gives produceState fresh storage immediately, not one recomposition after a channel change.
     return key(identity) {
-        val result by produceState<ExternalTitleMetadata?>(null) {
+        val result by produceState(artworkCache.get(identity)) {
             if (!metadata.enabled || !config.enabled) return@produceState
-            delay(MetadataRepository.FOCUS_DEBOUNCE_MS)
-            value = try {
-                if (tmdbId != null && type != null) repository.known(tmdbId, type)
-                else title?.takeIf { it.isNotBlank() }?.let { repository.live(it, details) }
+            if (value == null) delay(MetadataRepository.FOCUS_DEBOUNCE_MS)
+            val publish: (ExternalTitleMetadata) -> Unit = { data ->
+                artworkCache.put(identity, data)
+                value = data
+            }
+            val resolved = try {
+                if (tmdbId != null && type != null) repository.known(tmdbId, type, publish)
+                else title?.takeIf { it.isNotBlank() }?.let { repository.live(it, details, publish) }
             } catch (error: CancellationException) { throw error } catch (_: Exception) { null }
+            resolved?.let(publish)
         }
         result
     }

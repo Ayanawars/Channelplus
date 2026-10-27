@@ -32,16 +32,16 @@ class ExternalMetadataRepository(
         lock.withLock { store.save(config); client.clearSession() }
     }
 
-    suspend fun live(rawTitle: String, details: EpgDetails?): ExternalTitleMetadata? = resolve(
-        ExternalMetadataRules.liveTitle(rawTitle), details?.year, null, null, details,
+    suspend fun live(rawTitle: String, details: EpgDetails?, onArtwork: (ExternalTitleMetadata) -> Unit = {}): ExternalTitleMetadata? = resolve(
+        ExternalMetadataRules.liveTitle(rawTitle), details?.year, null, null, details, onArtwork,
     )
 
-    suspend fun known(tmdbId: Int, type: MetadataType): ExternalTitleMetadata? {
+    suspend fun known(tmdbId: Int, type: MetadataType, onArtwork: (ExternalTitleMetadata) -> Unit = {}): ExternalTitleMetadata? {
         if (type == MetadataType.EPISODE || tmdbId <= 0) return null
-        return resolve("", null, tmdbId, type, null)
+        return resolve("", null, tmdbId, type, null, onArtwork)
     }
 
-    private suspend fun resolve(title: String, year: Int?, knownId: Int?, type: MetadataType?, epg: EpgDetails?): ExternalTitleMetadata? = withContext(Dispatchers.IO) {
+    private suspend fun resolve(title: String, year: Int?, knownId: Int?, type: MetadataType?, epg: EpgDetails?, onArtwork: (ExternalTitleMetadata) -> Unit): ExternalTitleMetadata? = withContext(Dispatchers.IO) {
         val cfg = store.config.value
         val metadata = settings.metadataConfig()
         if (!cfg.enabled || !metadata.enabled || (knownId == null && title.length < 3)) return@withContext null
@@ -72,10 +72,16 @@ class ExternalMetadataRepository(
                 tmdbRating = full.rating?.takeIf { it.isFinite() && it > 0 && it <= 10 },
                 posterUrl = MetadataImages.poster(full.posterPath), logoUrl = MetadataImages.logo(full.logoPath),
                 overview = full.overview)
+            // The poster does not depend on optional TVDB translations or title logos.
+            onArtwork(result)
             var failed = false
             if (cfg.tvdbKey.isNotBlank() && result.type == MetadataType.TV && result.tvdbId != null) {
                 try {
-                    val data = client.tvdb(requireNotNull(result.tvdbId), cfg, metadata.resolvedLanguage)
+                    val data = client.tvdb(requireNotNull(result.tvdbId), cfg, metadata.resolvedLanguage) { partial ->
+                        result = result.copy(tvdbOverview = partial.overview, tvdbArtwork = partial.artwork,
+                            tvdbUrl = partial.url, tvdbLoaded = true)
+                        onArtwork(result)
+                    }
                     result = result.copy(tvdbOverview = data.overview, tvdbArtwork = data.artwork, tvdbUrl = data.url, tvdbLoaded = true, logoUrl = data.logo ?: result.logoUrl)
                 } catch (error: CancellationException) { throw error }
                 catch (_: Exception) { failed = true }

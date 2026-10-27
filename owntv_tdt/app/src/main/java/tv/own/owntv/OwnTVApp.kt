@@ -6,6 +6,7 @@ import android.content.res.Configuration
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
+import coil3.svg.SvgDecoder
 import coil3.memory.MemoryCache
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.request.allowRgb565
@@ -176,7 +177,10 @@ class OwnTVApp : Application(), SingletonImageLoader.Factory, androidx.work.Conf
             .protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
             .build()
         return ImageLoader.Builder(context)
-            .components { add(OkHttpNetworkFetcherFactory(callFactory = { imageHttpClient })) }
+            .components {
+                add(OkHttpNetworkFetcherFactory(callFactory = { imageHttpClient }))
+                add(SvgDecoder.Factory())
+            }
             .memoryCache { MemoryCache.Builder().maxSizePercent(context, 0.10).build() }
             // Explicit bounded disk cache: posters/logos survive across sessions instead of
             // re-downloading, capped so a 220k-item catalog can't eat the box's storage.

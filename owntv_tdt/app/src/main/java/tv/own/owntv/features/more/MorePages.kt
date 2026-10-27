@@ -601,6 +601,8 @@ internal fun AboutPage(vm: MoreCountsViewModel, entry: FocusRequester, onOpenLan
             modifier = Modifier.padding(top = 10.mpx, bottom = 24.mpx).widthIn(max = 860.mpx))
         Text(stringResource(R.string.channel_upstream_attribution), style = stageText(16, 500), color = StageColors.Dim,
             modifier = Modifier.padding(top = 10.mpx).widthIn(max = 860.mpx))
+        Text(stringResource(R.string.picons_wikimedia_attribution), style = stageText(16, 500), color = StageColors.Dim,
+            modifier = Modifier.padding(top = 10.mpx).widthIn(max = 860.mpx))
         Row(Modifier.padding(top = 22.mpx), horizontalArrangement = Arrangement.spacedBy(10.mpx)) {
             // The link is for reading: a TV has no browser to open it in.
             Row(
