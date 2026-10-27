@@ -1126,6 +1126,7 @@ fun SpanHelpBlock() {
 fun dotSeparator(): String = stringResource(R.string.settings_breadcrumb_eyebrow, "", "")
 
 /** Wide list settings, sharing the same category rail on root and detail pages. */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun SettingsListPage(
     group: String,
