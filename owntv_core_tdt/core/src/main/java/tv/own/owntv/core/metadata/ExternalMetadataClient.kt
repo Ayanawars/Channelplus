@@ -30,11 +30,15 @@ class ExternalMetadataClient(client: OkHttpClient) {
 
     data class TvdbDetails(val overview: String?, val artwork: String?, val url: String?, val logo: String?)
 
-    suspend fun tvdb(id: Int, config: ExternalMetadataConfig, language: String): TvdbDetails {
+    suspend fun tvdb(id: Int, config: ExternalMetadataConfig, language: String, onArtwork: (TvdbDetails) -> Unit = {}): TvdbDetails {
         require(id > 0)
         val data = authorized("/series/$id/extended", config).optJSONObject("data") ?: throw ApiFailure(422)
         if (data.optInt("id") != id) throw ApiFailure(422)
         var overview = clean(data.optString("overview"))
+        val artwork = clean(data.optString("image"))?.takeIf { it.startsWith("https://") }
+        val slug = data.optString("slug").takeIf { it.matches(Regex("[a-zA-Z0-9-]+")) }
+        val url = slug?.let { "https://thetvdb.com/series/$it" }
+        onArtwork(TvdbDetails(overview, artwork, url, null))
         val iso3 = runCatching { java.util.Locale.forLanguageTag(language.ifBlank { "en" }).isO3Language }.getOrNull()
         if (!iso3.isNullOrBlank() && iso3 != "eng") {
             // A missing translation keeps the base overview; auth/network errors propagate for retry.
@@ -43,9 +47,7 @@ class ExternalMetadataClient(client: OkHttpClient) {
                 overview = translated?.optString("overview")?.let(::clean) ?: overview
             } catch (error: ApiFailure) { if (error.status != 404) throw error }
         }
-        val slug = data.optString("slug").takeIf { it.matches(Regex("[a-zA-Z0-9-]+")) }
-        return TvdbDetails(overview, clean(data.optString("image"))?.takeIf { it.startsWith("https://") },
-            slug?.let { "https://thetvdb.com/series/$it" }, clearLogo(data, config, iso3))
+        return TvdbDetails(overview, artwork, url, clearLogo(data, config, iso3))
     }
 
     /** Resolve artwork type IDs from the API rather than hardcoding a provider-specific number. */

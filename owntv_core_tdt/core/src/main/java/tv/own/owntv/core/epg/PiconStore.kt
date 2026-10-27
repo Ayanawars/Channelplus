@@ -14,11 +14,19 @@ import tv.own.owntv.core.settings.SettingsRepository
 object PiconStore {
     private var style by mutableStateOf(PiconStyle.ORIGINAL)
     private var catalog by mutableStateOf<PiconCatalog?>(null)
+    private var wikimedia by mutableStateOf<PiconCatalog?>(null)
 
     fun start(context: Context, scope: CoroutineScope, settings: SettingsRepository) {
         scope.launch {
             settings.piconStyle.collectLatest { selected ->
-                if (selected != PiconStyle.ORIGINAL && catalog == null) {
+                if (selected == PiconStyle.WIKIMEDIA && wikimedia == null) {
+                    wikimedia = runCatching {
+                        context.assets.open("channel-logos/wikimedia/catalog.tsv").bufferedReader().use { reader ->
+                            PiconCatalog.fromWikimediaTsv(reader.lineSequence())
+                        }
+                    }.getOrNull()
+                }
+                if (selected != PiconStyle.ORIGINAL && selected != PiconStyle.WIKIMEDIA && catalog == null) {
                     catalog = runCatching {
                         context.assets.open("picons/catalog.tsv").bufferedReader().use { reader ->
                             PiconCatalog.fromTsv(reader.lineSequence())
@@ -30,5 +38,6 @@ object PiconStore {
         }
     }
 
-    fun iconFor(name: String): String? = catalog?.iconFor(name, style)
+    fun iconFor(name: String): String? =
+        (if (style == PiconStyle.WIKIMEDIA) wikimedia else catalog)?.iconFor(name, style)
 }

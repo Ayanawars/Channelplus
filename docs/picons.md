@@ -1,8 +1,8 @@
 # Channel+ picons
 
-Settings → Appearance → Channel logos (picons) offers Original logos, Transparent and Color.
-Original is the default. The selection is persisted and included in settings backups.
-The two Jungle Team packs are bundled as assets: neither a network request nor a new APK release
+Settings → Appearance → Channel logos (picons) offers Original logos, Wikimedia (SVG), Transparent and Color.
+Wikimedia is the default for an unset preference; explicit choices remain unchanged. The selection is persisted and included in settings backups.
+The two Jungle Team packs and the separate Wikimedia SVG pack are bundled as assets: neither a network request nor a new APK release
 is needed when switching between them. Unmatched names retain the EPG/provider logo.
 
 The display override uses `ChannelEntity.displayLogoUrl`, shared by Live TV, guide, search,
@@ -24,6 +24,8 @@ python tools/channelplus/import_picons.py /path/to/Picon-enigma2-Movistar /path/
 ```
 
 Validation: PNG decoding, content hashes, catalog paths, ES/EN resource XML, name/alias fixtures,
-numbered-feed isolation and `git diff --check` passed. Kotlin unit tests were added in
-`PiconCatalogTest`. Android compilation and those tests remain unverified here: the Gradle wrapper
-cannot download Gradle 9.7.1 (`Network is unreachable`). No APK or release has been produced.
+numbered-feed isolation and whitespace checks passed. The existing PNG integration was included
+in the published 5.3.0 build. Both catalog test suites pass (8 JVM tests) with the new SVG style;
+the SVG pack ships with 5.3.1.
+
+Wikimedia integration: see [wikimedia-channel-logos.md](wikimedia-channel-logos.md). The SVG pack is independent of the PNG importer and retains its own per-file attribution.

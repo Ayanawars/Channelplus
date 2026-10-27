@@ -80,7 +80,7 @@ internal fun LivePlayerFooter(
             { player.togglePlayPause() }, onScrub)) {
             Column(modifier.fillMaxWidth().padding(horizontal = 28.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    ChannelLogo(meta.logoUrl, meta.title, 32)
+                    ChannelLogo(meta.logoUrl, meta.title, 72)
                     Text(listOfNotNull(meta.subtitle?.trim()?.removePrefix("#"), meta.title)
                         .joinToString(stringResource(R.string.content_metadata_separator)),
                         style = stageText(25, 600), color = hudInk, maxLines = 1,

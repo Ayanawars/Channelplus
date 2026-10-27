@@ -41,6 +41,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import androidx.tv.material3.Text
@@ -80,17 +83,22 @@ fun LiveProgrammeInfo(epg: EpgNowNext?, atMs: Long? = null, modifier: Modifier =
     LaunchedEffect(Unit) { while (true) { delay(10_000); wallNow = System.currentTimeMillis() } }
     val now = atMs ?: wallNow
     val programmeNow = epg?.now
-    val external = tv.own.owntv.ui.metadata.rememberExternalMetadata(programmeNow?.title, epg?.nowDetails)
+    val retained = LocalLiveProgrammeArtwork.current
+    val external = if (retained != null && retained.identity == programmeArtworkIdentity(epg)) retained.metadata
+        else tv.own.owntv.ui.metadata.rememberExternalMetadata(programmeNow?.title, epg?.nowDetails)
     // Artwork is scoped to this exact airing and clears synchronously on programme changes.
     val poster = external?.posterUrl ?: external?.tvdbArtwork
     val logo = external?.logoUrl
+    val context = LocalContext.current
+    val posterRequest = remember(poster, context) { ImageRequest.Builder(context).data(poster).crossfade(false).build() }
+    val logoRequest = remember(logo, context) { ImageRequest.Builder(context).data(logo).crossfade(false).build() }
     var posterFailed by remember(poster) { mutableStateOf(false) }
     var logoFailed by remember(logo) { mutableStateOf(false) }
     BoxWithConstraints(modifier.fillMaxWidth()) {
         val wide = maxWidth >= 680.dp
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(18.dp), verticalAlignment = Alignment.CenterVertically) {
             if (wide && poster != null && !posterFailed) {
-                AsyncImage(model = poster, contentDescription = null, contentScale = ContentScale.Fit,
+                AsyncImage(model = posterRequest, contentDescription = null, contentScale = ContentScale.Fit,
                     onError = { posterFailed = true },
                     modifier = Modifier.width(104.dp).height(156.dp).clip(RoundedCornerShape(5.dp)))
             }
@@ -138,7 +146,7 @@ fun LiveProgrammeInfo(epg: EpgNowNext?, atMs: Long? = null, modifier: Modifier =
             }
             if (wide && logo != null && !logoFailed) {
                 // Fit preserves the original transparent canvas; never add a plate behind title art.
-                AsyncImage(model = logo, contentDescription = null, contentScale = ContentScale.Fit,
+                AsyncImage(model = logoRequest, contentDescription = null, contentScale = ContentScale.Fit,
                     onError = { logoFailed = true }, modifier = Modifier.width(210.dp).height(90.dp))
             }
         }
