@@ -61,6 +61,8 @@ import tv.own.owntv.ui.theme.gradientWash
 @Immutable
 data class MediaDetailsUi(
     val title: String,
+    val tmdbId: Int? = null,
+    val metadataType: tv.own.owntv.core.metadata.MetadataType? = null,
     val subtitle: String? = null,       // e.g. "S2 · E5 · aired 2019-04-14"
     val backdropUrl: String? = null,    // 16:9 hero
     val logoUrl: String? = null,        // title-logo artwork; null means "draw the title as text"
@@ -79,6 +81,10 @@ data class MediaDetailsUi(
  */
 @Composable
 fun MediaDetailsScreen(details: MediaDetailsUi, onExit: () -> Unit, modifier: Modifier = Modifier) {
+    val external = if (details.tmdbId != null && details.metadataType != null)
+        tv.own.owntv.ui.metadata.rememberExternalMetadata(null, tmdbId = details.tmdbId, type = details.metadataType) else null
+    val plot = details.plot?.takeIf { it.isNotBlank() } ?: external?.tvdbOverview
+    val poster = details.posterUrl ?: external?.tvdbArtwork
     val scroll = rememberScrollState()
     val focus = remember { FocusRequester() }
     val scope = rememberCoroutineScope()
@@ -116,9 +122,9 @@ fun MediaDetailsScreen(details: MediaDetailsUi, onExit: () -> Unit, modifier: Mo
                     .padding(start = 120.mpx, end = 120.mpx, top = 300.mpx, bottom = 80.mpx),
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(36.mpx), verticalAlignment = Alignment.Bottom) {
-                    if (!details.posterUrl.isNullOrBlank()) {
+                    if (!poster.isNullOrBlank()) {
                         AsyncImage(
-                            model = details.posterUrl, contentDescription = null, contentScale = ContentScale.Crop,
+                            model = poster, contentDescription = null, contentScale = ContentScale.Crop,
                             modifier = Modifier.width(220.mpx).aspectRatio(2f / 3f).clip(RoundedCornerShape(20.mpx)),
                         )
                     }
@@ -130,6 +136,7 @@ fun MediaDetailsScreen(details: MediaDetailsUi, onExit: () -> Unit, modifier: Mo
                         if (details.metaLine.isNotBlank()) {
                             Text(details.metaLine, style = stageText(22, 600), color = StageColors.ItemText, modifier = Modifier.padding(top = 12.mpx))
                         }
+                        tv.own.owntv.ui.metadata.ExternalMetadataBadges(external, modifier = Modifier.padding(top = 12.mpx), color = StageColors.ItemText)
                         if (details.genres.isNotEmpty()) {
                             FlowRow(Modifier.padding(top = 16.mpx), horizontalArrangement = Arrangement.spacedBy(10.mpx), verticalArrangement = Arrangement.spacedBy(10.mpx)) {
                                 details.genres.forEach { tv.own.owntv.ui.stage.StageTag(it) }
@@ -137,9 +144,9 @@ fun MediaDetailsScreen(details: MediaDetailsUi, onExit: () -> Unit, modifier: Mo
                         }
                     }
                 }
-                if (!details.plot.isNullOrBlank()) {
+                if (!plot.isNullOrBlank()) {
                     DetailsLabel(stringResource(R.string.content_media_overview))
-                    Text(details.plot, style = stageText(21, 400).copy(lineHeight = (21 * 1.55f).mpxSp), color = StageColors.ItemText, modifier = Modifier.widthIn(max = 1300.mpx))
+                    Text(plot, style = stageText(21, 400).copy(lineHeight = (21 * 1.55f).mpxSp), color = StageColors.ItemText, modifier = Modifier.widthIn(max = 1300.mpx))
                 }
                 if (details.cast.isNotEmpty()) {
                     DetailsLabel(stringResource(R.string.content_media_cast))

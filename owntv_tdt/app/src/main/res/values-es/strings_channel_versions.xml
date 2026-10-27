@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_channel_version">Fuente / Calidad</string>
+    <string name="player_channel_version_auto">Automática · Primero TDT, después IPTV</string>
+    <string name="player_channel_version_tdt">TDT</string>
+    <string name="player_channel_version_iptv">IPTV</string>
+    <string name="player_channel_version_unknown">Calidad sin indicar</string>
+    <string name="player_channel_version_label">%1$s · %2$s — %3$s (%4$s)</string>
+</resources>

@@ -537,7 +537,7 @@ open class StalkerClient(okHttpClient: OkHttpClient) {
             poster = (f["screenshot_uri"] ?: f["poster"] ?: f["cover"])?.takeIf { it.isNotBlank() && it != "0" },
             year = parseYear(f["year"]),
             plot = f["description"]?.takeIf { it.isNotBlank() },
-            rating = (f["rating_imdb"] ?: f["rating"])?.trim()?.toDoubleOrNull()?.takeIf { it > 0 },
+            rating = f["rating"]?.trim()?.toDoubleOrNull()?.takeIf { it > 0 },
             categoryId = (f["category_id"] ?: f["category"])?.takeIf { it.isNotBlank() && it != "*" },
             addedAt = parseAddedAt(f["added"]),
         )

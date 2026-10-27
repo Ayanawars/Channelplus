@@ -1171,6 +1171,8 @@ private fun buildSeriesDetails(
     val metaLine = listOfNotNull(year?.let { localizedInteger(it, grouping = false) }, rating?.let { stringResource(R.string.content_rating, it) }).joinToString(stringResource(R.string.content_metadata_separator))
     return tv.own.owntv.features.shell.components.MediaDetailsUi(
         title = s.name,
+        tmdbId = meta?.tmdbId,
+        metadataType = tv.own.owntv.core.metadata.MetadataType.TV,
         backdropUrl = backdrop,
         logoUrl = tv.own.owntv.core.metadata.MetadataImages.logo(meta?.logoPath),
         posterUrl = poster,

@@ -145,7 +145,13 @@ internal fun LiveStageRow(
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
     trailing: (@Composable () -> Unit)? = null,
+    compact: Boolean = false,
 ) {
+    if (compact) {
+        LiveDrawerRow(channel, name.name, now?.title ?: nowTitle, isFavorite, showNumber,
+            onFocus, onClick, onLongClick, modifier)
+        return
+    }
     StageRow(
         onClick = onClick,
         onLongClick = onLongClick,
@@ -249,6 +255,7 @@ internal fun LiveStagePane(
     onBackToList: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val external = tv.own.owntv.ui.metadata.rememberExternalMetadata(nowNext?.now?.title, nowNext?.nowDetails)
     val previewState by previewEngine.state.collectAsStateWithLifecycle()
     val streamChips by previewEngine.streamChips.collectAsStateWithLifecycle()
     val playing = showVideo && previewState != tv.own.owntv.player.LivePreviewEngine.State.ERROR &&
@@ -313,6 +320,7 @@ internal fun LiveStagePane(
         Column(Modifier.fillMaxWidth().padding(start = 4.mpx, end = 4.mpx, top = 34.mpx)) {
             if (now != null) {
                 Text(now.title, style = stageText(42, 800, (-0.5).mpxSp), color = StageColors.Text, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                tv.own.owntv.ui.metadata.ExternalMetadataBadges(external)
                 Text(
                     detailsLine(now, nowNext.nowDetails),
                     style = stageText(19, 400), color = StageColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis,
@@ -322,7 +330,7 @@ internal fun LiveStagePane(
                     StageProgress(progressOf(now), Modifier.weight(1f))
                     Text(timeLeftText(minutesLeft(now)), style = stageText(17, 400).copy(fontFeatureSettings = Tabular), color = StageColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
-                now.description?.takeIf { it.isNotBlank() }?.let {
+                (now.description?.takeIf { it.isNotBlank() } ?: external?.tvdbOverview)?.let {
                     Text(
                         it, style = stageText(19, 400).copy(lineHeight = (19 * 1.55f).mpxSp), color = stageTone(Color(0xFFCCD6D2), StageColors.Body),
                         maxLines = 3, overflow = TextOverflow.Ellipsis,

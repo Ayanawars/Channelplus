@@ -36,7 +36,9 @@ fun livePagingSource(
     val playlist = sort == SettingsRepository.SortMode.PLAYLIST
     return if (query.isBlank()) {
         when (key) {
-            LiveKey.All -> if (playlist) channelDao.pagingAllOriginal(ids) else channelDao.pagingAll(ids)
+            LiveKey.All -> if (hasManualOrder(ContentOrderEntity.ALL_CHANNELS_CONTEXT))
+                channelDao.pagingAllManual(ids, profileId, ContentOrderEntity.ALL_CHANNELS_CONTEXT)
+                else if (playlist) channelDao.pagingAllOriginal(ids) else channelDao.pagingAll(ids)
             LiveKey.Favorites -> channelDao.pagingFavoritesManual(profileId, ContentOrderEntity.FAV_CONTEXT, ids)
             LiveKey.History -> channelDao.pagingHistory(profileId, ids)
             LiveKey.Catchup -> if (playlist) channelDao.pagingCatchupOriginal(ids) else channelDao.pagingCatchup(ids)

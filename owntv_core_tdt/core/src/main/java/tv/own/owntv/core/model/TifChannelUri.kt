@@ -5,8 +5,8 @@ import java.net.URLDecoder
 import java.net.URLEncoder
 
 /** References a channel owned by Android's TV Provider; never a network stream. */
-data class TifChannelUri(val inputId: String, val channelId: Long) {
-    fun encode(): String = "owntv-tif://channel?input=${URLEncoder.encode(inputId, "UTF-8")}&id=$channelId"
+data class TifChannelUri(val inputId: String, val channelId: Long, val videoHeight: Int? = null) {
+    fun encode(): String = "owntv-tif://channel?input=${URLEncoder.encode(inputId, "UTF-8")}&id=$channelId" + (videoHeight?.let { "&height=$it" } ?: "")
     companion object {
         fun parse(value: String): TifChannelUri? = runCatching {
             val uri = URI(value)
@@ -17,7 +17,8 @@ data class TifChannelUri(val inputId: String, val channelId: Long) {
             val input = fields["input"] ?: return null
             val id = fields["id"]?.toLongOrNull() ?: return null
             if (id < 0 || input.length !in 3..512 || !input.contains('/') || input.any { it.isISOControl() }) return null
-            TifChannelUri(input, id)
+            val height = fields["height"]?.toIntOrNull()?.takeIf { it in setOf(480, 576, 720, 1080, 2160, 4320) }
+            TifChannelUri(input, id, height)
         }.getOrNull()
     }
 }

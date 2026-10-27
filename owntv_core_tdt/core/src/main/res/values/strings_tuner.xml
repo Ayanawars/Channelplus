@@ -8,7 +8,7 @@
     <string name="tuner_channel_name">Channel %1$d</string>
     <string name="tuner_unknown_programme">No programme information</string>
     <string name="tuner_source_missing">The antenna source is unavailable</string>
-    <string name="tuner_pause_unsupported">Pausing terrestrial TV is unavailable in this version</string>
+    <string name="tuner_pause_unsupported">The TV tuner has not made timeshift available for this channel</string>
     <string name="tuner_signal_missing">No antenna signal</string>
     <string name="tuner_connection_failed">Could not connect to the tuner</string>
     <string name="tuner_disconnected">The tuner disconnected</string>

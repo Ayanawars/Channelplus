@@ -127,6 +127,9 @@ val dataModule = module {
     }
     // provider, metadataDao, settings, overrideStore — the on-demand resolve + cache orchestrator.
     single { tv.own.owntv.core.metadata.MetadataRepository(get(), get(), get(), get(), get()) }
+    single { tv.own.owntv.core.metadata.ExternalMetadataStore(androidContext()) }
+    single { tv.own.owntv.core.metadata.ExternalMetadataClient(get()) }
+    single { tv.own.owntv.core.metadata.ExternalMetadataRepository(androidContext(), get(), get(), get(), get(), get()) }
     single { tv.own.owntv.core.metadata.OriginalLanguageLookup(get(), get(), get()) }
     // Gates the TMDB Trending download to once every 5–8 days per playlist and holds the shared
     // candidate list; deliberately DataStore, not Room (derived state, no migration, no backup).

@@ -458,6 +458,7 @@ internal const val LIVE_SCRUB_STEP_SEC = 60     // per Left/Right press (hold to
 @Composable
 internal fun LiveTimelineBar(
     offsetSec: Int,
+    windowSec: Int = LIVE_WINDOW_SEC,
     programmes: List<LiveProgramme>,
     liveEdgeMs: Long,
     onScrub: (Int) -> Unit,
@@ -467,10 +468,10 @@ internal fun LiveTimelineBar(
 ) {
     val interaction = remember { MutableInteractionSource() }
     val focused by interaction.collectIsFocusedAsState()
-    val frac = offsetFrac(offsetSec) // 1 = live edge, 0 = far edge
+    val frac = offsetFrac(offsetSec, windowSec) // 1 = live edge, 0 = far edge
     // Keyed on the minute, not the raw instant: the live edge advances every second, and no tick on a
     // two-hour bar can move visibly in less than that.
-    val ticks = remember(programmes, liveEdgeMs / 60_000L) { liveTicks(programmes, liveEdgeMs) }
+    val ticks = remember(programmes, liveEdgeMs / 60_000L, windowSec) { liveTicks(programmes, liveEdgeMs, windowSec) }
     val here = remember(programmes, liveEdgeMs / 60_000L, offsetSec) { programmeAt(programmes, liveEdgeMs, offsetSec) }
     val clock = rememberSystemTimeFormatter()
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
@@ -493,7 +494,7 @@ internal fun LiveTimelineBar(
         }
         // Where the saved copy has no picture (the connection dropped): dark, so a jump over it is
         // expected rather than a surprise. Read here, where the bar redraws with the ticking offset.
-        liveGapSpans(gaps(), liveEdgeMs).forEach { span ->
+        liveGapSpans(gaps(), liveEdgeMs, windowSec).forEach { span ->
             Box(Modifier.fillMaxWidth(span.endFrac), contentAlignment = Alignment.CenterEnd) {
                 Box(
                     Modifier.fillMaxWidth((span.endFrac - span.startFrac) / span.endFrac)
@@ -508,7 +509,7 @@ internal fun LiveTimelineBar(
         // the boundary and hanging the tick off that box's end, the same placement [Playhead] uses.
         // Matched on position, not on title: a channel that runs the same show twice inside the window
         // would otherwise light up both of its boundaries.
-        val hereStartFrac = here?.let { offsetFrac(((liveEdgeMs - it.startMs) / 1000L).toInt()) }
+        val hereStartFrac = here?.let { offsetFrac(((liveEdgeMs - it.startMs) / 1000L).toInt(), windowSec) }
         ticks.forEach { tick ->
             if (tick.startFrac <= 0f || tick.startFrac >= 1f) return@forEach
             val current = tick.startFrac == hereStartFrac

@@ -886,6 +886,9 @@ class SettingsViewModel(
 
     val appIcon: StateFlow<AppIcon> = settings.appIcon.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AppIcon.DEFAULT)
     fun setAppIcon(icon: AppIcon) { viewModelScope.launch { settings.setAppIcon(icon) } }
+
+    val piconStyle = settings.piconStyle.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.owntv.core.epg.PiconStyle.ORIGINAL)
+    fun setPiconStyle(style: tv.own.owntv.core.epg.PiconStyle) { viewModelScope.launch { settings.setPiconStyle(style) } }
     val brandAccentTriangle: StateFlow<Boolean> = settings.brandAccentTriangle.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
     fun setBrandAccentTriangle(on: Boolean) { viewModelScope.launch { settings.setBrandAccentTriangle(on) } }
 
@@ -970,6 +973,10 @@ class SettingsViewModel(
     val vodLayout: StateFlow<tv.own.owntv.core.settings.SettingsRepository.VodLayout> =
         settings.vodLayout.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.owntv.core.settings.SettingsRepository.VodLayout.SEPARATE)
     fun setVodLayout(layout: tv.own.owntv.core.settings.SettingsRepository.VodLayout) { viewModelScope.launch { settings.setVodLayout(layout) } }
+    val liveHudSizePercent = settings.liveHudSizePercent
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 70)
+    fun setLiveHudSizePercent(value: Int) { viewModelScope.launch { settings.setLiveHudSizePercent(value) } }
+
     val liveLayout: StateFlow<tv.own.owntv.core.settings.SettingsRepository.LiveLayout> =
         settings.liveLayout.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tv.own.owntv.core.settings.SettingsRepository.LiveLayout.STAGE)
     fun setLiveLayout(layout: tv.own.owntv.core.settings.SettingsRepository.LiveLayout) { viewModelScope.launch { settings.setLiveLayout(layout) } }

@@ -10,6 +10,7 @@ import tv.own.owntv.features.more.MoreCountsViewModel
 import tv.own.owntv.features.shell.RailCountsViewModel
 import org.koin.dsl.module
 import tv.own.owntv.features.customize.CustomizeItemsViewModel
+import tv.own.owntv.features.customize.ChannelEditorViewModel
 import tv.own.owntv.features.customize.CustomizeViewModel
 import tv.own.owntv.features.downloads.DownloadsViewModel
 import tv.own.owntv.features.recordings.RecordingsViewModel
@@ -161,6 +162,7 @@ val appModule = module {
     viewModelOf(::EpgViewModel)
     viewModelOf(::CustomizeViewModel)
     viewModelOf(::CustomizeItemsViewModel)
+    viewModelOf(::ChannelEditorViewModel)
     viewModelOf(::BackupViewModel)
     viewModelOf(::EpgSourcesViewModel)
     // The counts the More rows and the Favourites / History tabs carry.

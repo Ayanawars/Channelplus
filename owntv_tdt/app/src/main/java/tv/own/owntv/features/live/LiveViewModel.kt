@@ -2,6 +2,8 @@
 
 package tv.own.owntv.features.live
 
+import tv.own.owntv.core.live.ChannelVariants
+import tv.own.owntv.player.PlaybackFailure
 import tv.own.owntv.core.epg.displayLogoUrl
 import android.content.Context
 import android.util.Log
@@ -25,6 +27,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -411,7 +414,15 @@ class LiveViewModel(
     /** "Watching" clock: the wall-clock instant actually on screen. During archive playback the HUD
      *  clock alone is misleading — it reads 10:00 while the picture is yesterday at 13:00. Null
      *  whenever the picture IS the present (live edge, or a movie/episode). */
-    val watchingWallMs: StateFlow<Long?> = timeshift.watchingWallMs
+    private val tunerTiming: StateFlow<Pair<tv.own.owntv.player.TunerTimeshiftState, Long>?> = combine(
+        previewEngine.tvInputActive, previewEngine.tunerTimeshift,
+        flow { while (true) { emit(System.currentTimeMillis()); delay(1_000) } },
+    ) { active, shift, now -> if (active) shift to now else null }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    val watchingWallMs: StateFlow<Long?> = combine(timeshift.watchingWallMs, tunerTiming) { archive, tuner ->
+        if (tuner == null) archive else tuner.first.currentMs.takeIf { tuner.first.offsetSec(tuner.second) != null }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
 
     /** Now/next for the focused channel, fetched (debounced) — each answer with the id of the channel it
@@ -419,8 +430,18 @@ class LiveViewModel(
     private val keyedNowNext: StateFlow<Pair<Long?, EpgNowNext?>> = combine(_previewChannel, epgRefresh) { ch, tick -> ch to tick }
         .debounce(350)
         .distinctUntilChanged { a, b -> a.first?.id == b.first?.id && a.second == b.second }
-        .mapLatest { (ch, _) -> ch?.id to ch?.let { epgReader.nowNext(it, custom.value, epgOffset.value) } }
+        .mapLatest { (ch, _) -> ch?.id to ch?.let { stationNowNext(it) } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null to null)
+
+    private suspend fun stationNowNext(channel: ChannelEntity): EpgNowNext? {
+        val own = epgReader.nowNext(channel, custom.value, epgOffset.value)
+        if (own?.now != null || own?.next != null) return own
+        for (alternative in versionsFor(channel).filter { it.id != channel.id }) {
+            val guide = epgReader.nowNext(alternative, custom.value, epgOffset.value)
+            if (guide?.now != null || guide?.next != null) return guide
+        }
+        return own
+    }
 
     val nowNext: StateFlow<EpgNowNext?> = keyedNowNext.map { it.second }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
@@ -578,6 +599,117 @@ class LiveViewModel(
     private val custResolved: StateFlow<CustState> = combine(custom, hiddenCategoryIds) { c, h -> CustState(c, h) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CustState(SectionCustomizations(), emptySet()))
 
+    private data class VariantCatalogue(
+        val profileId: Long = -1, val sourceIds: List<Long> = emptyList(),
+        val byId: Map<Long, ChannelEntity> = emptyMap(),
+        val groups: Map<String, List<ChannelEntity>> = emptyMap(),
+    )
+    private val variantCatalogue: StateFlow<VariantCatalogue> = ctx.flatMapLatest { c ->
+        if (c.profileId < 0) flowOf(VariantCatalogue()) else
+            combine(channelDao.observeVariantChannels(c.sourceIds.ifEmpty { listOf(-1L) }), custResolved) { rows, cs ->
+                withContext(Dispatchers.Default) {
+                    val visible = rows.filter { ch ->
+                        CustomizeKeys.channel(ch) !in cs.cust.hiddenItems &&
+                            (ch.categoryId == null || ch.categoryId !in cs.hiddenCats)
+                    }
+                    VariantCatalogue(c.profileId, c.sourceIds, visible.associateBy { it.id },
+                        visible.groupBy(ChannelVariants::key).mapValues { it.value.sortedWith(ChannelVariants.preference) })
+                }
+            }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, VariantCatalogue())
+
+    private val _channelVersions = MutableStateFlow<List<ChannelEntity>>(emptyList())
+    val channelVersions: StateFlow<List<ChannelEntity>> = _channelVersions.asStateFlow()
+    private val _automaticVersion = MutableStateFlow(true)
+    val automaticVersion: StateFlow<Boolean> = _automaticVersion.asStateFlow()
+    private var versionWatchJob: Job? = null
+    private var versionSession = 0L
+    private var versionStation: ChannelEntity? = null
+    private val attemptedVersions = mutableSetOf<Long>()
+
+    private fun tunerIsShifted(): Boolean = previewEngine.tvInputActive.value &&
+        previewEngine.tunerTimeshift.value.offsetSec(System.currentTimeMillis()) != null
+
+    /** A manual selection is kept for this viewing session; a new channel starts in Automatic. */
+    fun selectChannelVersion(id: Long?) {
+        val station = versionStation ?: return
+        if (_catchupActive.value || timeshift.isRewound || tunerIsShifted()) return
+        _automaticVersion.value = id == null
+        attemptedVersions.clear()
+        val chosen = if (id == null) _channelVersions.value.firstOrNull()
+            else _channelVersions.value.firstOrNull { it.id == id }
+        if (chosen != null) live.launch {
+            val fresh = versionsFor(station)
+            _channelVersions.value = fresh
+            fresh.firstOrNull { it.id == chosen.id }?.let { playVersion(it, station) }
+        }
+    }
+
+    private suspend fun versionsFor(channel: ChannelEntity): List<ChannelEntity> {
+        val c = ctx.value
+        val catalogue = variantCatalogue.first { it.profileId == c.profileId && it.sourceIds == c.sourceIds }
+        // Resolve from the original row: a profile rename must not change station identity.
+        val original = catalogue.byId[channel.id] ?: return emptyList()
+        return catalogue.groups[ChannelVariants.key(original)].orEmpty()
+    }
+
+    private suspend fun advanceVersion(channel: ChannelEntity, session: Long) {
+        if (session != versionSession || _previewChannel.value?.id != channel.id ||
+            !_automaticVersion.value || _catchupActive.value || timeshift.isRewound || tunerIsShifted()) return
+        val available = versionsFor(versionStation ?: channel)
+        if (session != versionSession || !_automaticVersion.value) return
+        _channelVersions.value = available
+        val next = available.firstOrNull { it.id !in attemptedVersions } ?: return
+        val station = versionStation ?: channel
+        live.launch { playVersion(next, station) }
+    }
+
+    private fun watchVersion(channel: ChannelEntity, session: Long) {
+        versionWatchJob?.cancel()
+        versionWatchJob = viewModelScope.launch {
+            kotlinx.coroutines.coroutineScope {
+                launch {
+                    combine(live.liveOnExo, previewEngine.error, player.error) { exo, exoError, mpvError ->
+                        if (exo) exoError else mpvError
+                    }.collectLatest { failure ->
+                        if (failure == null) return@collectLatest
+                        // Existing engine recovery gets the first opportunity to restore this source.
+                        delay(3_000)
+                        val activeError = if (live.liveOnExo.value) previewEngine.error.value else player.error.value
+                        if (activeError != failure) return@collectLatest
+                        if (failure is PlaybackFailure.Raw && failure.message ==
+                            appContext.getString(tv.own.owntv.core.R.string.tuner_parental_block)) return@collectLatest
+                        advanceVersion(channel, session)
+                    }
+                }
+                if (ChannelVariants.isTdt(channel)) launch {
+                    previewEngine.isPlaying.collectLatest { playing ->
+                        if (playing) return@collectLatest
+                        delay(15_000)
+                        if (!previewEngine.isPlaying.value && previewEngine.error.value == null && !tunerIsShifted())
+                            advanceVersion(channel, session)
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun playVersion(channel: ChannelEntity, station: ChannelEntity) {
+        val pid = currentProfileId() ?: return
+        if (channel.sourceId !in ctx.value.sourceIds || !tv.own.owntv.core.content.AdultCategoryClassifier.allows(
+                pid, channel.categoryId, profileDao, categoryDao)) return
+        versionWatchJob?.cancel()
+        val session = ++versionSession
+        attemptedVersions += channel.id
+        versionStation = station
+        _previewChannel.value = channel
+        clearTimeshift()
+        _catchupActive.value = false
+        live.start(channel, getSource(channel.sourceId))
+        recordLiveHistory(channel)
+        watchVersion(channel, session)
+    }
+
     val railItems: StateFlow<List<LiveRailItem>> = ctx
         .flatMapLatest { c ->
             if (c.profileId < 0) flowOf(defaultRail)
@@ -629,22 +761,17 @@ class LiveViewModel(
             // that the UI already collected must never be re-transformed (Paging forbids re-collection,
             // which is why hiding a channel used to crash). A customization change re-creates the pager.
             Pager(PagingConfig(pageSize = 80, prefetchDistance = 40, initialLoadSize = 120, maxSize = 400)) {
-                pagingSource(key, c, query, sort)
-            }.flow.map { paging ->
-                val cust = cs.cust
-                val hiddenCats = cs.hiddenCats
-                val movedFrom = cust.movedFromOrigin
-                if (cust.hiddenItems.isEmpty() && cust.itemNames.isEmpty() && hiddenCats.isEmpty() && movedFrom.isEmpty()) paging
-                else paging
-                    .filter { ch ->
-                        isChannelVisible(ch, cust, hiddenCats, key) &&
-                            // Moved-out items leave ONLY their origin folder (they stay in All/search).
-                            (movedFrom[CustomizeKeys.channel(ch)]?.let { origin ->
+                GroupedChannelPagingSource(
+                    original = pagingSource(key, c, query, sort),
+                    visible = { ch ->
+                        isChannelVisible(ch, cs.cust, cs.hiddenCats, key) &&
+                            (cs.cust.movedFromOrigin[CustomizeKeys.channel(ch)]?.let { origin ->
                                 key !is LiveKey.Folder || origin != folderContextKeys.value[key.id]
                             } ?: true)
-                    }
-                    .map { ch -> cust.itemNames[CustomizeKeys.channel(ch)]?.let { ch.copy(name = it) } ?: ch }
-            }
+                    },
+                    rename = { ch -> cs.cust.itemNames[CustomizeKeys.channel(ch)]?.let { ch.copy(name = it) } ?: ch },
+                )
+            }.flow
         }
         .cachedIn(viewModelScope)
 
@@ -1038,7 +1165,8 @@ class LiveViewModel(
     // they apply are shared with the browse lists and belong beside them.
     private val zapList = LiveZapList(
         scope = viewModelScope,
-        playingChannelId = { _previewChannel.value?.id },
+        playingChannelId = { versionStation?.id ?: _previewChannel.value?.id },
+        playingStationKey = { (versionStation ?: _previewChannel.value)?.let(ChannelVariants::key) },
         loadForChannel = ::channelsAroundChannel,
         loadForCategory = ::channelsInCategory,
         loadWindowAround = ::buildZapList,
@@ -1094,7 +1222,7 @@ class LiveViewModel(
             when (key) {
                 LiveKey.Favorites -> channelDao.snapshotFavoritesManual(c.profileId, ContentOrderEntity.FAV_CONTEXT, sources, ZAP_LIST_LIMIT)
                 LiveKey.Catchup -> channelDao.snapshotCatchup(sources, ZAP_LIST_LIMIT)
-                else -> channelDao.snapshotAll(sources, ZAP_LIST_LIMIT)
+                else -> channelDao.snapshotAllManual(sources, c.profileId, ContentOrderEntity.ALL_CHANNELS_CONTEXT, ZAP_LIST_LIMIT)
             }
         }
         val cust = custom.value
@@ -1133,7 +1261,7 @@ class LiveViewModel(
                 channelDao.snapshotByCategoryManual(catId, pid, folderContextKeys.value[catId] ?: "", ZAP_LIST_LIMIT)
             } else {
                 // No category on this row (hand-made M3U entries) — fall back to All Channels.
-                channelDao.snapshotAll(ctx.value.sourceIds.ifEmpty { listOf(-1L) }, ZAP_LIST_LIMIT)
+                channelDao.snapshotAllManual(ctx.value.sourceIds.ifEmpty { listOf(-1L) }, pid ?: return@withContext emptyList(), ContentOrderEntity.ALL_CHANNELS_CONTEXT, ZAP_LIST_LIMIT)
             }
         }
         val cust = custom.value
@@ -1151,6 +1279,7 @@ class LiveViewModel(
         val hiddenCats = hiddenCategoryIds.value
         return channelDao.recentlyWatchedWithTimestamp(pid, limit).first()
             .filter { (ch) -> CustomizeKeys.channel(ch) !in cust.hiddenItems && (ch.categoryId == null || ch.categoryId !in hiddenCats) }
+            .distinctBy { ChannelVariants.key(it.channel) }
             .map { e -> cust.itemNames[CustomizeKeys.channel(e.channel)]?.let { e.copy(channel = e.channel.copy(name = it)) } ?: e }
     }
 
@@ -1188,6 +1317,8 @@ class LiveViewModel(
      *  pane may re-take the engine (and re-apply the preview mute) on the next focus. Keeps the stream
      *  playing (no stop) — just clears the flag so [playPreview] works again. */
     fun onFullscreenExited() {
+        versionWatchJob?.cancel()
+        ++versionSession
         live.detach() // the stream stays; its watchers and the give-up alarm stand down
         // Leaving full-screen ends the rewind: the archive stream is torn down with the player, and the
         // 1 Hz "behind live" ticker would otherwise keep running against nothing for the rest of the session.
@@ -1200,6 +1331,8 @@ class LiveViewModel(
     }
 
     fun clearLiveOnExo() {
+        versionWatchJob?.cancel()
+        ++versionSession
         // A live tune still in flight would otherwise start over whatever takes mpv now.
         live.cancelTune()
         live.releaseForArchive()
@@ -1411,7 +1544,7 @@ class LiveViewModel(
             if (tuned.id == currentChannel.id) {
                 return tv.own.owntv.player.DirectTuneResult.Found(
                     tv.own.owntv.player.DirectTuneChannelInfo(
-                        tuned.number, tuned.name, tuned.logoUrl, restarted = false,
+                        tuned.number, tuned.name, tuned.displayLogoUrl, restarted = false,
                     ),
                 )
             }
@@ -1421,7 +1554,7 @@ class LiveViewModel(
 
             return tv.own.owntv.player.DirectTuneResult.Found(
                 tv.own.owntv.player.DirectTuneChannelInfo(
-                    tuned.number, tuned.name, tuned.logoUrl, restarted = true,
+                    tuned.number, tuned.name, tuned.displayLogoUrl, restarted = true,
                 ),
             )
         } catch (e: kotlinx.coroutines.CancellationException) {
@@ -1511,6 +1644,8 @@ class LiveViewModel(
 
     /** [ensurePlaying] without forgetting the zap press: the tune a CH+/- step opens, timed from that press. */
     private fun startTune(channel: ChannelEntity) {
+        versionWatchJob?.cancel()
+        ++versionSession
         zapList.cancelPendingRebuild()
         // A deliberate pick supersedes a CH+/- step still waiting out its delay — otherwise the deferred
         // tune would land half a second later and drag the user off the channel they just chose.
@@ -1538,17 +1673,19 @@ class LiveViewModel(
         // A protected channel stays in-app whatever this setting says: no standard intent extra
         // carries a licence URL, so the external player would open it and fail immediately.
         if (externalPlayerOn.value && channel.drmConfig == null) { playExternal(channel); return }
-        _previewChannel.value = channel
-        clearTimeshift() // normal live = not timeshifted
-        _catchupActive.value = false // tuning live ends any archive playback the HUD was showing
-        // Core routes it (DRM, the pin, a learned panel refusal, the playlist, the setting), arms the
-        // ladder and starts the engine — the same code the phone runs.
-        live.start(channel, getSource(channel.sourceId))
-        recordLiveHistory(channel)
+        versionWatchJob?.cancel()
+        ++versionSession
+        _automaticVersion.value = true
+        attemptedVersions.clear()
+        val versions = versionsFor(channel)
+        _channelVersions.value = versions
+        versionStation = channel
+        playVersion(versions.firstOrNull() ?: channel, channel)
     }
 
     /** HUD "compatibility mode" toggle: flip the current channel's engine and pin the choice. */
     fun toggleForceMpv() {
+        if (previewEngine.tvInputActive.value) return
         // A catch-up archive is loaded, not the live stream: re-tuning here would replace the programme
         // the user is watching with the channel's CURRENT one. The HUD hides the toggle then too.
         if (_catchupActive.value) return
@@ -1772,12 +1909,17 @@ class LiveViewModel(
     // it on screen, and the HUD-facing wrappers that add the channel currently being previewed.
 
     /** How far behind live the picture is. Null at the live edge. */
-    val timeshiftOffsetSec: StateFlow<Int?> = timeshift.offsetSec
+    val timeshiftOffsetSec: StateFlow<Int?> = combine(timeshift.offsetSec, tunerTiming) { archive, tuner ->
+        if (tuner == null) archive else tuner.first.offsetSec(tuner.second)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** True when the channel on screen records an archive, or is saved on this device — the HUD
      *  then offers "Rewind" on live. */
     val canRewindLive: StateFlow<Boolean> =
-        combine(_previewChannel, live.localTimeshift) { ch, copy -> ch?.catchup == true || (ch != null && copy != null) }
+        combine(_previewChannel, live.localTimeshift, tunerTiming) { ch, copy, tuner ->
+            if (tuner != null) ch != null && tuner.first.canSeek(tuner.second)
+            else ch?.catchup == true || (ch != null && copy != null)
+        }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
     /** The user came back to a channel whose copy was kept: where they were, for "Resume from
@@ -1852,6 +1994,7 @@ class LiveViewModel(
      *  scrubber). */
     fun scrubLive(deltaSec: Int) {
         val ch = _previewChannel.value ?: return
+        if (previewEngine.tvInputActive.value) { previewEngine.seekTunerBy(deltaSec); return }
         timeshift.scrub(ch, deltaSec)
     }
 
@@ -1861,6 +2004,7 @@ class LiveViewModel(
 
     /** Jump back to the real-time live edge (back on the fast ExoPlayer engine). */
     fun goToLive() {
+        if (previewEngine.tvInputActive.value) { previewEngine.goToTunerLive(); return }
         clearTimeshift()
         _previewChannel.value?.let { ensurePlaying(it) }
     }
@@ -1914,6 +2058,10 @@ class LiveViewModel(
     }
 
     fun stopPreview() {
+        versionWatchJob?.cancel()
+        ++versionSession
+        versionStation = null
+        _channelVersions.value = emptyList()
         live.stop() // both engines, every watcher and the give-up alarm, and the reconnect link
         _previewChannel.value = null
     }

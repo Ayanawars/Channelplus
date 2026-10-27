@@ -439,3 +439,34 @@ private fun OptionRow(label: String, selected: Boolean, modifier: Modifier = Mod
 private fun ActionRow(label: String, icon: OwnTVIcon, onClick: () -> Unit) {
     tv.own.owntv.ui.stage.StagePopupOption(title = label, onClick = onClick, leading = { tv.own.owntv.ui.stage.StagePopupIcon(icon) })
 }
+
+/** Station sources, separate from adaptive video tracks in QualityDialog. */
+@Composable
+internal fun ChannelVersionDialog(
+    versions: List<tv.own.owntv.core.database.entity.ChannelEntity>, sourceNames: Map<Long, String>, automatic: Boolean,
+    selectedId: Long?, onSelect: (Long?) -> Unit, onDismiss: () -> Unit,
+) {
+    val focus = remember { FocusRequester() }
+    val state = androidx.compose.foundation.lazy.rememberLazyListState()
+    val selectedIndex = if (automatic) 0 else (versions.indexOfFirst { it.id == selectedId } + 1).coerceAtLeast(0)
+    LaunchedEffect(selectedIndex, versions.size) {
+        state.scrollToItem(selectedIndex)
+        requestFocusRetrying(focus)
+    }
+    BackHandler { onDismiss() }
+    DialogScaffold(title = stringResource(R.string.player_channel_version), onDismiss = onDismiss, state = state) {
+        items(versions.size + 1) { index ->
+            val channel = versions.getOrNull(index - 1)
+            val label = if (channel == null) stringResource(R.string.player_channel_version_auto) else {
+                val source = stringResource(if (tv.own.owntv.core.live.ChannelVariants.isTdt(channel))
+                    R.string.player_channel_version_tdt else R.string.player_channel_version_iptv)
+                val quality = tv.own.owntv.core.live.ChannelVariants.qualityLabel(channel)
+                    ?: stringResource(R.string.player_channel_version_unknown)
+                stringResource(R.string.player_channel_version_label, source, quality, channel.name, sourceNames[channel.sourceId].orEmpty())
+            }
+            OptionRow(label = label, selected = index == selectedIndex,
+                modifier = if (index == selectedIndex) Modifier.focusRequester(focus) else Modifier,
+                onClick = { onSelect(channel?.id) })
+        }
+    }
+}

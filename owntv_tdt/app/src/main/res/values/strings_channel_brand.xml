@@ -1,4 +1,5 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<string name="channel_brand_name" translatable="false">Channel +</string>
 <string name="update_ready">Channel + v<xliff:g id="available">%1$s</xliff:g> is ready (you have v<xliff:g id="current">%2$s</xliff:g>).</string>
 <string name="recovery_title">Channel + could not open its database</string>
 <string name="settings_recording_timers_inexact">This device does not allow Channel + to set exact alarms, so a recording may begin a few minutes late. Recordings start earlier to make up for it.</string>

@@ -145,6 +145,9 @@ fun MetadataSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     var confirmClearAdvanced by remember { mutableStateOf(false) }
     var showModePicker by remember { mutableStateOf(false) }
     var showRemoteHandover by remember { mutableStateOf(false) }
+    var showExternal by remember { mutableStateOf(false) }
+    var externalWasOpen by remember { mutableStateOf(false) }
+    val externalFocus = remember { FocusRequester() }
     LaunchedEffect(storedKey, storedUrl) {
         if (!seeded) {
             key = storedKey; url = storedUrl
@@ -174,7 +177,7 @@ fun MetadataSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     val back = stringResource(R.string.common_back)
     val content = stringResource(R.string.settings_group_content_metadata)
     val modeLabels = tv.own.owntv.core.metadata.MetadataMode.entries.map { stringResource(metadataModeLabelRes(it)) }
-    val rows = if (mode.enrich) 4 else 1
+    val rows = if (mode.enrich) 5 else 2
     StageFullPage(
         parents = listOf(content),
         title = stringResource(R.string.settings_metadata),
@@ -268,6 +271,8 @@ fun MetadataSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
             )
         }
 
+        ExternalMetadataSettingRow(onClick = { showExternal = true }, modifier = Modifier.focusRequester(externalFocus))
+
         // TMDB attribution — logo + line, required by TMDB's API terms.
         Column(Modifier.padding(start = 22.mpx, top = 28.mpx)) {
             androidx.compose.foundation.Image(
@@ -280,6 +285,16 @@ fun MetadataSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                 color = StageColors.Muted,
                 modifier = Modifier.padding(top = 8.mpx),
             )
+        }
+    }
+
+    if (showExternal) ExternalMetadataPopup(onDismiss = { showExternal = false })
+    LaunchedEffect(showExternal) {
+        if (showExternal) externalWasOpen = true
+        else if (externalWasOpen) {
+            externalWasOpen = false
+            kotlinx.coroutines.delay(80)
+            runCatching { externalFocus.requestFocus() }
         }
     }
 

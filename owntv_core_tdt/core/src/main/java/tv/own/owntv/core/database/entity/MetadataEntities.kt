@@ -21,7 +21,7 @@ import androidx.room.PrimaryKey
 data class MetadataCacheEntity(
     @PrimaryKey val key: String,
     val tmdbId: Int,
-    val imdbId: String?,      // the id Trakt sync will need
+    val imdbId: String?,      // legacy nullable column retained for database compatibility; no longer populated
     val type: String,         // movie | tv | episode
     val title: String,
     val year: Int?,

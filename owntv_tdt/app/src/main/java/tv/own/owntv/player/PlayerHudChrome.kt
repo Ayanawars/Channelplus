@@ -30,6 +30,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -163,7 +165,7 @@ internal fun TopBar(
 
 /** The channel logo tile, falling back to the first letters of the channel name. */
 @Composable
-private fun ChannelLogo(logoUrl: String?, title: String?, size: Int, modifier: Modifier = Modifier) {
+internal fun ChannelLogo(logoUrl: String?, title: String?, size: Int, modifier: Modifier = Modifier) {
     Box(
         modifier.size(size.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFF004F46)),
         contentAlignment = Alignment.Center,
@@ -330,6 +332,13 @@ internal fun BottomBar(
     favorite: Boolean = false, onToggleFavorite: (() -> Unit)? = null,
     onPreviousChannel: (() -> Unit)? = null,
     onOtherChannels: (() -> Unit)? = null, otherChannelsCount: Int = 0,
+    onChannelVersion: (() -> Unit)? = null,
+    channelVersionLabel: String? = null,
+    primaryFocus: FocusRequester? = null,
+    toolsExpanded: Boolean = false,
+    onToolsExpandedChange: (Boolean) -> Unit = {},
+    liveInfo: (@Composable () -> Unit)? = null,
+    liveMatch: (@Composable () -> Unit)? = null,
     onOpenDialog: (HudDialog) -> Unit, onPip: (() -> Unit)?, onAudioMode: (() -> Unit)?,
     onMultiview: (() -> Unit)? = null, onRecordThis: (() -> Unit)? = null, recordingThis: Boolean = false,
     /** Given to whichever timeline is drawn, so Left/Right with the controls hidden can land on it. */
@@ -338,10 +347,29 @@ internal fun BottomBar(
 ) {
     // Changes only while rewound into the archive. The film position is read lower still, by
     // [VodTimeline], so the tool buttons do not redraw every second.
+    val nativeTimeshift = (player as? LivePreviewEngine)?.tunerTimeshift?.collectAsStateWithLifecycle()?.value
     val timeshiftOffsetSec = timeshiftOffset()
     // Only whether one runs: the countdown itself ticks every second, and this bar must not.
     val sleepLeft = org.koin.compose.koinInject<SleepTimer>().remainingMs.collectAsStateWithLifecycle()
     val sleepRunning by androidx.compose.runtime.remember { androidx.compose.runtime.derivedStateOf { sleepLeft.value != null } }
+    if (isLive) {
+        LivePlayerFooter(
+            player = player, info = liveInfo, match = liveMatch,
+            toolsExpanded = toolsExpanded, onToolsExpandedChange = onToolsExpandedChange,
+            primaryFocus = primaryFocus, seekFocus = seekFocus,
+            sourceLabel = channelVersionLabel, onSource = onChannelVersion,
+            onScrub = onScrubLive, offset = timeshiftOffsetSec,
+            onDialog = onOpenDialog, onGoLive = onGoToLive, onJumpBack = onOpenJumpBack,
+            onFavorite = onToggleFavorite, favorite = favorite,
+            onPrevious = onPreviousChannel, onOther = onOtherChannels,
+            onEngine = onToggleCompatMode, onPip = onPip, onAudioOnly = onAudioMode,
+            onMultiview = onMultiview, onRecord = onRecordThis, recording = recordingThis,
+            onInfo = onInfo, infoOn = infoOn, onReport = onReport,
+            sleepRunning = sleepRunning, speedLabel = speedLabel,
+            modifier = modifier,
+        )
+        return
+    }
     Dock(modifier = modifier.fillMaxWidth().padding(horizontal = 28.dp, vertical = 20.dp)) {
         // Band A — the instrument. The times are the bar's own end caps now; the separate time row is
         // gone, and on live the right cap is the state badge instead of a clock.
@@ -353,6 +381,8 @@ internal fun BottomBar(
                         // The live edge is now; the offset says how far behind it the picture is.
                         LiveTimelineBar(
                             offsetSec = timeshiftOffsetSec ?: 0,
+                            windowSec = nativeTimeshift?.takeIf { it.available }?.depthSec(System.currentTimeMillis())
+                                ?.coerceAtLeast(1) ?: LIVE_WINDOW_SEC,
                             programmes = liveProgrammes,
                             liveEdgeMs = System.currentTimeMillis(),
                             onScrub = onScrubLive,

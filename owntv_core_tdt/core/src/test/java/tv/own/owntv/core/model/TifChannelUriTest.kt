@@ -4,6 +4,12 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class TifChannelUriTest {
+    @Test fun `signal format round trips without changing input identity`() {
+        val channel = TifChannelUri("test/.Input/HW1", 42, 1080)
+        assertEquals(channel, TifChannelUri.parse(channel.encode()))
+        assertNull(TifChannelUri.parse("owntv-tif://channel?input=a%2Fb&id=42&height=999")?.videoHeight)
+    }
+
     @Test fun `TCL hardware channel survives URI encoding`() {
         val channel = TifChannelUri("com.tcl.tvinput/.TDTVInputService/HW1413742848", 42)
         assertEquals(channel, TifChannelUri.parse(channel.encode()))

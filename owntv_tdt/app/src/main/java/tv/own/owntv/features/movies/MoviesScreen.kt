@@ -1178,6 +1178,8 @@ private fun buildMovieDetails(
     val plot = if (tmdbWins) meta?.overview ?: movie.plot else movie.plot?.takeIf { it.isNotBlank() } ?: meta?.overview
     return tv.own.owntv.features.shell.components.MediaDetailsUi(
         title = movie.name,
+        tmdbId = meta?.tmdbId,
+        metadataType = tv.own.owntv.core.metadata.MetadataType.MOVIE,
         backdropUrl = backdrop,
         logoUrl = tv.own.owntv.core.metadata.MetadataImages.logo(meta?.logoPath),
         posterUrl = poster,

@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.player.wrappedZapIndex
 import tv.own.owntv.core.live.LiveKey
+import tv.own.owntv.core.live.ChannelVariants
 
 /**
  * The channel list the player zaps within — CH+/CH−, the D-pad, the in-player channel-list overlay —
@@ -37,6 +38,8 @@ class LiveZapList(
     /** A bounded provider-order window centred on a channel — the rebuild after a numeric tune. */
     private val loadWindowAround: suspend (ChannelEntity) -> List<ChannelEntity>,
     private val categoryName: suspend (Long) -> String?,
+    /** The active source can differ from this rail's representative after an automatic/manual switch. */
+    private val playingStationKey: () -> String? = { null },
 ) {
 
     private var list: List<ChannelEntity> = emptyList()
@@ -158,9 +161,9 @@ class LiveZapList(
 
     /** Publish a list without touching the context around it — the guarded rebuild's landing point. */
     private fun replace(loaded: List<ChannelEntity>) {
-        list = loaded
-        _channels.value = loaded
-        _canZap.value = loaded.size > 1
+        list = ChannelVariants.collapse(loaded)
+        _channels.value = list
+        _canZap.value = list.size > 1
     }
 
     fun contains(channelId: Long): Boolean = list.any { it.id == channelId }
@@ -176,9 +179,16 @@ class LiveZapList(
      *     bounded rebuild has published) — step through the anchor saved at tune time instead, so CH±
      *     is responsive rather than dead. The anchor moves with the user, so a held key still chains.
      */
+    private fun indexOfPlaying(id: Long?): Int {
+        val direct = list.indexOfFirst { it.id == id }
+        if (direct >= 0) return direct
+        val key = playingStationKey() ?: return -1
+        return list.indexOfFirst { ChannelVariants.key(it) == key }
+    }
+
     fun next(delta: Int): ChannelEntity? {
         val currentId = playingChannelId()
-        val i = if (currentId != null) list.indexOfFirst { it.id == currentId } else -1
+        val i = indexOfPlaying(currentId)
         if (i >= 0) {
             val nextIdx = wrappedZapIndex(i, delta, list.size) ?: return null
             return list[nextIdx]
@@ -217,7 +227,7 @@ class LiveZapList(
 
         val inherited = pending?.takeIf { it.targetChannelId == currentChannelId }
         val anchorList = inherited?.previousList ?: list
-        val anchorIndex = inherited?.previousIndex ?: list.indexOfFirst { it.id == currentChannelId }
+        val anchorIndex = inherited?.previousIndex ?: indexOfPlaying(currentChannelId)
         val hasValidAnchor = anchorList.size >= 2 && anchorIndex in anchorList.indices
 
         if (alreadyInList) {

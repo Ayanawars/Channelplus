@@ -1,5 +1,6 @@
 package tv.own.owntv.features.sports
 
+import tv.own.owntv.core.epg.displayLogoUrl
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
@@ -542,7 +543,7 @@ private fun OnChannelsRow(item: GuideSportItem, now: Long, modifier: Modifier, o
     val locale = LocalConfiguration.current.locales[0]
     StageRow(onClick = onClick, height = 96.mpx, modifier = modifier, horizontalPadding = 18.mpx) { _ ->
         ChannelLogoTile(
-            logoUrl = ch.logoUrl,
+            logoUrl = ch.displayLogoUrl,
             modifier = Modifier.size(78.mpx, 48.mpx).background(stageStillBack, RoundedCornerShape(10.mpx)),
             fill = Color.Transparent,
         ) {}

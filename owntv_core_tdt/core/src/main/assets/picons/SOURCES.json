@@ -1,0 +1,1949 @@
+{
+  "picons": {
+    "url": "https://github.com/jungla-team/Picon-enigma2-Movistar",
+    "commit": "1e195db6352bd4339e09be4de5e26d793628b66d"
+  },
+  "channel_names": {
+    "url": "https://github.com/jungla-team/Canales-enigma2",
+    "commit": "0653550e23c7a2ffdccc12292d6316b96e0a5980"
+  },
+  "changes": "Only Transparente and Color. Images unchanged; duplicate bytes stored once per style. Channel/name index added.",
+  "entries": [
+    {
+      "name": "1ª FEDERACION HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_7504_420_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_7504_420_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "24 HORAS",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7738_416_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7738_416_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "ANIME",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/ANIME.png",
+        "color": "jungle-picon-Movistar-color/picon/ANIME.png"
+      }
+    },
+    {
+      "name": "ANTENA 3",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_772C_416_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_772C_416_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "ARAGON TV INT",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7473_3F0_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7473_3F0_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "AXN",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7477_3F0_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7477_3F0_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "AXN HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_7856_41A_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_7856_41A_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "AXN MOVIES",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_757F_412_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_757F_412_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "Al Jazeera English HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_13A7_3EA_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_13A7_3EA_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "Anewz",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7A4D_410_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7A4D_410_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "Arirang HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_1B64_3FC_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_1B64_3FC_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "BBC EARTH",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_76C4_40E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_76C4_40E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "BBC FOOD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_76CE_40E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_76CE_40E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "BBC HISTORY",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7731_416_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7731_416_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "BBC LIFESTYLE",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_76C3_40E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_76C3_40E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "BBC News",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_1389_3EA_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_1389_3EA_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "BBC SERIES",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_77C1_40A_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_77C1_40A_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "BBC TOP GEAR",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7795_424_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7795_424_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "BE MAD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_74A8_41C_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_74A8_41C_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "BOING",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_749E_41C_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_749E_41C_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "BabyTV",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_778A_424_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_778A_424_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "Bloomberg Europe TV",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_1C20_457_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_1C20_457_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "CALLE 13",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7790_424_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7790_424_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "CANAL COCINA",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/CANAL COCINA.png",
+        "color": "jungle-picon-Movistar-color/picon/CANAL COCINA.png"
+      }
+    },
+    {
+      "name": "CANAL SUR A.",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7729_416_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7729_416_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "CAZA Y PESCA",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_772B_416_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_772B_416_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "CAZAyPESCA HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_78B8_3EC_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_78B8_3EC_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "CAZAyPESCA HD.",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_788D_414_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_788D_414_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "CGTN Documentary",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_18EE_3F4_3_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_18EE_3F4_3_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "CGTN Francais",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_18EF_3F4_3_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_18EF_3F4_3_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "CGTN HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_18ED_3F4_3_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_18ED_3F4_3_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "CINE",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/CINE.png",
+        "color": "jungle-picon-Movistar-color/picon/CINE.png"
+      }
+    },
+    {
+      "name": "CINE BELICO",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/CINE BELICO.png",
+        "color": "jungle-picon-Movistar-color/picon/CINE BELICO.png"
+      }
+    },
+    {
+      "name": "CLAN TVE",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_76C1_40E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_76C1_40E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "CLASSICA",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7577_412_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7577_412_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "CNBC",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_7D_B_85_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_7D_B_85_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "CNN Int.",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_164E_42C_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_164E_42C_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "COMEDY CENTRAL",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_76C8_40E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_76C8_40E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "COSMO",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7730_416_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7730_416_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "CUATRO",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7792_424_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7792_424_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "Clint Eastwood",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/Clint Eastwood.png",
+        "color": "jungle-picon-Movistar-color/picon/Clint Eastwood.png"
+      }
+    },
+    {
+      "name": "Copa del Rey",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/Copa del Rey.png",
+        "color": "jungle-picon-Movistar-color/picon/Copa del Rey.png"
+      }
+    },
+    {
+      "name": "Crimen",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/picon_color_Crimen.png",
+        "color": "jungle-picon-Movistar-color/picon/picon_color_Crimen.png"
+      }
+    },
+    {
+      "name": "Cubavision Internacional",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_1647_42C_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_1647_42C_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "DAZN 1",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_76A4_41E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_76A4_41E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "DAZN 1 BAR",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7574_412_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7574_412_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "DAZN 1 HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_7855_41A_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_7855_41A_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "DAZN 2",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_772A_416_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_772A_416_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "DAZN 2 BAR",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7582_412_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7582_412_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "DAZN 2 HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_785F_41A_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_785F_41A_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "DAZN 3",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_77BE_40A_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_77BE_40A_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "DAZN 4",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_77C0_40A_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_77C0_40A_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "DAZN F1",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7732_416_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7732_416_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "DAZN F1 HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_7531_426_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_7531_426_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "DAZN LA LIGA 2 HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/DAZN LA LIGA 2 HD.png"
+      }
+    },
+    {
+      "name": "DAZN LA LIGA HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/DAZN LA LIGA HD.png"
+      }
+    },
+    {
+      "name": "DAZN LALIGA",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_76C9_40E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_76C9_40E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "DAZN LALIGA 2",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7691_41E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7691_41E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "DAZN LALIGA 2 HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_749D_41C_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_749D_41C_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "DAZN LALIGA HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_7534_426_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_7534_426_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "DAZN LALIGA HD.",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7884_414_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7884_414_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "DE CASA",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/DE CASA.png",
+        "color": "jungle-picon-Movistar-color/picon/DE CASA.png"
+      }
+    },
+    {
+      "name": "DISCOVERY",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_772F_416_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_772F_416_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "DISNEY CH HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_788B_414_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_788B_414_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "DISNEY JR",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_746B_3F0_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_746B_3F0_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "DIVINITY",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_749A_41C_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_749A_41C_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "Daystar Espanol",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_18F7_3F4_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_18F7_3F4_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "DreamWorks",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_77C7_40A_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_77C7_40A_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "ENERGY",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_749F_41C_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_749F_41C_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "EURONEWS GERMAN SD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_18F4_3F4_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_18F4_3F4_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "EUROSPORT 1",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_772D_416_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_772D_416_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "EUROSPORT 2",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_76A5_41E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_76A5_41E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "EUROSPORT1HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_7535_426_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_7535_426_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "EUROSPORT1HD.",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_7826_428_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_7826_428_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "EXTREMADURA SAT",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_18F0_3F4_3_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_18F0_3F4_3_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "FDF",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_77BC_40A_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_77BC_40A_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "FOX",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/FOX.png",
+        "color": "jungle-picon-Movistar-color/picon/FOX.png"
+      }
+    },
+    {
+      "name": "FRANK CAPRA",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/FRANK CAPRA.png",
+        "color": "jungle-picon-Movistar-color/picon/FRANK CAPRA.png"
+      }
+    },
+    {
+      "name": "France 24 (In English)",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_1AFA_3FE_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_1AFA_3FE_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "France 24 (en Francais)",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_1AF9_3FE_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_1AF9_3FE_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "GOL",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7890_414_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7890_414_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "GOL PLAY",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_74A3_41C_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_74A3_41C_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "HISTORIA",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/HISTORIA.png",
+        "color": "jungle-picon-Movistar-color/picon/HISTORIA.png"
+      }
+    },
+    {
+      "name": "HITCHCOCK",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/HITCHCOCK.png",
+        "color": "jungle-picon-Movistar-color/picon/HITCHCOCK.png"
+      }
+    },
+    {
+      "name": "HOLLYWOOD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/HOLLYWOOD.png",
+        "color": "jungle-picon-Movistar-color/picon/HOLLYWOOD.png"
+      }
+    },
+    {
+      "name": "I24 Francis",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7A4B_410_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7A4B_410_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "IBERALIA TV",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_746A_3F0_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_746A_3F0_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "II guerra mundial",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/II_guerra mundial.png",
+        "color": "jungle-picon-Movistar-color/picon/II_guerra mundial.png"
+      }
+    },
+    {
+      "name": "JamesBond",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/JamesBond.png",
+        "color": "jungle-picon-Movistar-color/picon/JamesBond.png"
+      }
+    },
+    {
+      "name": "LA 1",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_76C2_40E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_76C2_40E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "LA 1 HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_7863_41A_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_7863_41A_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "LA 2",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7474_3F0_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7474_3F0_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "LA SEXTA",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_769E_41E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_769E_41E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "LALIGA TV BAR",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7793_424_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7793_424_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "LALIGA TV BAR 2",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_76C5_40E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_76C5_40E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "LALIGA TV BAR 3",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_769A_41E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_769A_41E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "LALIGA TV BAR 4",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7830_428_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7830_428_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "LALIGA TV BAR HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_74FF_420_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_74FF_420_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "LALIGA TV HYPERMOTION",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7825_428_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7825_428_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "LALIGA TV HYPERMOTION 2",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7831_428_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7831_428_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "LALIGA TV HYPERMOTION 3",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_782A_428_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_782A_428_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "LIGACAMPEONES 17",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/LIGACAMPEONES_17.png"
+      }
+    },
+    {
+      "name": "LIGACAMPEONES 18",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/LIGACAMPEONES_18.png"
+      }
+    },
+    {
+      "name": "Ligacampeones2",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/Ligacampeones2.png",
+        "color": "jungle-picon-Movistar-color/picon/Ligacampeones2.png"
+      }
+    },
+    {
+      "name": "M+ ACCIÓN",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_746C_3F0_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_746C_3F0_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ ACCIÓN HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_7509_420_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_7509_420_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ CLÁSICOS",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_77C6_40A_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_77C6_40A_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ CLÁSICOS HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_78BF_3EC_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_78BF_3EC_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ COMEDIA",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_746D_3F0_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_746D_3F0_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ CRACKS",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_749D_41C_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_749D_41C_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ Copa del Rey",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7584_412_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7584_412_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ DEPORTES",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_778F_424_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_778F_424_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ DRAMA",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_746E_3F0_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_746E_3F0_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ DRAMA HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_750B_420_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_750B_420_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ Documentales",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7471_3F0_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7471_3F0_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ EN JUEGO",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7696_41E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7696_41E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ ESTRENOS",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_76C0_40E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_76C0_40E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ ESTRENOS HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_7539_426_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_7539_426_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ Ellas V",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7468_3F0_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7468_3F0_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ GOLF",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7789_424_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7789_424_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ GOLF HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_78B7_3EC_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_78B7_3EC_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ HITS",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_76CA_40E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_76CA_40E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ HITS HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_78B6_3EC_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_78B6_3EC_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ Indie",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_76CF_40E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_76CF_40E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ Indie HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_7533_426_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_7533_426_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ LALIGA",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7797_424_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7797_424_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ LALIGA 2 HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_750D_420_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_750D_420_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ LALIGA 3",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_77BD_40A_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_77BD_40A_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ LALIGA 4",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7892_414_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7892_414_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ LALIGA 5",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7893_414_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7893_414_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ LALIGA HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_750F_420_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_750F_420_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ LALIGA TV 2",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_769D_41E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_769D_41E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ LALIGA TV 2 HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_7853_41A_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_7853_41A_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ LALIGA TV 3 HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_74A3_41C_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_74A3_41C_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ NAVIDAD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7885_414_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7885_414_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ Originales",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7478_3F0_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7478_3F0_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ Originales HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_750C_420_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_750C_420_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ Originales HD.",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_788C_414_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_788C_414_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ Suspense HD.",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7882_414_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7882_414_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ VAMOS",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7734_416_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7734_416_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ VAMOS 2",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7579_412_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7579_412_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ VAMOS 2 HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_74A8_41C_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_74A8_41C_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ VAMOS BAR",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_778E_424_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_778E_424_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ VAMOSHD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_750A_420_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_750A_420_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+2",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/M+2.png",
+        "color": "jungle-picon-Movistar-color/picon/M+2.png"
+      }
+    },
+    {
+      "name": "M+Baloncesto",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_768E_41E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_768E_41E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+Baloncesto2",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_756B_412_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_756B_412_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+BaloncestoHD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_7536_426_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_7536_426_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+COMEDIA HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_7537_426_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_7537_426_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+Cine Español",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7736_416_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7736_416_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+DEPORTES2",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7739_416_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7739_416_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+DEPORTES2HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_7532_426_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_7532_426_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+DEPORTES3",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_77C2_40A_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_77C2_40A_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+DEPORTES4",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_77BF_40A_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_77BF_40A_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+DEPORTES5",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_77C8_40A_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_77C8_40A_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+DEPORTES6",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_769B_41E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_769B_41E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+DEPORTES7",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_782D_428_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_782D_428_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+DEPORTES8",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_77C9_40A_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_77C9_40A_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+DEPORTESHD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_78C0_3EC_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_78C0_3EC_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+DEPORTESHD.",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_7828_428_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_7828_428_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+Documentales HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_78BE_3EC_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_78BE_3EC_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+ELLAS V HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_78B5_3EC_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_78B5_3EC_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+GOLF 2",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_756D_412_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_756D_412_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+LCAMPEON10",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_782F_428_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_782F_428_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+LCAMPEON11",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7820_428_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7820_428_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+LCAMPEON12",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7821_428_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7821_428_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+LCAMPEON13",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_782B_428_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_782B_428_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+LCAMPEON14",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7798_424_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7798_424_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+LCAMPEON15",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7882_414_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7882_414_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+LCAMPEON16",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_788C_414_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_788C_414_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+LCAMPEON17",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7894_414_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7894_414_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+LCAMPEON18",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7884_414_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7884_414_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+LCAMPEON19",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_788D_414_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_788D_414_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+LCAMPEON2",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_749E_41C_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_749E_41C_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+LCAMPEON3",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_769F_41E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_769F_41E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+LCAMPEON4",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_77D8_40A_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_77D8_40A_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+LCAMPEON5",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_77C4_40A_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_77C4_40A_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+LCAMPEON6",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7829_428_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7829_428_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+LCAMPEON7",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7822_428_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7822_428_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+LCAMPEON8",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7824_428_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7824_428_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+LCAMPEON9",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_782C_428_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_782C_428_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+LCAMPEONES",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_757B_412_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_757B_412_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+VAMOSBAR2",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_756C_412_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_756C_412_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "M+VAMOSBAR3",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7584_412_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7584_412_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "MEZZO",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7699_41E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7699_41E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "MEZZO LIVE",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_74A2_41C_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_74A2_41C_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "MEZZO LIVE.",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_7823_428_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_7823_428_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "MTV 00s",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_6FF0_436_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_6FF0_436_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "MTV ESPAÑA",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_74A2_41C_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_74A2_41C_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "MULTIDEPORTE",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_76A3_41E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_76A3_41E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "Movistar Crimen",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/picon_Movistar_Crimen.png"
+      }
+    },
+    {
+      "name": "Movistar Plus+",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7588_412_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7588_412_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "Movistar Plus+ HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_749A_41C_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_749A_41C_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "Movistar Plus+2 HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_74D8_3F8_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_74D8_3F8_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "NAT GEO WILD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7472_3F0_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7472_3F0_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "NAT GEOGRAPH",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_778D_424_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_778D_424_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "NEOX",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7587_412_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7587_412_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "NG WILD HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7889_414_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7889_414_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "NHK WORLD-JPN",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_139D_3EA_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_139D_3EA_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "NICK JR",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7697_41E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7697_41E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "NICKELODEON",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_772E_416_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_772E_416_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "NOVA",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7469_3F0_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7469_3F0_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "PLAYBOY TV",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_778B_424_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_778B_424_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "SBN International",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_2F9A_454_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_2F9A_454_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "SENDER NEU JERUSALEM",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7A4A_410_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "STAR Channel",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_746F_3F0_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_746F_3F0_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "SYFY",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7796_424_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7796_424_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "Sky News Intl",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_1C7A_457_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_1C7A_457_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "Star Channel 2024",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/picon_color_Star_Channel_2024.png"
+      }
+    },
+    {
+      "name": "Star Channel 2024 II",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/Star_Channel_2024_II.png"
+      }
+    },
+    {
+      "name": "TCM",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_76C7_40E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_76C7_40E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "TCM HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7885_414_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7885_414_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "TELECINCO",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_778C_424_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_778C_424_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "TELEDEPORTE",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_76CC_40E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_76CC_40E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "TEST_CSD1",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_75DE_422_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_75DE_422_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "TEST_CSD2",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_75DF_422_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_75DF_422_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "TEST_CSD3",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_75E0_422_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_75E0_422_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "TEST_CSD4",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_75E1_422_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_75E1_422_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "TEST_CSD5",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_75E2_422_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_75E2_422_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "TV5 MONDE EUROPE HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_1B03_3FE_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_1B03_3FE_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "TVGA EUROPA HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_18F1_3F4_3_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_18F1_3F4_3_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "TVGA HD EUROPA",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_18F1_3F4_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_18F1_3F4_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "Telesur HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7A49_410_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7A49_410_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "WARNERTV",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_76CB_40E_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_76CB_40E_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "WARNERTV HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_1_7888_414_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_1_7888_414_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "Woody Allen",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/picon_color_Woody_Allen.png",
+        "color": "jungle-picon-Movistar-color/picon/picon_color_Woody_Allen.png"
+      }
+    },
+    {
+      "name": "ZDF HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_2B66_3F3_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_2B66_3F3_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "arte HD",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/1_0_19_283E_3FB_1_C00000_0_0_0.png",
+        "color": "jungle-picon-Movistar-color/picon/1_0_19_283E_3FB_1_C00000_0_0_0.png"
+      }
+    },
+    {
+      "name": "bbcdrama",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/bbcdrama.png",
+        "color": "jungle-picon-Movistar-color/picon/bbcdrama.png"
+      }
+    },
+    {
+      "name": "comic",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/comic.png",
+        "color": "jungle-picon-Movistar-color/picon/comic.png"
+      }
+    },
+    {
+      "name": "copa america 1",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/copa america 1.png",
+        "color": "jungle-picon-Movistar-color/picon/copa america 1.png"
+      }
+    },
+    {
+      "name": "copa america 2",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/copa america 2.png",
+        "color": "jungle-picon-Movistar-color/picon/copa america 2.png"
+      }
+    },
+    {
+      "name": "copadelrey",
+      "sources": {
+        "color": "jungle-picon-Movistar-color/picon/copadelrey.png"
+      }
+    },
+    {
+      "name": "cracks",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/picon_color_cracks.png",
+        "color": "jungle-picon-Movistar-color/picon/picon_color_cracks.png"
+      }
+    },
+    {
+      "name": "deepoca",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/deepoca.png",
+        "color": "jungle-picon-Movistar-color/picon/deepoca.png"
+      }
+    },
+    {
+      "name": "dei moore",
+      "sources": {
+        "color": "jungle-picon-Movistar-color/picon/dei moore.png"
+      }
+    },
+    {
+      "name": "demi moore",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/demi moore.png"
+      }
+    },
+    {
+      "name": "disneychannel",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/disneychannel.png"
+      }
+    },
+    {
+      "name": "disneychannels",
+      "sources": {
+        "color": "jungle-picon-Movistar-color/picon/disneychannels.png"
+      }
+    },
+    {
+      "name": "ellas vamos",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/ellas vamos.png",
+        "color": "jungle-picon-Movistar-color/picon/ellas vamos.png"
+      }
+    },
+    {
+      "name": "enfamilia",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/enfamilia.png",
+        "color": "jungle-picon-Movistar-color/picon/enfamilia.png"
+      }
+    },
+    {
+      "name": "enjuego",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/enjuego.png",
+        "color": "jungle-picon-Movistar-color/picon/enjuego.png"
+      }
+    },
+    {
+      "name": "eudosport4",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/eudosport4.png",
+        "color": "jungle-picon-Movistar-color/picon/eudosport4.png"
+      }
+    },
+    {
+      "name": "eurosport 2",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/eurosport 2.png"
+      }
+    },
+    {
+      "name": "eurosport 7",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/eurosport 7.png"
+      }
+    },
+    {
+      "name": "eurosport2",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/eurosport2.png"
+      }
+    },
+    {
+      "name": "eurosport5",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/eurosport5.png",
+        "color": "jungle-picon-Movistar-color/picon/eurosport5.png"
+      }
+    },
+    {
+      "name": "eurosport6",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/eurosport6.png",
+        "color": "jungle-picon-Movistar-color/picon/eurosport6.png"
+      }
+    },
+    {
+      "name": "eurosport7",
+      "sources": {
+        "color": "jungle-picon-Movistar-color/picon/eurosport7.png"
+      }
+    },
+    {
+      "name": "festival sansebastian",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/festival_sansebastian.png",
+        "color": "jungle-picon-Movistar-color/picon/festival_sansebastian.png"
+      }
+    },
+    {
+      "name": "la-uno-SD-original",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/la-uno-SD-original.png"
+      }
+    },
+    {
+      "name": "ligacampeones3",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/ligacampeones3.png",
+        "color": "jungle-picon-Movistar-color/picon/ligacampeones3.png"
+      }
+    },
+    {
+      "name": "los goya",
+      "sources": {
+        "color": "jungle-picon-Movistar-color/picon/los goya.png"
+      }
+    },
+    {
+      "name": "los90",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/los90.png",
+        "color": "jungle-picon-Movistar-color/picon/los90.png"
+      }
+    },
+    {
+      "name": "mligadecampeonesorange",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/mligadecampeonesorange.png",
+        "color": "jungle-picon-Movistar-color/picon/mligadecampeonesorange.png"
+      }
+    },
+    {
+      "name": "movistar ellas vamos",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/movistar_ellas_vamos.png",
+        "color": "jungle-picon-Movistar-color/picon/movistar_ellas_vamos.png"
+      }
+    },
+    {
+      "name": "movistar popup",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/movistar_popup.png",
+        "color": "jungle-picon-Movistar-color/picon/movistar_popup.png"
+      }
+    },
+    {
+      "name": "mundial 1",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/mundial_1.png",
+        "color": "jungle-picon-Movistar-color/picon/mundial_1.png"
+      }
+    },
+    {
+      "name": "mundial 2",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/mundial_2.png",
+        "color": "jungle-picon-Movistar-color/picon/mundial_2.png"
+      }
+    },
+    {
+      "name": "mundial3",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/mundial3.png",
+        "color": "jungle-picon-Movistar-color/picon/mundial3.png"
+      }
+    },
+    {
+      "name": "mundial4",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/mundial4.png",
+        "color": "jungle-picon-Movistar-color/picon/mundial4.png"
+      }
+    },
+    {
+      "name": "musica",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/musica.png",
+        "color": "jungle-picon-Movistar-color/picon/musica.png"
+      }
+    },
+    {
+      "name": "musicales",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/musicales.png",
+        "color": "jungle-picon-Movistar-color/picon/musicales.png"
+      }
+    },
+    {
+      "name": "nicolascage",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/nicolascage.png",
+        "color": "jungle-picon-Movistar-color/picon/nicolascage.png"
+      }
+    },
+    {
+      "name": "orgullo",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/orgullo.png",
+        "color": "jungle-picon-Movistar-color/picon/orgullo.png"
+      }
+    },
+    {
+      "name": "san sebastian",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/san sebastian.png"
+      }
+    },
+    {
+      "name": "sansebastian",
+      "sources": {
+        "color": "jungle-picon-Movistar-color/picon/sansebastian.png"
+      }
+    },
+    {
+      "name": "series",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/series.png",
+        "color": "jungle-picon-Movistar-color/picon/series.png"
+      }
+    },
+    {
+      "name": "squirrel",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/squirrel.png"
+      }
+    },
+    {
+      "name": "squirrel-color",
+      "sources": {
+        "color": "jungle-picon-Movistar-color/picon/squirrel-color.png"
+      }
+    },
+    {
+      "name": "superagentes",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/picon_color_superagentes.png",
+        "color": "jungle-picon-Movistar-color/picon/picon_color_superagentes.png"
+      }
+    },
+    {
+      "name": "supercopa",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/supercopa.png",
+        "color": "jungle-picon-Movistar-color/picon/supercopa.png"
+      }
+    },
+    {
+      "name": "suspense",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/suspense.png",
+        "color": "jungle-picon-Movistar-color/picon/suspense.png"
+      }
+    },
+    {
+      "name": "tarantino",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/picon_color_tarantino.png",
+        "color": "jungle-picon-Movistar-color/picon/picon_color_tarantino.png"
+      }
+    },
+    {
+      "name": "terror",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/picon_color_terror.png"
+      }
+    },
+    {
+      "name": "tierra media",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/tierra media.png",
+        "color": "jungle-picon-Movistar-color/picon/tierra media.png"
+      }
+    },
+    {
+      "name": "tomcruise",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/tomcruise.png",
+        "color": "jungle-picon-Movistar-color/picon/tomcruise.png"
+      }
+    },
+    {
+      "name": "vacaciones",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/vacaciones.png",
+        "color": "jungle-picon-Movistar-color/picon/vacaciones.png"
+      }
+    },
+    {
+      "name": "vhs",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/picon_color_vhs.png",
+        "color": "jungle-picon-Movistar-color/picon/picon_color_vhs.png"
+      }
+    },
+    {
+      "name": "western",
+      "sources": {
+        "transparent": "jungle-picon-Movistar-Transparente/picon/western.png",
+        "color": "jungle-picon-Movistar-color/picon/western.png"
+      }
+    }
+  ]
+}

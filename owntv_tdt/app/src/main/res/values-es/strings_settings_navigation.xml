@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_menu_general">General</string>
+    <string name="settings_menu_navigation">Navegación y diseño</string>
+    <string name="settings_menu_sources_guide">Fuentes y guía de TV</string>
+    <string name="settings_menu_artwork">Información y artwork</string>
+    <string name="settings_menu_select">Seleccionar</string>
+    <string name="settings_menu_return">Volver</string>
+</resources>

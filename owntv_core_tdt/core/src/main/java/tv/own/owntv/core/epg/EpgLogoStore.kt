@@ -93,4 +93,4 @@ object EpgLogoStore {
  * "what the playlist said".
  */
 val ChannelEntity.displayLogoUrl: String?
-    get() = EpgLogoStore.iconFor(this) ?: logoUrl
+    get() = PiconStore.iconFor(name) ?: EpgLogoStore.iconFor(this) ?: logoUrl

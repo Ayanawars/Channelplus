@@ -8,7 +8,7 @@
     <string name="tuner_channel_name">Canal %1$d</string>
     <string name="tuner_unknown_programme">Sin información</string>
     <string name="tuner_source_missing">No se encuentra la fuente de antena</string>
-    <string name="tuner_pause_unsupported">La pausa de TDT no está disponible en esta versión</string>
+    <string name="tuner_pause_unsupported">El sintonizador de la TV no ha habilitado timeshift para este canal</string>
     <string name="tuner_signal_missing">Sin señal de antena</string>
     <string name="tuner_connection_failed">No se pudo conectar con el sintonizador</string>
     <string name="tuner_disconnected">El sintonizador se ha desconectado</string>

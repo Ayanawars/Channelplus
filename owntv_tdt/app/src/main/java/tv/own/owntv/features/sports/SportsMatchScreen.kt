@@ -1,5 +1,6 @@
 package tv.own.owntv.features.sports
 
+import tv.own.owntv.core.epg.displayLogoUrl
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
@@ -572,7 +573,7 @@ internal fun qualityTag(rank: Int): String? = when (rank) {
 internal fun ChannelRow(o: WatchOption, m: Match, onClick: () -> Unit, onHold: (() -> Unit)?, modifier: Modifier = Modifier, playing: Boolean = false) {
     StageRow(onClick = onClick, onLongClick = onHold, height = 90.mpx, modifier = modifier.fillMaxWidth(), horizontalPadding = 18.mpx) { _ ->
         ChannelLogoTile(
-            logoUrl = o.channel.logoUrl,
+            logoUrl = o.channel.displayLogoUrl,
             modifier = Modifier.size(69.mpx, 42.mpx).background(stageStillBack, RoundedCornerShape(10.mpx)),
             fill = Color.Transparent,
         ) {}
