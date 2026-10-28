@@ -146,3 +146,26 @@ fun MetadataSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
         options = TMDB_LANGUAGE_CODES.map { it to tmdbLangName(it) }, selected = language,
         onSelect = { vm.setMetadataLanguage(it); showLanguage = false }, onDismiss = { showLanguage = false })
 }
+
+@Composable
+internal fun CompanionKeyDialog(
+    titleRes: Int,
+    state: tv.own.owntv.core.companion.CompanionServerState,
+    onStart: (Int) -> Unit,
+    onStop: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val closeFocus = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        onStart(tv.own.owntv.core.companion.CompanionLink.DEFAULT_PORT)
+        kotlinx.coroutines.delay(60)
+        runCatching { closeFocus.requestFocus() }
+    }
+    androidx.compose.runtime.DisposableEffect(Unit) { onDispose { onStop() } }
+    tv.own.owntv.ui.stage.StagePopup(
+        onDismiss = onDismiss,
+        title = stringResource(titleRes),
+        width = 820.mpx,
+        buttons = { tv.own.owntv.ui.stage.StageButton(stringResource(R.string.common_cancel), onClick = onDismiss, height = 56.mpx, textSize = 19, modifier = Modifier.focusRequester(closeFocus)) },
+    ) { tv.own.owntv.ui.components.StageCompanionStatus(state) }
+}
