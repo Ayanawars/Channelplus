@@ -46,7 +46,10 @@ class MetadataRepository(
     private val seasonFetchLock = kotlinx.coroutines.sync.Mutex()
 
     /** The metadata language the cache keys are scoped by; blank keeps the pre-language key format. */
-    private suspend fun currentLang(): String = settings.metadataConfig().resolvedLanguage
+    private suspend fun currentLang(): String = providerLanguage(settings.metadataConfig().resolvedLanguage)
+
+    // Provider/version and credential changes cannot reuse a TMDB-era rating or image cache.
+    private fun providerLanguage(language: String): String = "trakt-v1:$language"
 
     /** Search complete TMDB unless the active profile is explicitly marked as Kids. */
     private suspend fun currentProfileAllowsAdult(): Boolean {
@@ -373,7 +376,7 @@ class MetadataRepository(
         val allowsAdult = profileAllowsAdultMetadata(profileDao.getById(pid)?.isKids)
         val matchKey = maturityMatchKey(seriesLocalKey(series), allowsAdult)
         val tvId = dao.getMatch(matchKey)?.tmdbId ?: return@withContext emptyMap()
-        episodesByCacheKey(tvId, episodes, cfg.resolvedLanguage)
+        episodesByCacheKey(tvId, episodes, providerLanguage(cfg.resolvedLanguage))
     }
 
     /**
@@ -404,7 +407,7 @@ class MetadataRepository(
         // provider, which is exactly the case that makes a run of blank tiles — so ids are a list.
         val matchKeyToIds = items.groupBy({ maturityMatchKey(it.second, allowsAdult) }, { it.first })
         val cacheKeyToIds = dao.getMatches(matchKeyToIds.keys.toList())
-            .mapNotNull { m -> m.tmdbId?.let { id -> m.localKey to (if (tv) tvCacheKey(id, cfg.resolvedLanguage) else cacheKey(id, cfg.resolvedLanguage)) } }
+            .mapNotNull { m -> m.tmdbId?.let { id -> m.localKey to (if (tv) tvCacheKey(id, providerLanguage(cfg.resolvedLanguage)) else cacheKey(id, providerLanguage(cfg.resolvedLanguage))) } }
             .groupBy({ it.second }, { it.first })
             .mapValues { (_, localKeys) -> localKeys.flatMap { matchKeyToIds[it].orEmpty() } }
         if (cacheKeyToIds.isEmpty()) return@withContext emptyMap()
