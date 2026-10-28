@@ -1,0 +1,94 @@
+PACK SVG · IMDb
+9 archivos SVG originales de la categoría de Wikimedia Commons, descargados sin modificar el 28/10/2026.
+Se conservaron los originales y se renombraron con un prefijo numérico para evitar confundir los archivos IMDb logo.svg e Imdb logo.svg.
+Categoría: https://commons.wikimedia.org/wiki/Category:Logos_of_IMDb
+
+01-font-awesome.svg
+File:Font Awesome 5 brands imdb.svg
+Autor: Font Awesome
+Licencia: CC BY 4.0
+URL licencia: https://creativecommons.org/licenses/by/4.0
+Página: https://commons.wikimedia.org/wiki/File:Font_Awesome_5_brands_imdb.svg
+Archivo original: https://upload.wikimedia.org/wikipedia/commons/b/bf/Font_Awesome_5_brands_imdb.svg
+Atribución: Font Awesome Free 5.4.1 by @fontawesome -  https://fontawesome.com
+Modificaciones: ninguna (solo nombre de archivo).
+
+02-rounded.svg
+File:IMDB - Rounded.svg
+Autor: Matlevant
+Licencia: CC0
+URL licencia: http://creativecommons.org/publicdomain/zero/1.0/deed.en
+Página: https://commons.wikimedia.org/wiki/File:IMDB_-_Rounded.svg
+Archivo original: https://upload.wikimedia.org/wikipedia/commons/e/e3/IMDB_-_Rounded.svg
+Atribución: 
+Modificaciones: ninguna (solo nombre de archivo).
+
+03-supertinyicons.svg
+File:IMDB - SuperTinyIcons.svg
+Autor: SuperTinyIcons project
+Licencia: Public domain
+URL licencia: 
+Página: https://commons.wikimedia.org/wiki/File:IMDB_-_SuperTinyIcons.svg
+Archivo original: https://upload.wikimedia.org/wikipedia/commons/5/53/IMDB_-_SuperTinyIcons.svg
+Atribución: 
+Modificaciones: ninguna (solo nombre de archivo).
+
+04-logo-2012-2016.svg
+File:IMDb logo (2012–2016).svg
+Autor: IMDb
+Licencia: Public domain
+URL licencia: 
+Página: https://commons.wikimedia.org/wiki/File:IMDb_logo_(2012%E2%80%932016).svg
+Archivo original: https://upload.wikimedia.org/wikipedia/commons/9/90/IMDb_logo_%282012%E2%80%932016%29.svg
+Atribución: 
+Modificaciones: ninguna (solo nombre de archivo).
+
+05-logo-2016.svg
+File:IMDB Logo 2016.svg
+Autor: Internet Movie Database
+Licencia: Public domain
+URL licencia: 
+Página: https://commons.wikimedia.org/wiki/File:IMDB_Logo_2016.svg
+Archivo original: https://upload.wikimedia.org/wikipedia/commons/6/69/IMDB_Logo_2016.svg
+Atribución: 
+Modificaciones: ninguna (solo nombre de archivo).
+
+06-logo-rectangle.svg
+File:IMDb Logo Rectangle.svg
+Autor: Internet Movie Database (IMDb)
+Licencia: Public domain
+URL licencia: 
+Página: https://commons.wikimedia.org/wiki/File:IMDb_Logo_Rectangle.svg
+Archivo original: https://upload.wikimedia.org/wikipedia/commons/5/57/IMDb_Logo_Rectangle.svg
+Atribución: 
+Modificaciones: ninguna (solo nombre de archivo).
+
+07-logo-square.svg
+File:IMDb Logo Square.svg
+Autor: Internet Movie Database (IMDb)
+Licencia: Public domain
+URL licencia: 
+Página: https://commons.wikimedia.org/wiki/File:IMDb_Logo_Square.svg
+Archivo original: https://upload.wikimedia.org/wikipedia/commons/c/cc/IMDb_Logo_Square.svg
+Atribución: 
+Modificaciones: ninguna (solo nombre de archivo).
+
+08-logo-imdb.svg
+File:IMDb logo.svg
+Autor: IMDb
+Licencia: Public domain
+URL licencia: 
+Página: https://commons.wikimedia.org/wiki/File:IMDb_logo.svg
+Archivo original: https://upload.wikimedia.org/wikipedia/commons/3/35/IMDb_logo.svg
+Atribución: 
+Modificaciones: ninguna (solo nombre de archivo).
+
+09-logo-imdb-alternativo.svg
+File:Imdb logo.svg
+Autor: IMDb
+Licencia: Public domain
+URL licencia: 
+Página: https://commons.wikimedia.org/wiki/File:Imdb_logo.svg
+Archivo original: https://upload.wikimedia.org/wikipedia/commons/1/1e/Imdb_logo.svg
+Atribución: 
+Modificaciones: ninguna (solo nombre de archivo).

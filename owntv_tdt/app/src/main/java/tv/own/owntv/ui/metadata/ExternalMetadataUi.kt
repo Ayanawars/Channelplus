@@ -2,6 +2,14 @@ package tv.own.owntv.ui.metadata
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
+import tv.own.owntv.ui.theme.hudAccent
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,7 +44,7 @@ fun rememberExternalMetadata(
     // key() gives produceState fresh storage immediately, not one recomposition after a channel change.
     return key(identity) {
         val result by produceState(artworkCache.get(identity)) {
-            if (!metadata.enabled || !config.enabled) return@produceState
+            if (!config.enabled) return@produceState
             if (value == null) delay(MetadataRepository.FOCUS_DEBOUNCE_MS)
             val publish: (ExternalTitleMetadata) -> Unit = { data ->
                 artworkCache.put(identity, data)
@@ -53,10 +61,39 @@ fun rememberExternalMetadata(
 }
 
 @Composable
-fun ExternalMetadataBadges(data: ExternalTitleMetadata?, modifier: Modifier = Modifier, color: Color = Color.White) {
-    data ?: return
-    FlowRow(modifier, horizontalArrangement = Arrangement.spacedBy(20.mpx), verticalArrangement = Arrangement.spacedBy(6.mpx)) {
-        data.tmdbRating?.let { Text(stringResource(R.string.external_tmdb_rating, it), style = stageText(18, 500), color = color, maxLines = 1, overflow = TextOverflow.Ellipsis) }
-        if (data.tvdbLoaded) Text(stringResource(R.string.external_tvdb_source), style = stageText(18, 500), color = color, maxLines = 1, overflow = TextOverflow.Ellipsis)
+fun ExternalMetadataBadges(data: ExternalTitleMetadata?, modifier: Modifier = Modifier, color: Color = Color.White,
+    details: EpgDetails? = null) {
+    val age = SpanishProgrammeBadges.age(details?.rating) ?: SpanishProgrammeBadges.age(data?.ageRating)
+    val descriptors = SpanishProgrammeBadges.descriptors(details?.categoryList.orEmpty() + listOfNotNull(details?.rating))
+    val rating = data?.imdbRating
+    if (rating == null && age == null && descriptors.isEmpty()) return
+    FlowRow(modifier, horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        if (rating != null) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                AsyncImage("file:///android_asset/programme-badges/imdb.svg", contentDescription = stringResource(R.string.programme_imdb),
+                    contentScale = ContentScale.Fit, modifier = Modifier.width(56.dp).height(28.dp))
+                Text(stringResource(R.string.programme_score, rating), style = stageText(22, 700), color = hudAccent, maxLines = 1)
+            }
+        }
+        if (age != null) {
+            if (rating != null) BadgeSeparator(color)
+            AsyncImage("file:///android_asset/programme-badges/age-$age.svg", contentDescription = stringResource(R.string.programme_age, age.uppercase()),
+                contentScale = ContentScale.Fit, modifier = Modifier.width(28.dp).height(28.dp))
+        }
+        descriptors.forEachIndexed { index, descriptor ->
+            if (rating != null || age != null || index > 0) BadgeSeparator(color)
+            AsyncImage("file:///android_asset/programme-badges/$descriptor.svg", contentDescription = stringResource(when (descriptor) {
+                "violencia" -> R.string.programme_violence
+                "lenguaje" -> R.string.programme_language
+                "sexo" -> R.string.programme_sex
+                "miedo-o-angustia" -> R.string.programme_fear
+                "drogas-y-sustancias-toxicas" -> R.string.programme_drugs
+                "discriminacion" -> R.string.programme_discrimination
+                else -> R.string.programme_imitable
+            }), contentScale = ContentScale.Fit, modifier = Modifier.width(28.dp).height(28.dp))
+        }
     }
 }
+
+@Composable
+private fun BadgeSeparator(color: Color) = Text(stringResource(R.string.programme_bullet), style = stageText(20, 500), color = color)

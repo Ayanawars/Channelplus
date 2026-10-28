@@ -1,12 +1,12 @@
 package tv.own.owntv.core.metadata
 
-/** TMDB ratings and TheTVDB artwork retain separate provenance. */
+/** IMDb ratings are supplied by Trakt; artwork comes exclusively from TheTVDB. */
 data class ExternalTitleMetadata(
     val tmdbId: Int,
     val type: MetadataType,
     val title: String,
     val tvdbId: Int? = null,
-    val tmdbRating: Double? = null,
+    val imdbRating: Double? = null,
     val tvdbOverview: String? = null,
     val tvdbArtwork: String? = null,
     val tvdbUrl: String? = null,
@@ -14,6 +14,11 @@ data class ExternalTitleMetadata(
     val posterUrl: String? = null,
     val logoUrl: String? = null,
     val overview: String? = null,
+    val traktId: Int? = null,
+    val imdbId: String? = null,
+    val year: Int? = null,
+    val genres: List<String> = emptyList(),
+    val ageRating: String? = null,
 )
 
 object ExternalMetadataRules {

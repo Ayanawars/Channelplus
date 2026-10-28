@@ -112,7 +112,7 @@ internal fun LiveDrawerProgramme(
                 StageProgress(((instant - now.startMs).toFloat() / (now.stopMs - now.startMs).coerceAtLeast(1)).coerceIn(0f, 1f), Modifier.weight(1f), flat = true)
                 Text(time(now.stopMs), style = stageText(18, 400), color = DrawerMuted)
             }
-            (now.description?.takeIf { it.isNotBlank() } ?: external?.tvdbOverview)?.let {
+            (now.description?.takeIf { it.isNotBlank() } ?: external?.overview ?: external?.tvdbOverview)?.let {
                 Text(it, style = stageText(19, 400), color = DrawerMuted, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }
         }

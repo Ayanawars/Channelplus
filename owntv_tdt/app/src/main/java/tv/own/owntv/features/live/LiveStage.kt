@@ -330,7 +330,7 @@ internal fun LiveStagePane(
                     StageProgress(progressOf(now), Modifier.weight(1f))
                     Text(timeLeftText(minutesLeft(now)), style = stageText(17, 400).copy(fontFeatureSettings = Tabular), color = StageColors.Muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
-                (now.description?.takeIf { it.isNotBlank() } ?: external?.tvdbOverview)?.let {
+                (now.description?.takeIf { it.isNotBlank() } ?: external?.overview ?: external?.tvdbOverview)?.let {
                     Text(
                         it, style = stageText(19, 400).copy(lineHeight = (19 * 1.55f).mpxSp), color = stageTone(Color(0xFFCCD6D2), StageColors.Body),
                         maxLines = 3, overflow = TextOverflow.Ellipsis,

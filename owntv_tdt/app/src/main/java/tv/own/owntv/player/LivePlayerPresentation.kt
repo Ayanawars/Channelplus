@@ -105,15 +105,11 @@ fun LiveProgrammeInfo(epg: EpgNowNext?, atMs: Long? = null, modifier: Modifier =
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 programmeNow?.let { programme ->
                     val guideDetails = epg?.nowDetails
-                    val separator = stringResource(R.string.player_metadata_separator)
-                    val details = (guideDetails?.categoryList.orEmpty() + listOfNotNull(guideDetails?.year?.toString(), guideDetails?.rating))
-                        .joinToString(separator)
-                    if (details.isNotBlank()) Text(details, style = stageText(18, 500), color = hudInk.copy(alpha = 0.7f),
-                        maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Text(programme.title, style = stageText(38, 700), color = hudInk,
                         maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    tv.own.owntv.ui.metadata.ExternalMetadataBadges(external, color = hudInk.copy(alpha = 0.8f))
-                    (programme.description?.takeIf { it.isNotBlank() } ?: external?.tvdbOverview ?: external?.overview)?.let { description ->
+                    tv.own.owntv.ui.metadata.ExternalMetadataBadges(external, color = hudInk.copy(alpha = 0.8f), details = guideDetails)
+                    ProgrammeMetadataLine(external, guideDetails)
+                    (programme.description?.takeIf { it.isNotBlank() } ?: external?.overview ?: external?.tvdbOverview)?.let { description ->
                         Text(description, style = stageText(21, 400), color = hudInk.copy(alpha = 0.85f),
                             maxLines = 2, overflow = TextOverflow.Ellipsis)
                     }
@@ -189,4 +185,26 @@ private fun ProgrammeSeekTrack(progress: Float, modifier: Modifier = Modifier) {
             if (progress > 0f) Box(Modifier.fillMaxWidth(progress.coerceIn(0f, 1f)).height(if (focused) 5.dp else 4.dp).background(hudAccent))
         }
     }
+}
+
+@Composable
+private fun ProgrammeMetadataLine(data: tv.own.owntv.core.metadata.ExternalTitleMetadata?, details: tv.own.owntv.core.parser.EpgDetails?) {
+    val categories = details?.categoryList.orEmpty()
+    val series = data?.type == tv.own.owntv.core.metadata.MetadataType.TV || !details?.episode.isNullOrBlank() || categories.any { it.contains("serie", true) }
+    val movie = data?.type == tv.own.owntv.core.metadata.MetadataType.MOVIE || categories.any { it.contains("película", true) || it.contains("pelicula", true) || it.contains("movie", true) }
+    val genre = categories.filterNot { it.lowercase() in setOf("serie", "series", "película", "pelicula", "cine", "movie", "film") }.takeIf { it.isNotEmpty() } ?: data?.genres.orEmpty()
+    val parts = listOfNotNull((details?.year ?: data?.year)?.toString(),
+        if (series) stringResource(R.string.programme_series) else if (movie) stringResource(R.string.programme_movie) else null) + genre.take(2).map { g ->
+        when (g.lowercase()) {
+            "crime" -> stringResource(R.string.programme_crime)
+            "drama" -> stringResource(R.string.programme_drama)
+            "comedy" -> stringResource(R.string.programme_comedy)
+            "action" -> stringResource(R.string.programme_action)
+            "thriller" -> stringResource(R.string.programme_thriller)
+            "documentary" -> stringResource(R.string.programme_documentary)
+            else -> g
+        }
+    }
+    if (parts.isNotEmpty()) Text(parts.distinct().joinToString(stringResource(R.string.programme_separator)),
+        style = stageText(18, 500), color = hudInk.copy(alpha = 0.75f), maxLines = 1, overflow = TextOverflow.Ellipsis)
 }

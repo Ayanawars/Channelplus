@@ -102,7 +102,7 @@
     <string name="settings_auto">Automático</string>
     <string name="settings_city_latlon">Ciudad o lat,lon</string>
     <string name="settings_location_hint">Déjalo en blanco para realizar la detección automática a partir de tu IP pública. Introduce una ciudad (p. ej., Londres) o «lat,lon» (p. ej., 51.5,-0.12).</string>
-    <string name="settings_metadata">Metadatos (TMDB)</string>
+    <string name="settings_metadata">Metadatos</string>
     <string name="settings_metadata_source">Fuente de metadatos</string>
     <string name="settings_metadata_source_description">Elige de dónde proceden los detalles de películas y series.</string>
     <string name="settings_metadata_provider_description">Usa únicamente lo que proporciona tu lista de reproducción. No se realizan consultas a TMDB.</string>
@@ -150,8 +150,8 @@
     <string name="settings_looking_up">Buscando…</string>
     <string name="settings_tmdb_attribution">Este producto usa la API de TMDB, pero no está respaldado ni certificado por TMDB.</string>
     <string name="settings_metadata_provider_only">Solo proveedor</string>
-    <string name="settings_metadata_provider_plus_tmdb">Proveedor + TMDB</string>
-    <string name="settings_metadata_tmdb_only">Solo TMDB</string>
+    <string name="settings_metadata_provider_plus_tmdb">Proveedor + Trakt</string>
+    <string name="settings_metadata_tmdb_only">Priorizar Trakt</string>
     <string name="settings_tier_default">Predeterminado (compartido)</string>
     <string name="settings_tier_key">Tu clave de TMDB</string>
     <string name="settings_tier_self_host">Autoalojado</string>

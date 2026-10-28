@@ -19,7 +19,6 @@ import kotlin.coroutines.coroutineContext
 /** Lazy, bounded enrichment shared by the channel drawer, player HUD and VOD details. */
 class ExternalMetadataRepository(
     context: Context,
-    private val provider: MetadataProvider,
     private val client: ExternalMetadataClient,
     private val settings: SettingsRepository,
     val store: ExternalMetadataStore,
@@ -44,8 +43,10 @@ class ExternalMetadataRepository(
     private suspend fun resolve(title: String, year: Int?, knownId: Int?, type: MetadataType?, epg: EpgDetails?, onArtwork: (ExternalTitleMetadata) -> Unit): ExternalTitleMetadata? = withContext(Dispatchers.IO) {
         val cfg = store.config.value
         val metadata = settings.metadataConfig()
-        if (!cfg.enabled || !metadata.enabled || (knownId == null && title.length < 3)) return@withContext null
+        if (!cfg.enabled || (knownId == null && title.length < 3)) return@withContext null
         val includeAdult = profileAllowsAdultMetadata(profiles.getById(settings.activeProfileIdNow())?.isKids)
+        if (!includeAdult) return@withContext null
+        if (cfg.traktClientId.isBlank() && cfg.tvdbKey.isBlank()) return@withContext null
         // Separate type, metadata language, maturity and credential configurations. No raw keys in filenames.
         val key = hash(listOf(ARTWORK_CACHE_VERSION, title, year, knownId, type, epg?.categories, epg?.episode, metadata.resolvedLanguage, includeAdult, cfg.json()).joinToString("|"))
         lock.withLock {
@@ -53,53 +54,66 @@ class ExternalMetadataRepository(
             val file = File(directory, key)
             // A cached explicit miss is different from a failed network request.
             if (file.exists() && readMiss(file)) return@withLock null
-            val match = if (knownId == null) {
-                val hits = mutableListOf<MetadataSearchResult>()
-                val categories = epg?.categoryList.orEmpty().joinToString(" ").lowercase(java.util.Locale.ROOT)
-                val movieOnly = listOf("película", "pelicula", "movie", "film", "cine").any { categories.contains(it) }
-                val tvOnly = !epg?.episode.isNullOrBlank() || categories.contains("series") || categories.contains("serie")
-                if (!tvOnly) hits += provider.searchMovie(title, year, includeAdult) ?: return@withLock null
-                if (!movieOnly || tvOnly) hits += provider.searchTv(title, if (tvOnly) null else year, includeAdult) ?: return@withLock null
-                val selected = ExternalMetadataRules.choose(title, if (tvOnly) null else year, hits)
-                if (selected == null) { write(key, null, 6 * HOUR); return@withLock null }
-                selected.tmdbId to selected.type
-            } else knownId to requireNotNull(type)
-            val full = if (match.second == MetadataType.TV) provider.tvDetails(match.first) else provider.movieDetails(match.first)
-            full ?: return@withLock null
-            if (full.tmdbId != match.first) return@withLock null
-            var result = ExternalTitleMetadata(full.tmdbId, match.second, full.title,
-                tvdbId = full.tvdbId,
-                tmdbRating = full.rating?.takeIf { it.isFinite() && it > 0 && it <= 10 },
-                posterUrl = MetadataImages.poster(full.posterPath), logoUrl = MetadataImages.logo(full.logoPath),
-                overview = full.overview)
-            // The poster does not depend on optional TVDB translations or title logos.
-            onArtwork(result)
             var failed = false
-            if (cfg.tvdbKey.isNotBlank() && result.type == MetadataType.TV && result.tvdbId != null) {
-                try {
-                    val data = client.tvdb(requireNotNull(result.tvdbId), cfg, metadata.resolvedLanguage) { partial ->
-                        result = result.copy(tvdbOverview = partial.overview, tvdbArtwork = partial.artwork,
-                            tvdbUrl = partial.url, tvdbLoaded = true)
-                        onArtwork(result)
-                    }
-                    result = result.copy(tvdbOverview = data.overview, tvdbArtwork = data.artwork, tvdbUrl = data.url, tvdbLoaded = true, logoUrl = data.logo ?: result.logoUrl)
-                } catch (error: CancellationException) { throw error }
-                catch (_: Exception) { failed = true }
+            var result: ExternalTitleMetadata? = null
+            val categories = epg?.categoryList.orEmpty().joinToString(" ").lowercase(java.util.Locale.ROOT)
+            val movieOnly = listOf("película", "pelicula", "movie", "film", "cine").any { categories.contains(it) }
+            val tvOnly = !epg?.episode.isNullOrBlank() || categories.contains("serie")
+            val target = type ?: when { tvOnly -> MetadataType.TV; movieOnly -> MetadataType.MOVIE; else -> null }
+            fun choose(hits: List<ExternalMetadataClient.TitleHit>): ExternalMetadataClient.TitleHit? {
+                val selected = ExternalMetadataRules.choose(title, if (target == MetadataType.TV) null else year,
+                    hits.map { MetadataSearchResult(it.id, it.type, it.title, it.originalTitle, it.year, null, null, 0.0) })
+                return hits.firstOrNull { it.id == selected?.tmdbId && it.type == selected?.type }
             }
+            if (cfg.traktClientId.isNotBlank()) {
+                try {
+                    val hit = if (knownId != null) client.lookupTrakt(knownId, requireNotNull(type), cfg)
+                        else choose(client.searchTrakt(title, if (target == MetadataType.TV) null else year, target, cfg))
+                    if (hit != null) {
+                        result = client.trakt(hit, cfg, metadata.resolvedLanguage)
+                        onArtwork(requireNotNull(result))
+                        try { result = result?.copy(imdbRating = client.imdbRating(hit.id, hit.type, cfg)) }
+                        catch (e: CancellationException) { throw e } catch (_: Exception) { failed = true }
+                    }
+                } catch (e: CancellationException) { throw e } catch (_: Exception) { failed = true }
+            }
+            if (cfg.tvdbKey.isNotBlank()) {
+                try {
+                    val base = result
+                    val tvdbId = base?.tvdbId
+                    val hit = if (tvdbId != null) ExternalMetadataClient.TitleHit(tvdbId, requireNotNull(base).type, base.title, base.year)
+                        else if (base?.imdbId != null) client.searchTvdb(base.title, null, base.type, cfg, base.imdbId).singleOrNull()
+                        else if (title.isNotBlank()) choose(client.searchTvdb(title, if (target == MetadataType.TV) null else year, target, cfg)) else null
+                    if (hit != null) {
+                        fun merge(data: ExternalMetadataClient.TvdbDetails): ExternalTitleMetadata =
+                            (result ?: ExternalTitleMetadata(knownId ?: 0, hit.type, data.title ?: hit.title)).copy(
+                                tvdbId = hit.id, tvdbOverview = data.overview, tvdbArtwork = data.artwork,
+                                tvdbUrl = data.url, tvdbLoaded = true, posterUrl = data.artwork, logoUrl = data.logo,
+                                overview = result?.overview ?: data.overview, year = result?.year ?: data.year ?: hit.year,
+                                genres = result?.genres?.takeIf { it.isNotEmpty() } ?: data.genres, ageRating = data.ageRating)
+                        val full = client.tvdb(hit.id, cfg, metadata.resolvedLanguage, { partial ->
+                            result = merge(partial); onArtwork(requireNotNull(result))
+                        }, hit.type)
+                        result = merge(full)
+                    }
+                } catch (e: CancellationException) { throw e } catch (_: Exception) { failed = true }
+            }
+            // Never replace a short-lived failure with a week-long negative cache entry.
+            if (result == null && failed) return@withLock null
             coroutineContext.ensureActive()
-            write(key, result, if (failed) 5 * 60_000L else 7 * 24 * HOUR)
+            write(key, result, if (failed) 5 * 60_000L else if (result == null) 6 * HOUR else 7 * 24 * HOUR)
             result
         }
     }
 
-    /** Test the configured services without searching a title or exposing exception text. */
-    suspend fun test(): Boolean? = withContext(Dispatchers.IO) {
+    data class ServiceTest(val trakt: Boolean?, val tvdb: Boolean?)
+    suspend fun test(): ServiceTest = withContext(Dispatchers.IO) {
         lock.withLock {
             val cfg = store.config.value
             suspend fun attempt(block: suspend () -> Unit): Boolean = try { block(); true }
                 catch (error: CancellationException) { throw error } catch (_: Exception) { false }
-            val tvdb = if (cfg.tvdbKey.isBlank()) null else attempt { client.tvdb(121361, cfg, "en") }
-            tvdb
+            ServiceTest(if (cfg.traktClientId.isBlank()) null else attempt { client.testTrakt(cfg) },
+                if (cfg.tvdbKey.isBlank()) null else attempt { client.tvdb(121361, cfg, "en") })
         }
     }
 
@@ -113,12 +127,15 @@ class ExternalMetadataRepository(
         if (o.optLong("expires") <= System.currentTimeMillis()) return@runCatching null
         val d = o.optJSONObject("data") ?: return@runCatching null
         ExternalTitleMetadata(d.getInt("tmdb"), MetadataType.valueOf(d.getString("type")), d.getString("title"),
-            tvdbId = d.optInt("tvdb").takeIf { it > 0 }, tmdbRating = ExternalMetadataRules.rating(d.optString("tmdbRating")),
+            tvdbId = d.optInt("tvdb").takeIf { it > 0 }, imdbRating = ExternalMetadataRules.rating(d.optString("imdbRating")),
             tvdbOverview = d.optString("overview").takeIf { it.isNotBlank() }, tvdbArtwork = d.optString("artwork").takeIf { it.isNotBlank() },
-            tvdbUrl = d.optString("url").takeIf { it.startsWith("https://thetvdb.com/series/") }, tvdbLoaded = d.optBoolean("tvdbLoaded"),
+            tvdbUrl = d.optString("url").takeIf { it.startsWith("https://thetvdb.com/series/") || it.startsWith("https://thetvdb.com/movies/") }, tvdbLoaded = d.optBoolean("tvdbLoaded"),
             posterUrl = d.optString("posterUrl").takeIf { it.startsWith("https://") },
             logoUrl = d.optString("logoUrl").takeIf { it.startsWith("https://") },
-            overview = d.optString("baseOverview").takeIf { it.isNotBlank() })
+            overview = d.optString("baseOverview").takeIf { it.isNotBlank() },
+            traktId = d.optInt("traktId").takeIf { it > 0 }, imdbId = d.optString("imdbId").takeIf { it.startsWith("tt") },
+            year = d.optInt("year").takeIf { it > 0 }, ageRating = d.optString("ageRating").takeIf { it.isNotBlank() },
+            genres = d.optJSONArray("genres")?.let { a -> (0 until a.length()).map { a.getString(it) } }.orEmpty())
     }.getOrNull()
 
     private fun write(key: String, value: ExternalTitleMetadata?, ttl: Long) {
@@ -128,7 +145,8 @@ class ExternalMetadataRepository(
             directory.listFiles()?.filter { it.name != key }?.sortedByDescending { it.lastModified() }
                 ?.drop(255)?.forEach { it.delete() }
             val data = value?.let { d -> JSONObject().put("tmdb", d.tmdbId).put("type", d.type.name).put("title", d.title)
-                .put("tvdb", d.tvdbId).put("tmdbRating", d.tmdbRating)
+                .put("tvdb", d.tvdbId).put("imdbRating", d.imdbRating)
+                .put("traktId", d.traktId).put("imdbId", d.imdbId).put("year", d.year).put("ageRating", d.ageRating).put("genres", org.json.JSONArray(d.genres))
                 .put("overview", d.tvdbOverview).put("artwork", d.tvdbArtwork).put("url", d.tvdbUrl).put("tvdbLoaded", d.tvdbLoaded).put("posterUrl", d.posterUrl).put("logoUrl", d.logoUrl).put("baseOverview", d.overview) }
             val bytes = JSONObject().put("expires", System.currentTimeMillis() + ttl).put("data", data ?: JSONObject.NULL).toString().toByteArray()
             val atomic = AtomicFile(File(directory, key))
@@ -138,5 +156,5 @@ class ExternalMetadataRepository(
     }
 
     private fun hash(value: String): String = MessageDigest.getInstance("SHA-256").digest(value.toByteArray()).joinToString("") { "%02x".format(java.util.Locale.ROOT, it) }
-    private companion object { const val HOUR = 3_600_000L; const val ARTWORK_CACHE_VERSION = 3 }
+    private companion object { const val HOUR = 3_600_000L; const val ARTWORK_CACHE_VERSION = 4 }
 }

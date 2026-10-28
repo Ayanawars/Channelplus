@@ -50,8 +50,8 @@ android {
         targetSdk = 36
         // Release defaults also apply to the APK built by Channelplus CI.
         // Keep both values above every previously distributed test APK for in-place updates.
-        versionCode = (System.getenv("VERSION_CODE") ?: "100010").toInt()
-        versionName = System.getenv("VERSION_NAME") ?: "5.3.1"
+        versionCode = (System.getenv("VERSION_CODE") ?: "100011").toInt()
+        versionName = System.getenv("VERSION_NAME") ?: "5.3.2"
 
         // Opt-in local diagnostic APKs keep the rolling playback trace enabled even when they are
         // release-signed (so they can update an installed production build without changing its data).
