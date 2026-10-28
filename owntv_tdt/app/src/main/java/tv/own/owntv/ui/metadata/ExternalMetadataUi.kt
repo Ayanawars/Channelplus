@@ -72,7 +72,7 @@ fun ExternalMetadataBadges(data: ExternalTitleMetadata?, modifier: Modifier = Mo
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 AsyncImage("file:///android_asset/programme-badges/imdb.svg", contentDescription = stringResource(R.string.programme_imdb),
                     contentScale = ContentScale.Fit, modifier = Modifier.width(56.dp).height(28.dp))
-                Text(stringResource(R.string.programme_score, rating), style = stageText(22, 700), color = hudAccent, maxLines = 1)
+                Text(stringResource(R.string.programme_score, rating), style = stageText(22, 700), color = Color(0xFFF5C518), maxLines = 1)
             }
         }
         if (age != null) {

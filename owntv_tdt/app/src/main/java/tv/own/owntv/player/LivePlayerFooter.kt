@@ -91,8 +91,8 @@ internal fun LivePlayerFooter(
                 }
                 match?.invoke()
                 if (info != null) info() else LiveProgrammeInfo(null)
-                Row(Modifier.fillMaxWidth().focusProperties { up = timeline },
-                    horizontalArrangement = if (toolsExpanded) Arrangement.Start else Arrangement.End,
+                Row(Modifier.fillMaxWidth(),
+                    horizontalArrangement = if (toolsExpanded) Arrangement.Start else Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically) {
                     if (toolsExpanded) {
                         Column(Modifier.fillMaxWidth().heightIn(max = 240.dp).background(hudShade(0.65f), RoundedCornerShape(16.dp))

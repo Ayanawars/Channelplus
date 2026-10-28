@@ -39,9 +39,25 @@ class TraktMetadataProvider(
         } else null
         val score = try { api.imdbRating(hit.id, type, cfg) }
             catch (e: CancellationException) { throw e } catch (_: Exception) { null }
+        val entity = if (type == MetadataType.TV) "shows" else "movies"
+        val cast = try {
+            val rows = api.traktObject("/$entity/${hit.id}/people", cfg).optJSONArray("cast")
+            if (rows == null) emptyList() else (0 until rows.length()).mapNotNull { index ->
+                rows.optJSONObject(index)?.optJSONObject("person")?.optString("name")?.takeIf { it.isNotBlank() }?.let { CastMember(it) }
+            }.distinctBy { it.name }.take(20)
+        } catch (e: CancellationException) { throw e } catch (_: Exception) { emptyList() }
+        val trailer = try {
+            val rows = api.traktArray("/$entity/${hit.id}/videos", cfg)
+            (0 until rows.length()).mapNotNull { index ->
+                val item = rows.optJSONObject(index) ?: return@mapNotNull null
+                val url = item.optString("url")
+                Regex("https://(?:www\\.)?(?:youtube\\.com/watch\\?v=|youtu\\.be/)([A-Za-z0-9_-]{11})(?:[&?].*)?")
+                    .matchEntire(url)?.groupValues?.get(1)
+            }.firstOrNull()
+        } catch (e: CancellationException) { throw e } catch (_: Exception) { null }
         MovieDetails(tmdbId = id, title = data.title, year = data.year, overview = data.overview ?: artwork?.overview,
             posterPath = artwork?.artwork, backdropPath = null, rating = score, genres = data.genres,
-            cast = emptyList(), trailerKey = null, logoPath = artwork?.logo, tvdbId = data.tvdbId)
+            cast = cast, trailerKey = trailer, logoPath = artwork?.logo, tvdbId = data.tvdbId)
     }
 
     override suspend fun trendingPage(type: MetadataType, page: Int): TrendingFeedPage? = attempt { cfg ->

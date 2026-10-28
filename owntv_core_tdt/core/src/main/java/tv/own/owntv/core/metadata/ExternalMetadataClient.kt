@@ -47,7 +47,7 @@ class ExternalMetadataClient(client: OkHttpClient) {
         val genres = data.optJSONArray("genres").objects().mapNotNull { clean(it.optString("name")) }
         val age = data.optJSONArray("contentRatings").objects().firstOrNull { it.optString("country").lowercase() in setOf("esp", "es", "spain") }?.optString("name")?.let(::clean)
         onArtwork(TvdbDetails(overview, artwork, url, null, title, year, genres, age))
-        val iso3 = runCatching { java.util.Locale.forLanguageTag(language.ifBlank { "en" }).isO3Language }.getOrNull()
+        val iso3 = runCatching { java.util.Locale.forLanguageTag(language.ifBlank { java.util.Locale.getDefault().toLanguageTag() }).isO3Language }.getOrNull()
         if (!iso3.isNullOrBlank() && iso3 != "eng") {
             // A missing translation keeps the base overview; auth/network errors propagate for retry.
             try {
@@ -103,7 +103,7 @@ class ExternalMetadataClient(client: OkHttpClient) {
         val ids = data.optJSONObject("ids") ?: throw ApiFailure(422)
         if (ids.optInt("trakt") != hit.id) throw ApiFailure(422)
         var overview = clean(data.optString("overview"))
-        val lang = java.util.Locale.forLanguageTag(language).language
+        val lang = java.util.Locale.forLanguageTag(language.ifBlank { java.util.Locale.getDefault().toLanguageTag() }).language
         if (lang.isNotBlank() && lang != "en") {
             try {
                 val translations = array(traktRequest("$base/translations?language=$lang", config)).objects()
@@ -137,6 +137,8 @@ class ExternalMetadataClient(client: OkHttpClient) {
             TitleHit(id, kind, translated ?: row.getString("name"), row.optString("year").toIntOrNull(), row.optString("name"))
         }
     }
+
+    internal suspend fun traktObject(path: String, config: ExternalMetadataConfig): JSONObject = json(traktRequest(TRAKT + path, config))
 
     internal suspend fun traktArray(path: String, config: ExternalMetadataConfig): JSONArray = array(traktRequest(TRAKT + path, config))
 
