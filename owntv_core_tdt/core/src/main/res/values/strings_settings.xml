@@ -206,7 +206,7 @@
     <!-- Translators: Placeholder hint text in the custom location field. -->
     <string name="settings_location_hint">Leave blank to auto-detect from your public IP. Enter a city (e.g. London) or \"lat,lon\" (e.g. 51.5,-0.12).</string>
     <!-- Translators: Section header for metadata settings. 'TMDB' is a brand name (The Movie Database). -->
-    <string name="settings_metadata">Metadata (TMDB)</string>
+    <string name="settings_metadata">Metadata</string>
     <!-- Translators: Setting label for the metadata source choice. -->
     <string name="settings_metadata_source">Metadata source</string>
     <!-- Translators: Description of the metadata source setting. -->
@@ -305,9 +305,9 @@
     <!-- Translators: Metadata source option: use only playlist-provided metadata. -->
     <string name="settings_metadata_provider_only">Provider only</string>
     <!-- Translators: Metadata source option: playlist metadata supplemented by TMDB. -->
-    <string name="settings_metadata_provider_plus_tmdb">Provider + TMDB</string>
+    <string name="settings_metadata_provider_plus_tmdb">Provider + Trakt</string>
     <!-- Translators: Metadata source option: prefer TMDB for all metadata. -->
-    <string name="settings_metadata_tmdb_only">TMDB only</string>
+    <string name="settings_metadata_tmdb_only">Prefer Trakt</string>
     <!-- Translators: TMDB tier option: the built-in shared API key. -->
     <string name="settings_tier_default">Default shared service</string>
     <!-- Translators: TMDB tier option: user's own TMDB API key. -->

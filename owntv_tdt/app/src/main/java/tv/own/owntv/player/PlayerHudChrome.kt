@@ -170,15 +170,17 @@ internal fun TopBar(
 
 /** The channel logo tile, falling back to the first letters of the channel name. */
 @Composable
-internal fun ChannelLogo(logoUrl: String?, title: String?, size: Int, modifier: Modifier = Modifier) {
+internal fun ChannelLogo(logoUrl: String?, title: String?, size: Int, modifier: Modifier = Modifier, onAvailable: ((Boolean) -> Unit)? = null) {
     val url = title?.let(PiconStore::iconFor) ?: logoUrl
     val context = LocalContext.current
     val request = remember(url, context) { ImageRequest.Builder(context).data(url).crossfade(false).build() }
     var failed by remember(url) { mutableStateOf(false) }
+    var loaded by remember(url) { mutableStateOf(false) }
+    androidx.compose.runtime.LaunchedEffect(url, failed, loaded) { onAvailable?.invoke(!url.isNullOrBlank() && loaded && !failed) }
     // Original logo canvas only: no colored tile, clipping or adaptive background plate.
     Box(modifier.width((size * 1.5f).dp).height(size.dp), contentAlignment = Alignment.Center) {
         if (!url.isNullOrBlank() && !failed) AsyncImage(model = request, contentDescription = null,
-            contentScale = ContentScale.Fit, onError = { failed = true }, modifier = Modifier.fillMaxSize())
+            contentScale = ContentScale.Fit, onSuccess = { loaded = true }, onError = { failed = true }, modifier = Modifier.fillMaxSize())
         else Text((title ?: "?").take(3).uppercase(), style = tv.own.owntv.ui.theme.stageText(22, 700),
             color = hudInk, fontWeight = FontWeight.Bold)
     }

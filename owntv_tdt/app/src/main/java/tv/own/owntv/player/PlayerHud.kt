@@ -299,7 +299,10 @@ fun PlayerHud(
     // First Back hides the controls (instead of leaving the channel); with the controls already hidden
     // this handler is disabled, so Back falls through to the shell, which exits the player. Also disabled
     // while an error/dialog is up (a dialog handles its own Back; an error should exit).
-    BackHandler(enabled = controlsVisible && !forceShow) { controlsVisible = false }
+    BackHandler(enabled = controlsVisible && error == null && dialog == HudDialog.NONE) {
+        liveToolsExpanded = false
+        controlsVisible = false
+    }
     // Channel zap (live only): a brief "now watching" card on up/down without revealing the full HUD.
     val canZap = onChannelUp != null && onChannelDown != null
     var channelFlash by remember { mutableIntStateOf(0) }
@@ -440,9 +443,9 @@ fun PlayerHud(
         player.setBitrateTrackingEnabled(showInfo)
         onDispose { player.setBitrateTrackingEnabled(false) }
     }
-    LaunchedEffect(controlsVisible, wakeTick, forceShow, inert) {
+    LaunchedEffect(controlsVisible, wakeTick, forceShow, inert, isLive) {
         // Don't auto-hide under an overlay — hiding is what triggers the catch-all focus grab below.
-        if (controlsVisible && !forceShow && !inert) { delay(4500); controlsVisible = false }
+        if (controlsVisible && !forceShow && !inert) { delay(if (isLive) LIVE_HUD_TIMEOUT_MS else 4500L); controlsVisible = false }
     }
     LaunchedEffect(controlsVisible, error, dialog, inert, showNextCard) {
         // Never steal focus while a dialog is open (its rows own it) or while a shell overlay is up
@@ -457,6 +460,7 @@ fun PlayerHud(
                 error != null -> runCatching { retryFocus.requestFocus() }
                 // Falls back to Play when no timeline is drawn after all (no duration yet, say).
                 toSeek -> runCatching { seekFocus.requestFocus() }.onFailure { runCatching { playFocus.requestFocus() } }
+                isLive && !liveToolsExpanded -> runCatching { seekFocus.requestFocus() }
                 else -> runCatching { playFocus.requestFocus() }
             }
         } else runCatching { catchFocus.requestFocus() }
@@ -575,7 +579,13 @@ fun PlayerHud(
                 // de facto TV convention (Live Channels, YouTube TV, Pluto TV). All of these keys move
                 // the same way; there is deliberately no split between CH+ and D-pad Up. Wrapping is
                 // intended: CH-/Down from the first channel lands on the last, and vice versa.
-                isLive && controlsVisible && !inert && dialog == HudDialog.NONE && error == null && e.key == Key.DirectionUp -> {
+                isLive && controlsVisible && !liveToolsExpanded && !inert && dialog == HudDialog.NONE && error == null && e.key == Key.DirectionDown -> {
+                    wakeTick++
+                    liveToolsExpanded = true
+                    true
+                }
+                isLive && controlsVisible && !liveToolsExpanded && !inert && dialog == HudDialog.NONE && error == null && e.key == Key.DirectionUp -> {
+                    liveToolsExpanded = false
                     wakeTick++
                     runCatching { seekFocus.requestFocus() }
                     true
@@ -609,7 +619,7 @@ fun PlayerHud(
                     e.key.horizontalDirection(layoutDirection) == HorizontalDirection.START -> { onOpenChannelList(); true }
                 onOpenHistoryList != null && !controlsVisible &&
                     e.key.horizontalDirection(layoutDirection) == HorizontalDirection.END -> { onOpenHistoryList(); true }
-                onToastOk != null && !controlsVisible &&
+                !isLive && onToastOk != null && !controlsVisible &&
                     (e.key == Key.DirectionCenter || e.key == Key.Enter || e.key == Key.NumPadEnter) -> { onToastOk(); true }
                 controlsVisible -> { wakeTick++; false }
                 else -> false
@@ -712,7 +722,7 @@ fun PlayerHud(
                 BottomBar(
                     primaryFocus = if (isLive) playFocus else null,
                     toolsExpanded = liveToolsExpanded,
-                    onToolsExpandedChange = { liveToolsExpanded = it },
+                    onToolsExpandedChange = { liveToolsExpanded = it; wakeTick++ },
                     liveInfo = liveEpgCard,
                     liveMatch = matchLine,
                     channelVersionLabel = channelVersions.firstOrNull { it.id == selectedVersionId }?.let { channel ->
@@ -991,3 +1001,5 @@ fun PlayerHud(
         HudDialog.NONE -> Unit
     }
 }
+
+internal const val LIVE_HUD_TIMEOUT_MS = 15_000L

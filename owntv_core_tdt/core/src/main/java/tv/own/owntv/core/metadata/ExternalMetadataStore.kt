@@ -19,9 +19,10 @@ class ExternalMetadataConfig(
     val enabled: Boolean = true,
     val tvdbKey: String = "",
     val tvdbPin: String = "",
+    val traktClientId: String = "",
 ) {
     internal fun json() = JSONObject().put("enabled", enabled)
-        .put("tvdb", tvdbKey).put("pin", tvdbPin)
+        .put("tvdb", tvdbKey).put("pin", tvdbPin).put("trakt", traktClientId)
 }
 
 class ExternalMetadataStore(context: Context) {
@@ -60,7 +61,7 @@ class ExternalMetadataStore(context: Context) {
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.DECRYPT_MODE, key(), GCMParameterSpec(128, bytes.copyOfRange(1, n + 1)))
         val o = JSONObject(String(cipher.doFinal(bytes.copyOfRange(n + 1, bytes.size)), Charsets.UTF_8))
-        ExternalMetadataConfig(o.optBoolean("enabled", true), o.optString("tvdb"), o.optString("pin")).also { clean ->
+        ExternalMetadataConfig(o.optBoolean("enabled", true), o.optString("tvdb"), o.optString("pin"), o.optString("trakt")).also { clean ->
             // Remove unsupported legacy credential fields while preserving current service settings.
             if (o.length() != clean.json().length()) persist(clean)
         }

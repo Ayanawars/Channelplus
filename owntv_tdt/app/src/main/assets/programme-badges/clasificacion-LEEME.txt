@@ -1,0 +1,16 @@
+CLASIFICACIÓN AUDIOVISUAL · SVG
+
+01-edades-articulo: TP, 7, 12, 16 y 18, reconstruidos a partir de la ilustración de Mundoplus.tv.
+02-descriptores-articulo: los siete pictogramas reconstruidos (violencia, sexo, miedo o angustia, lenguaje, drogas y sustancias tóxicas, discriminación, conductas imitables), sobre fondo oscuro.
+03-descriptores-transparentes: los mismos pictogramas blancos sin recuadro ni fondo, para colocar sobre fondos oscuros.
+04-edades-colores-boe: Infantil, TP, 0, 7, 12, 16, 18 y X. Adaptaciones propias con los colores de referencia del BOE; no son archivos SVG oficiales.
+
+Los símbolos del artículo son una ilustración, no un catálogo oficial de pictogramas. El acuerdo permite a los prestadores crear símbolos gráficos para comunicar los siete descriptores. Las reconstrucciones conservan el concepto y estilo general, con diferencias de dibujo y tipografía frente al JPG.
+
+Todos los SVG contienen geometría vectorial y letras convertidas a trazados. Sin imágenes rasterizadas incrustadas, scripts, enlaces ni fuentes externas. Se pueden escalar y editar.
+
+FUENTES
+https://www.mundoplus.tv/tv-digital/asi-cambia-la-clasificacion-por-edades-de-los-contenidos-de-television-y-streaming-en-espana/
+https://www.mundoplus.tv/wp-content/uploads/2026/09/clasificacion_por_edades.jpg
+https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-18871
+https://www.boe.es/datos/imagenes/disp/2026/223/18871_17406489_1.png

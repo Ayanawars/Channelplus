@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_options_down_hint">↓ Options</string>
+    <string name="player_tool_speed_value">Speed · %1$s</string>
+    <string name="programme_imdb">IMDb</string>
+    <string name="programme_score">%1$.1f</string>
+    <string name="programme_age">Age classification: %1$s</string>
+    <string name="programme_bullet">•</string>
+    <string name="programme_separator">" • "</string>
+    <string name="programme_series">Series</string>
+    <string name="programme_movie">Movie</string>
+    <string name="programme_crime">Crime</string>
+    <string name="programme_drama">Drama</string>
+    <string name="programme_comedy">Comedy</string>
+    <string name="programme_action">Action</string>
+    <string name="programme_thriller">Thriller</string>
+    <string name="programme_documentary">Documentary</string>
+    <string name="programme_violence">Violence</string>
+    <string name="programme_language">Language</string>
+    <string name="programme_sex">Sex</string>
+    <string name="programme_fear">Fear or distress</string>
+    <string name="programme_drugs">Drugs and toxic substances</string>
+    <string name="programme_discrimination">Discrimination</string>
+    <string name="programme_imitable">Imitable behaviour</string>
+</resources>

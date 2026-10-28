@@ -268,12 +268,15 @@ object XmltvParser {
                     if (list.size < EpgDetails.MAX_CATEGORIES * 2) list.add(readText(parser))
                 }
                 "date" -> if (year == null) year = XmltvDetailRules.year(readText(parser))
-                "rating" -> if (rating == null) {
+                "rating" -> {
                     inRating = true
                     ratingSystem = parser.getAttributeValue(null, "system")
                 }
                 // <value> also sits inside <star-rating>; only the age rating's is wanted.
-                "value" -> if (inRating && rating == null) rating = XmltvDetailRules.rating(ratingSystem, readText(parser))
+                "value" -> if (inRating) {
+                    val next = XmltvDetailRules.rating(ratingSystem, readText(parser))
+                    rating = listOfNotNull(rating, next).distinct().joinToString("; ").take(512).takeIf { it.isNotBlank() }
+                }
                 "length" -> if (lengthMin == null) {
                     val units = parser.getAttributeValue(null, "units")
                     lengthMin = XmltvDetailRules.lengthMinutes(readText(parser), units)
