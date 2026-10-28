@@ -6,9 +6,17 @@ The app builds with the local core source, including the existing TDT bridge. Pa
 
 ## Updates
 
-The app checks public releases in Ayanawars/Channelplus. Publish a numerically newer version tag (next build: v5.2.2, versionCode 100001) with an ARM .apk asset; x86 builds must include x86_64 in the filename. Android asks before installing. Existing installed versions need the first Channel + APK installed manually, because their updater is disabled.
+The app checks public releases in Ayanawars/Channelplus. Publish a numerically newer version tag (prepared build: v5.3.2, versionCode 100011; next versionCode: 100012) with an ARM .apk asset; x86 builds must include x86_64 in the filename. Android asks before installing. Existing installed versions need the first Channel + APK installed manually, because their updater is disabled.
 
 An upgrade must use the original signing key, retained outside Git. Never commit a keystore. CI generates a disposable key, so its artifacts cannot update the existing TV installation. Production releases must use KEYSTORE_FILE, KEYSTORE_PASSWORD, KEY_ALIAS and KEY_PASSWORD via private build inputs. Do not publish a CI APK as an update.
+
+## Signing-key recovery
+
+The original key is preserved in the user's private files as `Channelplus-original-signing.jks`. It can also be recovered from the private archive `OwnTV-TDT-5.2.1-test2-fuentes.zip`, entry `owntv_tdt/test-signing.jks`. Never publish that archive or the keystore, and never place the key in Git.
+
+Certificate SHA-256: `801bde35b2bcefcfe4fa65348b59d8e9b7053600b88842116e22f1979724be2f`. This certificate was checked against the published 5.3.1 APK before preparing 5.3.2. Check certificate equality before every update. The key alias is `tunerprobe`.
+
+The 5.3.2 publication uses the tested CI build re-signed with this key; the disposable CI certificate must never be published. An ephemeral release runner can receive a CMS envelope encrypted for its one-time public transport certificate, verify the old/new APK certificates, and upload the release without storing a plaintext signing key in the repository.
 
 ## Validation
 
