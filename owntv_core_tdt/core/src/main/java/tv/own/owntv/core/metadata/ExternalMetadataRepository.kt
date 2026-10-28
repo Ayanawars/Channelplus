@@ -91,9 +91,9 @@ class ExternalMetadataRepository(
                                 tvdbUrl = data.url, tvdbLoaded = true, posterUrl = data.artwork, logoUrl = data.logo,
                                 overview = result?.overview ?: data.overview, year = result?.year ?: data.year ?: hit.year,
                                 genres = result?.genres?.takeIf { it.isNotEmpty() } ?: data.genres, ageRating = data.ageRating)
-                        val full = client.tvdb(hit.id, cfg, metadata.resolvedLanguage, { partial ->
+                        val full = client.tvdb(hit.id, cfg, metadata.resolvedLanguage, type = hit.type, onArtwork = { partial ->
                             result = merge(partial); onArtwork(requireNotNull(result))
-                        }, hit.type)
+                        })
                         result = merge(full)
                     }
                 } catch (e: CancellationException) { throw e } catch (_: Exception) { failed = true }

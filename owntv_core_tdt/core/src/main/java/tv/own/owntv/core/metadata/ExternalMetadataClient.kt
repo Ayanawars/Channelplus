@@ -33,7 +33,7 @@ class ExternalMetadataClient(client: OkHttpClient) {
     data class TvdbDetails(val overview: String?, val artwork: String?, val url: String?, val logo: String?,
         val title: String? = null, val year: Int? = null, val genres: List<String> = emptyList(), val ageRating: String? = null)
 
-    suspend fun tvdb(id: Int, config: ExternalMetadataConfig, language: String, onArtwork: (TvdbDetails) -> Unit = {}, type: MetadataType = MetadataType.TV): TvdbDetails {
+    suspend fun tvdb(id: Int, config: ExternalMetadataConfig, language: String, type: MetadataType = MetadataType.TV, onArtwork: (TvdbDetails) -> Unit = {}): TvdbDetails {
         require(id > 0)
         val entity = if (type == MetadataType.MOVIE) "movies" else "series"
         val data = authorized("/$entity/$id/extended", config).optJSONObject("data") ?: throw ApiFailure(422)
