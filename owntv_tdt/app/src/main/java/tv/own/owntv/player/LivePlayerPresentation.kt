@@ -192,7 +192,7 @@ private fun ProgrammeMetadataLine(data: tv.own.owntv.core.metadata.ExternalTitle
     val categories = details?.categoryList.orEmpty()
     val series = data?.type == tv.own.owntv.core.metadata.MetadataType.TV || !details?.episode.isNullOrBlank() || categories.any { it.contains("serie", true) }
     val movie = data?.type == tv.own.owntv.core.metadata.MetadataType.MOVIE || categories.any { it.contains("película", true) || it.contains("pelicula", true) || it.contains("movie", true) }
-    val genre = categories.filterNot { tv.own.owntv.core.metadata.SpanishProgrammeBadges.descriptors(listOf(it)).isNotEmpty() || it.lowercase() in setOf("serie", "series", "película", "pelicula", "cine", "movie", "film") }.takeIf { it.isNotEmpty() } ?: data?.genres.orEmpty()
+    val genre = categories.map { it.replace(Regex("(?i)^(?:series?|pel[ií]culas?)\\s*[,/]\\s*"), "").trim() }.filter { it.isNotBlank() }.filterNot { tv.own.owntv.core.metadata.SpanishProgrammeBadges.descriptors(listOf(it)).isNotEmpty() || it.lowercase() in setOf("serie", "series", "película", "pelicula", "cine", "movie", "film") }.takeIf { it.isNotEmpty() } ?: data?.genres.orEmpty()
     val parts = listOfNotNull((details?.year ?: data?.year)?.toString(),
         if (series) stringResource(R.string.programme_series) else if (movie) stringResource(R.string.programme_movie) else null) + genre.take(2).map { g ->
         when (g.lowercase()) {
