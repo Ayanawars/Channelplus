@@ -1,0 +1,59 @@
+name: Build Channel+ 5.3.7 LOVEStv TCL
+
+on:
+  push:
+    branches:
+      - codex/channelplus-5.3.7-lovestv-ci
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hbbtv32:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Overlay exact 5.3.7 LOVEStv source changes
+        run: |
+          echo "fea649552eb21f7a5df958a20dbb1cf6915b186b701a346aca498be434b8173b  ci/channelplus-5.3.7-overlay.zip" | sha256sum -c -
+          unzip -oq ci/channelplus-5.3.7-overlay.zip -d .
+          test -f owntv_tdt/app/src/main/java/tv/own/owntv/features/hbbtv/HbbTvActivityHost.java
+          test -f owntv_tdt/app/libs/lovestv-runtime.jar
+          python3 tools/hbbtv/verify_channelplus_145.py
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Install Android SDK
+        run: sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
+      - name: Generate disposable CI certificate (test builds only)
+        run: keytool -genkeypair -keystore "$RUNNER_TEMP/ci.jks" -storepass android -keypass android -alias tunerprobe -keyalg RSA -validity 30 -dname 'CN=Channelplus CI'
+      - name: Build TCL HbbTV 32-bit APK
+        working-directory: owntv_tdt
+        env:
+          CHANNELPLUS_TEST_KEYSTORE: ${{ runner.temp }}/ci.jks
+          VERSION_CODE: '100018'
+          VERSION_NAME: '5.3.7-LOVEStv-CI'
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:assembleHbbtv32Debug --no-daemon --stacktrace --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g -Dfile.encoding=UTF-8" -Pkotlin.daemon.jvmargs=-Xmx3g
+      - name: Upload TCL test APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Channelplus-5.3.7-LOVEStv-hbbtv32-CI
+          path: owntv_tdt/app/build/outputs/apk/hbbtv32/debug/*.apk
+          if-no-files-found: error
+      - name: Upload Android signing tool
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apksigner-android-37
+          path: /opt/android-sdk/build-tools/37.0.0/lib/apksigner.jar
+          if-no-files-found: warn
