@@ -55,6 +55,15 @@ jobs:
           assert 'val channel = previewChannel' not in shell.split('val hbbKeyHandler by',1)[1].split('DisposableEffect(hbbActivity)',1)[0]
           print('PASS: startup, colour key queue, service visibility and fullscreen navigation checks')
           PY
+      - name: Classify HbbTV technical diagnostics for i18n inventory
+        working-directory: owntv_tdt
+        run: |
+          set -e
+          for text in 'ChannelplusHbb' 'Remote=' 'consumedByHbb=' 'shellHandler='; do
+            python3 tools/i18n/check_hardcoded_strings.py classify-safe \
+              --path app/src/main/java/tv/own/owntv/MainActivity.kt \
+              --text "$text" --category log
+          done
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
