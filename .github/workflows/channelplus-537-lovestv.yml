@@ -1,4 +1,4 @@
-name: Build Channel+ 5.3.9 LOVEStv TCL reliability
+name: Build Channel+ 5.3.10 LOVEStv TCL native autostart
 
 on:
   push:
@@ -55,6 +55,53 @@ jobs:
           assert 'val channel = previewChannel' not in shell.split('val hbbKeyHandler by',1)[1].split('DisposableEffect(hbbActivity)',1)[0]
           print('PASS: startup, colour key queue, service visibility and fullscreen navigation checks')
           PY
+      - name: Native LOVEStv 1.45 autostart parity (without coloured key)
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('owntv_tdt/app/src/main/java/tv/own/channelplus/lovestvprobe/HbbTvRuntimeService.java')
+          s=p.read_text(encoding='utf8')
+          def replace(old,new):
+              global s
+              assert s.count(old)==1, (old[:100],s.count(old))
+              s=s.replace(old,new)
+          replace('private Object engine,browser,initListener;', 'private Object engine,browser,initListener,eventNotify,eventListener;')
+          replace('root=new FrameLayout(windowContext); root.setBackgroundColor(Color.TRANSPARENT); root.setAlpha(0f); root.setFocusable(false);',
+                  'root=new FrameLayout(windowContext); root.setBackgroundColor(Color.TRANSPARENT); root.setAlpha(1f); root.setVisibility(View.VISIBLE); root.setFocusable(false); root.setClipChildren(false); root.setClipToPadding(false); Log.i(TAG,"Native HbbTV browser host visible before initialization");')
+          replace('        initializing=true;\n        main.removeCallbacks(timeout);',
+                  '        initializing=true;\n        visibility(); // display transparent host during native browser initialization; no remote key\n        main.removeCallbacks(timeout);')
+          replace('ExperimentalAuthorization.begin(this,authorized->main.post(()->{',
+                  'ExperimentalAuthorization.begin(windowContext!=null?windowContext:this,authorized->main.post(()->{')
+          replace('                prepareKeys();\n                browser=singleton("com.tcl.tbrowser.Tbrowser");',
+                  '                prepareKeys();\n                registerBroadcastEvents();\n                browser=singleton("com.tcl.tbrowser.Tbrowser");')
+          replace('    private void prepareKeys() throws ReflectiveOperationException {',
+          '''    // The working 1.45 probe registers native broadcaster events BEFORE Tbrowser init.
+              // Log genuine broadcast AIT/HbbTV state, never fabricate a side-button prompt.
+              private void registerBroadcastEvents() {
+                  try {
+                      Class<?> t=Class.forName("com.tcl.hbbtv.HbbtvEventNotify");
+                      Class<?> l=Class.forName("com.tcl.hbbtv.HbbtvEventListener");
+                      eventNotify=t.getMethod("getInstance",Context.class).invoke(null,windowContext);
+                      eventListener=Proxy.newProxyInstance(l.getClassLoader(),new Class<?>[]{l},(proxy,method,args)->{
+                          if(method.getDeclaringClass()==Object.class) return objectMethod(proxy,method,args);
+                          Log.i(TAG,"TCL broadcaster HbbTV event="+method.getName()+" channel="+channelId+" args="+java.util.Arrays.toString(args));
+                          return defaultValue(method.getReturnType());
+                      });
+                      t.getMethod("registerHbbtvEventListener",l).invoke(eventNotify,eventListener);
+                      Log.i(TAG,"Native broadcaster event listener registered (LOVEStv 1.45)");
+                  } catch(Exception | LinkageError error) {
+                      Log.w(TAG,"Native broadcaster event listener unavailable",error);
+                  }
+              }
+              private void prepareKeys() throws ReflectiveOperationException {''')
+          replace('private void visibility() { if(root!=null) root.setAlpha(running && ready && !hidden ? 1f : 0f); }',
+                  'private void visibility() { if(root!=null) { boolean show=ready && !hidden && (initializing || running); root.setAlpha(show ? 1f : 0f); if(show) root.bringToFront(); } }')
+          replace('            visibility(); reply(STARTED,new Bundle()); inspect.run();',
+                  '            visibility(); Log.i(TAG,"Native HbbTV autostart completed without pressing any key; awaiting broadcaster LOVEStv side hints"); reply(STARTED,new Bundle()); inspect.run();')
+          p.write_text(s,encoding='utf8')
+          assert 'registerBroadcastEvents();' in s and 'boolean show=ready' in s
+          print('PASS: native Tbrowser visible during startup; broadcaster event listener registered; colour key not required')
+          PY
       - name: Classify HbbTV technical diagnostics for i18n inventory
         working-directory: owntv_tdt
         run: |
@@ -80,8 +127,8 @@ jobs:
         working-directory: owntv_tdt
         env:
           CHANNELPLUS_TEST_KEYSTORE: ${{ runner.temp }}/ci.jks
-          VERSION_CODE: '100020'
-          VERSION_NAME: '5.3.9-LOVEStv-Reliability'
+          VERSION_CODE: '100021'
+          VERSION_NAME: '5.3.10-LOVEStv-Autostart'
         run: |
           chmod +x gradlew
           ./gradlew :app:assembleHbbtv32Debug --no-daemon --stacktrace --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g -Dfile.encoding=UTF-8" -Pkotlin.daemon.jvmargs=-Xmx3g
@@ -89,7 +136,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: Channelplus-5.3.9-LOVEStv-hbbtv32-CI
+          name: Channelplus-5.3.10-LOVEStv-hbbtv32-CI
           path: owntv_tdt/app/build/outputs/apk/hbbtv32/debug/*.apk
           if-no-files-found: error
       - name: Upload Android signing tool
