@@ -1,4 +1,4 @@
-name: Build Channel+ 5.3.10 LOVEStv TCL native autostart
+name: Build Channel+ 5.3.11 LOVEStv TCL TDT autostart gate
 
 on:
   push:
@@ -102,6 +102,24 @@ jobs:
           assert 'registerBroadcastEvents();' in s and 'boolean show=ready' in s
           print('PASS: native Tbrowser visible during startup; broadcaster event listener registered; colour key not required')
           PY
+      - name: Enable native HbbTV autostart for every full-screen TCL TDT tune
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          shell=Path('owntv_tdt/app/src/main/java/tv/own/owntv/features/shell/OwnTVShell.kt')
+          code=shell.read_text(encoding='utf-8')
+          old='hbbTvEnabled = isFull && zapSource == MainSection.LIVE_TV && !catchupActive,'
+          new='hbbTvEnabled = isFull && !catchupActive,'
+          assert code.count(old)==1, "Fullscreen TDT HbbTV gate changed; refuse blind patch"
+          shell.write_text(code.replace(old,new),encoding='utf-8')
+          manifest=Path('owntv_tdt/app/src/main/AndroidManifest.xml').read_text(encoding='utf-8')
+          assert '<service android:name="tv.own.channelplus.lovestvprobe.HbbTvRuntimeService"' in manifest
+          assert 'android:process="com.tcl.tv"' in manifest
+          view=Path('owntv_tdt/app/src/main/java/tv/own/owntv/player/MpvVideoSurface.kt').read_text(encoding='utf-8')
+          assert 'if (antenna)' in view and 'it.updateHbbTv(tunerVideo.inputId' in view
+          print('PASS: full-screen native TCL TDT starts HbbTV regardless of EPG, restored channel or TV entry route')
+          print('PASS: runtime service declared in manifest and tuner view invokes updateHbbTv')
+          PY
       - name: Classify HbbTV technical diagnostics for i18n inventory
         working-directory: owntv_tdt
         run: |
@@ -127,8 +145,8 @@ jobs:
         working-directory: owntv_tdt
         env:
           CHANNELPLUS_TEST_KEYSTORE: ${{ runner.temp }}/ci.jks
-          VERSION_CODE: '100021'
-          VERSION_NAME: '5.3.10-LOVEStv-Autostart'
+          VERSION_CODE: '100022'
+          VERSION_NAME: '5.3.11-LOVEStv-TDT-Autostart'
         run: |
           chmod +x gradlew
           ./gradlew :app:assembleHbbtv32Debug --no-daemon --stacktrace --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g -Dfile.encoding=UTF-8" -Pkotlin.daemon.jvmargs=-Xmx3g
@@ -136,7 +154,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: Channelplus-5.3.10-LOVEStv-hbbtv32-CI
+          name: Channelplus-5.3.11-LOVEStv-hbbtv32-CI
           path: owntv_tdt/app/build/outputs/apk/hbbtv32/debug/*.apk
           if-no-files-found: error
       - name: Upload Android signing tool
