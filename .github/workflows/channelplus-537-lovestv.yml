@@ -1,4 +1,4 @@
-name: Build Channel+ 5.3.11 LOVEStv TCL TDT autostart gate
+name: Build Channel+ 5.3.12 LOVEStv TCL direct Activity root
 
 on:
   push:
@@ -120,6 +120,19 @@ jobs:
           print('PASS: full-screen native TCL TDT starts HbbTV regardless of EPG, restored channel or TV entry route')
           print('PASS: runtime service declared in manifest and tuner view invokes updateHbbTv')
           PY
+      - name: Replace experimental browser surface with LOVEStv 1.45 Activity view
+        run: |
+          python3 tools/hbbtv/fix_5312_direct_activity.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('owntv_tdt/app/src/main/java/tv/own/channelplus/lovestvprobe/HbbTvRuntimeService.java').read_text()
+          v=Path('owntv_tdt/app/src/main/java/tv/own/owntv/features/hbbtv/HbbTvPlayerView.java').read_text()
+          assert 'activityParent.addView(root,new ViewGroup.LayoutParams(-1,-1))' in p
+          assert 'viewHost=new SurfaceControlViewHost' not in p
+          assert 'activity.getDisplay().getDisplayId()' in v
+          assert 'engine.attachTvInputView(tvView)' in Path('owntv_tdt/app/src/main/java/tv/own/owntv/player/MpvVideoSurface.kt').read_text()
+          print('PASS: exact 1.45 Activity root integration, existing TvView preserved')
+          PY
       - name: Classify HbbTV technical diagnostics for i18n inventory
         working-directory: owntv_tdt
         run: |
@@ -145,8 +158,8 @@ jobs:
         working-directory: owntv_tdt
         env:
           CHANNELPLUS_TEST_KEYSTORE: ${{ runner.temp }}/ci.jks
-          VERSION_CODE: '100022'
-          VERSION_NAME: '5.3.11-LOVEStv-TDT-Autostart'
+          VERSION_CODE: '100023'
+          VERSION_NAME: '5.3.12-LOVEStv-DirectActivity'
         run: |
           chmod +x gradlew
           ./gradlew :app:assembleHbbtv32Debug --no-daemon --stacktrace --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g -Dfile.encoding=UTF-8" -Pkotlin.daemon.jvmargs=-Xmx3g
@@ -154,7 +167,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: Channelplus-5.3.11-LOVEStv-hbbtv32-CI
+          name: Channelplus-5.3.12-LOVEStv-hbbtv32-CI
           path: owntv_tdt/app/build/outputs/apk/hbbtv32/debug/*.apk
           if-no-files-found: error
       - name: Upload Android signing tool
