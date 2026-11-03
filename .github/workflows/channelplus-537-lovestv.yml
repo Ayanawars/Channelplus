@@ -1,4 +1,4 @@
-name: Build Channel+ 5.3.8 LOVEStv TCL startup hotfix
+name: Build Channel+ 5.3.9 LOVEStv TCL reliability
 
 on:
   push:
@@ -39,6 +39,22 @@ jobs:
           assert "isRuntimeProcess(this)" in Path("owntv_tdt/app/src/main/java/tv/own/owntv/OwnTVApp.kt").read_text()
           print("PASS: Channel+ app process is not confused with the vendor-only process. Koin startup enabled.")
           PY
+      - name: Repair HbbTV remote and observable startup
+        run: |
+          python3 tools/hbbtv/fix_539_key_routing.py
+          python3 tools/hbbtv/fix_539_reliability.py
+          python3 tools/hbbtv/verify_channelplus_145.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('owntv_tdt/app/src/main/java/tv/own/owntv/features/hbbtv/HbbTvPlayerView.java').read_text()
+          s=Path('owntv_tdt/app/src/main/java/tv/own/channelplus/lovestvprobe/HbbTvRuntimeService.java').read_text()
+          shell=Path('owntv_tdt/app/src/main/java/tv/own/owntv/features/shell/OwnTVShell.kt').read_text()
+          assert 'Delivering queued colour key=' in p
+          assert 'TCL runtime bind callback timed out' in p
+          assert 'HbbTV service onCreate pid=' in s
+          assert 'val channel = previewChannel' not in shell.split('val hbbKeyHandler by',1)[1].split('DisposableEffect(hbbActivity)',1)[0]
+          print('PASS: startup, colour key queue, service visibility and fullscreen navigation checks')
+          PY
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -55,8 +71,8 @@ jobs:
         working-directory: owntv_tdt
         env:
           CHANNELPLUS_TEST_KEYSTORE: ${{ runner.temp }}/ci.jks
-          VERSION_CODE: '100019'
-          VERSION_NAME: '5.3.8-LOVEStv-StartupFix'
+          VERSION_CODE: '100020'
+          VERSION_NAME: '5.3.9-LOVEStv-Reliability'
         run: |
           chmod +x gradlew
           ./gradlew :app:assembleHbbtv32Debug --no-daemon --stacktrace --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g -Dfile.encoding=UTF-8" -Pkotlin.daemon.jvmargs=-Xmx3g
@@ -64,7 +80,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: Channelplus-5.3.8-LOVEStv-hbbtv32-CI
+          name: Channelplus-5.3.9-LOVEStv-hbbtv32-CI
           path: owntv_tdt/app/build/outputs/apk/hbbtv32/debug/*.apk
           if-no-files-found: error
       - name: Upload Android signing tool
