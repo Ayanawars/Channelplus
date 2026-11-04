@@ -1,4 +1,4 @@
-name: Build Channel+ 5.3.13 LOVEStv playback controls
+name: Build Channel+ 5.3.14 LOVEStv progressive seek and direct TDT
 
 on:
   push:
@@ -145,6 +145,22 @@ jobs:
           assert 'function tryAdvance(e)' in a and 'var steps=[30,120,240,480,960]' in a
           print('PASS: original 1.45 ad-skip/seek adapter; 5.3.12 native Activity browser preserved')
           PY
+      - name: Restore reliable LOVEStv remote scanning and return to TDT
+        run: |
+          python3 tools/hbbtv/fix_5314_seek_live.py
+          node --check owntv_tdt/app/src/hbbtv32/assets/lovestv_playback_145.js
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('owntv_tdt/app/src/main/java/tv/own/channelplus/lovestvprobe/HbbTvRuntimeService.java').read_text()
+          v=Path('owntv_tdt/app/src/main/java/tv/own/owntv/features/hbbtv/HbbTvPlayerView.java').read_text()
+          js=Path('owntv_tdt/app/src/hbbtv32/assets/lovestv_playback_145.js').read_text()
+          assert 'forwardRemotePlaybackKey(code)' in p
+          assert 'reply(HIDE,new Bundle())' in p and 'case HIDE:' in v
+          assert 'function tryAdvance(e)' in js and 'window.__channelplusPlaybackNativeKey' in js
+          assert 'activityParent.addView(root,new ViewGroup.LayoutParams(-1,-1))' in p
+          assert 'var speeds=[2,4,8,16,32],steps=[30,120,240,480,960];' in js
+          print('PASS: working 5.3.12 HbbTV browser, 5.3.13 green ad skip and 5.3.14 seek/return-to-TDT')
+          PY
       - name: Classify HbbTV technical diagnostics for i18n inventory
         working-directory: owntv_tdt
         run: |
@@ -170,8 +186,8 @@ jobs:
         working-directory: owntv_tdt
         env:
           CHANNELPLUS_TEST_KEYSTORE: ${{ runner.temp }}/ci.jks
-          VERSION_CODE: '100024'
-          VERSION_NAME: '5.3.13-LOVEStv-Playback'
+          VERSION_CODE: '100025'
+          VERSION_NAME: '5.3.14'
         run: |
           chmod +x gradlew
           ./gradlew :app:assembleHbbtv32Debug --no-daemon --stacktrace --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g -Dfile.encoding=UTF-8" -Pkotlin.daemon.jvmargs=-Xmx3g
@@ -179,7 +195,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: Channelplus-5.3.13-LOVEStv-hbbtv32-CI
+          name: Channelplus-5.3.14-LOVEStv-hbbtv32-CI
           path: owntv_tdt/app/build/outputs/apk/hbbtv32/debug/*.apk
           if-no-files-found: error
       - name: Upload Android signing tool
