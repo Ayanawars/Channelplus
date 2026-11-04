@@ -1,4 +1,4 @@
-name: Build Channel+ 5.3.12 LOVEStv TCL direct Activity root
+name: Build Channel+ 5.3.13 LOVEStv playback controls
 
 on:
   push:
@@ -133,6 +133,18 @@ jobs:
           assert 'engine.attachTvInputView(tvView)' in Path('owntv_tdt/app/src/main/java/tv/own/owntv/player/MpvVideoSurface.kt').read_text()
           print('PASS: exact 1.45 Activity root integration, existing TvView preserved')
           PY
+      - name: Restore tested LOVEStv 1.45 ad skip and progressive seek
+        run: |
+          python3 tools/hbbtv/fix_5313_playback_controls.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('owntv_tdt/app/src/main/java/tv/own/channelplus/lovestvprobe/HbbTvRuntimeService.java').read_text()
+          a=Path('owntv_tdt/app/src/hbbtv32/assets/lovestv_playback_145.js').read_text()
+          assert 'main.post(installPlaybackControls)' in p
+          assert 'activityParent.addView(root,new ViewGroup.LayoutParams(-1,-1))' in p
+          assert 'function tryAdvance(e)' in a and 'var steps=[30,120,240,480,960]' in a
+          print('PASS: original 1.45 ad-skip/seek adapter; 5.3.12 native Activity browser preserved')
+          PY
       - name: Classify HbbTV technical diagnostics for i18n inventory
         working-directory: owntv_tdt
         run: |
@@ -158,8 +170,8 @@ jobs:
         working-directory: owntv_tdt
         env:
           CHANNELPLUS_TEST_KEYSTORE: ${{ runner.temp }}/ci.jks
-          VERSION_CODE: '100023'
-          VERSION_NAME: '5.3.12-LOVEStv-DirectActivity'
+          VERSION_CODE: '100024'
+          VERSION_NAME: '5.3.13-LOVEStv-Playback'
         run: |
           chmod +x gradlew
           ./gradlew :app:assembleHbbtv32Debug --no-daemon --stacktrace --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g -Dfile.encoding=UTF-8" -Pkotlin.daemon.jvmargs=-Xmx3g
@@ -167,7 +179,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: Channelplus-5.3.12-LOVEStv-hbbtv32-CI
+          name: Channelplus-5.3.13-LOVEStv-hbbtv32-CI
           path: owntv_tdt/app/build/outputs/apk/hbbtv32/debug/*.apk
           if-no-files-found: error
       - name: Upload Android signing tool
