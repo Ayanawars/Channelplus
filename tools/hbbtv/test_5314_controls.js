@@ -17,4 +17,5 @@ clock+=450;result=window.__channelplusPlaybackNativeKey(22);assert.strictEqual(r
 clock+=450;result=window.__channelplusPlaybackNativeKey(22);assert.strictEqual(result,'seek-requested');assert.strictEqual(video.currentTime,970);console.log('PASS ×16 +8m');
 clock+=450;result=window.__channelplusPlaybackNativeKey(22);assert.strictEqual(result,'seek-requested');assert.strictEqual(video.currentTime,1930);console.log('PASS ×32 +16m');
 result=window.__channelplusPlaybackNativeKey(183);assert.strictEqual(result,'exit-to-tdt');console.log('PASS RED returns to live TCL TDT');
+clock+=5000;player.live=true;video.currentTime=100;result=window.__channelplusPlaybackNativeKey(22);assert.strictEqual(result,'seek-requested');assert.strictEqual(video.currentTime,130);console.log('PASS live startover without optional Vue metadata');
 console.log('All progressive seek and RED command tests passed.');
