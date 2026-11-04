@@ -149,6 +149,7 @@ jobs:
         run: |
           python3 tools/hbbtv/fix_5314_seek_live.py
           node --check owntv_tdt/app/src/hbbtv32/assets/lovestv_playback_145.js
+          node tools/hbbtv/test_5314_controls.js
           python3 - <<'PY'
           from pathlib import Path
           p=Path('owntv_tdt/app/src/main/java/tv/own/channelplus/lovestvprobe/HbbTvRuntimeService.java').read_text()
