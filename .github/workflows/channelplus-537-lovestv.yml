@@ -1,4 +1,4 @@
-name: Build Channel+ 5.3.15 UNRELEASED horizontal guide, HbbTV HUD, TDT/IPTV timeshift
+name: Build Channel+ 5.3.15 horizontal guide, HbbTV HUD, TDT/IPTV timeshift
 
 on:
   push:
@@ -215,7 +215,7 @@ jobs:
         env:
           CHANNELPLUS_TEST_KEYSTORE: ${{ runner.temp }}/ci.jks
           VERSION_CODE: '100026'
-          VERSION_NAME: '5.3.15-pending'
+          VERSION_NAME: '5.3.15'
         run: |
           chmod +x gradlew
           ./gradlew :app:assembleHbbtv32Debug --no-daemon --stacktrace --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g -Dfile.encoding=UTF-8" -Pkotlin.daemon.jvmargs=-Xmx3g
@@ -223,7 +223,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: Channelplus-5.3.15-PENDING-hbbtv32-CI
+          name: Channelplus-5.3.15-RELEASE-hbbtv32-CI
           path: owntv_tdt/app/build/outputs/apk/hbbtv32/debug/*.apk
           if-no-files-found: error
       - name: Upload Android signing tool
