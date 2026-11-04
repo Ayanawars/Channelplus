@@ -181,6 +181,14 @@ jobs:
           assert 'TIME_SHIFT_STATUS_AVAILABLE' in Path('owntv_core_tdt/player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt').read_text()
           print('PASS: 5.3.12 HbbTV unchanged, 5.3.13 green skip retained; HUD restored, horizontal guide, IPTV/TDT timeshift')
           PY
+      - name: Classify TCL native timeshift status logs
+        working-directory: owntv_core_tdt
+        run: |
+          for text in 'ChannelplusTimeshift' 'TDT native status=' 'available=' 'input='; do
+            python3 tools/i18n/check_hardcoded_strings.py classify-safe \
+              --path player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt \
+              --text "$text" --category log
+          done
       - name: Classify HbbTV technical diagnostics for i18n inventory
         working-directory: owntv_tdt
         run: |
