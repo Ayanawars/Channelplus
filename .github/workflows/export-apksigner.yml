@@ -1,0 +1,28 @@
+name: Export Android APK signing tool
+
+on:
+  push:
+    branches:
+      - codex/channelplus-5.3.7-lovestv-ci
+    paths:
+      - '.github/workflows/export-apksigner.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: android-actions/setup-android@v3
+      - name: Install Android signing tools
+        run: |
+          sdkmanager "build-tools;37.0.0"
+          mkdir -p export
+          cp "$(find "${ANDROID_HOME:-$ANDROID_SDK_ROOT}/build-tools" -name apksigner.jar -print -quit)" export/apksigner.jar
+          java -jar export/apksigner.jar --version
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Android-apksigner-37-jar
+          path: export/apksigner.jar
+          if-no-files-found: error
