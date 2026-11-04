@@ -105,13 +105,14 @@ jobs:
           tar -xzf "$RUNNER_TEMP/key-bundle.tar.gz" -C "$RUNNER_TEMP/signing"
           test -s "$RUNNER_TEMP/signing/channelplus.jks"
           test -s "$RUNNER_TEMP/signing/password.txt"
+          cp "$RUNNER_TEMP/signing/password.txt" "$RUNNER_TEMP/signing/key-password.txt"
           APKSIGNER="$ANDROID_HOME/build-tools/37.0.0/lib/apksigner.jar"
           unsigned="$(find "$RUNNER_TEMP/built" -name '*.apk' -type f -print -quit)"
           signed="$RUNNER_TEMP/Channelplus-5.3.14.apk"
           java -jar "$APKSIGNER" sign --ks "$RUNNER_TEMP/signing/channelplus.jks" \
             --ks-key-alias tunerprobe \
             --ks-pass "file:$RUNNER_TEMP/signing/password.txt" \
-            --key-pass "file:$RUNNER_TEMP/signing/password.txt" \
+            --key-pass "file:$RUNNER_TEMP/signing/key-password.txt" \
             --v1-signing-enabled true --v2-signing-enabled true \
             --out "$signed" "$unsigned"
           java -jar "$APKSIGNER" verify --print-certs "$signed" > "$RUNNER_TEMP/signature-verification.txt"
