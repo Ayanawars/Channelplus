@@ -29,7 +29,7 @@ replace('''  if(player.live===false){
 replace('''  if(e.repeat||(previous&&now-previous.lastPress<150))return true;
   var index=previous&&previous.player===player''',
 '''  if(e.repeat||(previous&&now-previous.lastPress<150))return true;
-  diag.lastNativeSeekKey={code:code,at:now};
+  if(!e.__channelplusNative)diag.lastDomSeekKey={code:code,at:now};
   var index=previous&&previous.player===player''','deduplicate native keys')
 replace('''  if(Math.abs(target-before)>.5)player.seek(target-before);
   if(typeof player.displayPlayer==='function')player.displayPlayer(4);''',
@@ -66,9 +66,9 @@ window.__channelplusPlaybackNativeKey=function(androidCode){
       return 'exit-to-tdt'; // Java releases HbbTV gate and shows native tuner
     }
     if(androidCode!==37&&androidCode!==39&&androidCode!==412&&androidCode!==417)return 'ignored';
-    if(diag.lastNativeSeekKey && diag.lastNativeSeekKey.code===androidCode &&
-       Date.now()-diag.lastNativeSeekKey.at<650)return 'already-handled';
-    var e={keyCode:androidCode,isTrusted:true,repeat:false,
+    if(diag.lastDomSeekKey && diag.lastDomSeekKey.code===androidCode &&
+       Date.now()-diag.lastDomSeekKey.at<650)return 'already-handled';
+    var e={keyCode:androidCode,isTrusted:true,__channelplusNative:true,repeat:false,
       preventDefault:function(){},stopImmediatePropagation:function(){}};
     var result=rtveScanKey(e)||scanKey(e);
     diag.nativeSeekResult={code:androidCode,ok:!!result,at:Date.now(),
