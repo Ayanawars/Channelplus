@@ -15,6 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
       - name: Install Android signing tools
         run: |
           sdkmanager "build-tools;37.0.0"
