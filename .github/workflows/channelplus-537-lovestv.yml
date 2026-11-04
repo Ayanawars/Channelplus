@@ -177,7 +177,7 @@ jobs:
           assert 'hbbFocusRestorationTick' in c and 'onHbbBrowserHidden' in a and 'hbbFocusRestorationTick' in p
           assert 'HorizontalChannelOverlay(' in c
           assert 'ChannelListOverlay(' in c  # right-hand history remains
-          assert 'prefs[Keys.TIMESHIFT_ENABLED] ?: true' in settings
+          assert 'it[Keys.TIMESHIFT_ENABLED] ?: true' in settings
           assert 'TIME_SHIFT_STATUS_AVAILABLE' in Path('owntv_core_tdt/player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt').read_text()
           print('PASS: 5.3.12 HbbTV unchanged, 5.3.13 green skip retained; HUD restored, horizontal guide, IPTV/TDT timeshift')
           PY
