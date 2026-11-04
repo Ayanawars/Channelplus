@@ -1,0 +1,20 @@
+'use strict';
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+const js=fs.readFileSync('owntv_tdt/app/src/hbbtv32/assets/lovestv_playback_145.js','utf8');
+let clock=1700000000000;
+class MockDate extends Date { static now(){return clock;} }
+const video={tagName:'VIDEO',readyState:3,duration:3600,currentTime:100,seekable:{length:1,start:()=>0,end:()=>3599},getBoundingClientRect:()=>({width:1200,height:700})};
+const player={video,live:false,onAdBreak:false,visible:false,bumperUrl:null,seekValue:0,seekMultiplier:1,trackSelectOpen:false,isSeekDisabled:()=>false,resetSeekValues(){this.seekValue=0},play(){},seek(delta){video.currentTime+=delta;},displayPlayer(){}};
+const root={className:'visible'};
+const document={body:{innerText:'',appendChild(){}},activeElement:null,addEventListener(){},getElementById(id){if(id==='videoPlayer')return root;if(id==='_vue-hbbtv-player-video')return video;return null;},querySelectorAll(){return []},querySelector(){return null},elementFromPoint(){return null},hasFocus(){return false},createElement(){return {style:{},setAttribute(){},click(){}}}};
+const window={player,location:{},setInterval(){return 1},setTimeout(){return 1},clearTimeout(){},getComputedStyle(){return {display:'block',visibility:'visible'}},RTVE:{},devicePixelRatio:1};
+const ctx={window,document,location:{origin:'https://hbbtv.lovestv.es',pathname:'/lovestv3-4.0.0/player'},navigator:{userAgent:'test'},Date:MockDate,console,innerWidth:1920,innerHeight:1080,devicePixelRatio:1,isFinite,Math,JSON,Array,Number,String};
+vm.runInNewContext(js,ctx,{timeout:1000});
+assert.strictEqual(typeof window.__channelplusPlaybackNativeKey,'function');
+let result=window.__channelplusPlaybackNativeKey(22);assert.strictEqual(result,'seek-requested');assert.strictEqual(video.currentTime,130);console.log('PASS ×2 +30s');
+clock+=450;result=window.__channelplusPlaybackNativeKey(22);assert.strictEqual(result,'seek-requested');assert.strictEqual(video.currentTime,250);console.log('PASS ×4 +2m');
+clock+=450;result=window.__channelplusPlaybackNativeKey(22);assert.strictEqual(result,'seek-requested');assert.strictEqual(video.currentTime,490);console.log('PASS ×8 +4m');
+clock+=450;result=window.__channelplusPlaybackNativeKey(22);assert.strictEqual(result,'seek-requested');assert.strictEqual(video.currentTime,970);console.log('PASS ×16 +8m');
+clock+=450;result=window.__channelplusPlaybackNativeKey(22);assert.strictEqual(result,'seek-requested');assert.strictEqual(video.currentTime,1930);console.log('PASS ×32 +16m');
+result=window.__channelplusPlaybackNativeKey(183);assert.strictEqual(result,'exit-to-tdt');console.log('PASS RED returns to live TCL TDT');
+console.log('All progressive seek and RED command tests passed.');
