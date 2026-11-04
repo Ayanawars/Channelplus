@@ -15,6 +15,11 @@ def replace(old,new, label):
     if n!=1: raise RuntimeError(f'JS {label}: expected one match, got {n}')
     s=s.replace(old,new)
 
+replace('''  return !!(inApplication()&&player&&(player.startOverDetails||player.live===false)&&root&&/(^|\\s)visible(\\s|$)/.test(root.className)&&video&&player.video===video&&video.tagName==='VIDEO');''',
+'''  // The source can be replayable even when TCL's Vue state omits both
+  // startOverDetails and the explicit live=false flag. The actual visible
+  // player/video and HTML5 readiness are enough to establish playback.
+  return !!(inApplication()&&player&&root&&/(^|\\s)visible(\\s|$)/.test(root.className)&&video&&player.video===video&&video.tagName==='VIDEO'&&video.readyState>=1);''','recognize native playback without optional Vue metadata')
 replace('''  if(!playbackContext(player)||!player.visible||player.onAdBreak||player.bumperUrl||player.trackSelectOpen||document.querySelectorAll('.dialog').length)return false;''',
 '''  // The 1.45 adapter checked player.visible as well as the real DOM video.
   // TCL reports this Vue flag false on some valid start-over/VOD screens.
