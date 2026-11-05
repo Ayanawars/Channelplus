@@ -1,4 +1,4 @@
-name: Build Channel+ 5.3.15 horizontal guide, HbbTV HUD, TDT/IPTV timeshift
+name: Build Channel+ 5.3.16 restore LOVEStv startup and retain live TV improvements
 
 on:
   push:
@@ -172,8 +172,10 @@ jobs:
           a=Path('owntv_tdt/app/src/main/java/tv/own/owntv/MainActivity.kt').read_text()
           p=Path('owntv_tdt/app/src/main/java/tv/own/owntv/player/PlayerHud.kt').read_text()
           settings=Path('owntv_core_tdt/core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt').read_text()
-          assert 'root.setVisibility(show ? View.VISIBLE : View.GONE)' in h
+          assert 'root.setVisibility(hidden ? View.GONE : View.VISIBLE)' in h
           assert 'activityParent.addView(root,new ViewGroup.LayoutParams(-1,-1))' in h
+          assert 'root.setDescendantFocusability(hidden ? ViewGroup.FOCUS_BLOCK_DESCENDANTS : ViewGroup.FOCUS_AFTER_DESCENDANTS)' in h
+          assert 'Tbrowser must stay ATTACHED and VISIBLE throughout initTbrowser' in h
           assert 'hbbFocusRestorationTick' in c and 'onHbbBrowserHidden' in a and 'hbbFocusRestorationTick' in p
           assert 'HorizontalChannelOverlay(' in c
           assert 'ChannelListOverlay(' in c  # right-hand history remains
@@ -214,8 +216,8 @@ jobs:
         working-directory: owntv_tdt
         env:
           CHANNELPLUS_TEST_KEYSTORE: ${{ runner.temp }}/ci.jks
-          VERSION_CODE: '100026'
-          VERSION_NAME: '5.3.15'
+          VERSION_CODE: '100027'
+          VERSION_NAME: '5.3.16'
         run: |
           chmod +x gradlew
           ./gradlew :app:assembleHbbtv32Debug --no-daemon --stacktrace --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g -Dfile.encoding=UTF-8" -Pkotlin.daemon.jvmargs=-Xmx3g
@@ -223,7 +225,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: Channelplus-5.3.15-RELEASE-hbbtv32-CI
+          name: Channelplus-5.3.16-RELEASE-hbbtv32-CI
           path: owntv_tdt/app/build/outputs/apk/hbbtv32/debug/*.apk
           if-no-files-found: error
       - name: Upload Android signing tool
