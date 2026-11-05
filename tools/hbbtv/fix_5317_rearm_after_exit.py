@@ -46,7 +46,7 @@ once('''    private void connect() {
         if(rearming) return;
         if(''', 'no early bind while rearming')
 
-anchor='''    private void fail(String reason,Throwable error) { Log.w(TAG,reason,error); failed=true; disconnect(); }'''
+anchor='''    private void fail(String reason,Throwable error) { Log.e(TAG,reason,error); failed=true; disconnect(); }'''
 method='''    /** After an explicit HbbTV exit, only recycle the native browser service.
      * Keep the TvView, input ID, current channel and Exo/Compose playback intact.
      * A fresh service performs the same 5.3.12 auto-registration as initial tune.
