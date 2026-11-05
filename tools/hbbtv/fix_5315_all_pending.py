@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Unreleased Channel+ 5.3.15 fixes: restore HbbTV focus, horizontal left channel bar, tuner/IPTV timeshift.
+"""Channel+ 5.3.16: restore proven TCL HbbTV autostart plus 5.3.15 UI/timeshift fixes.
 
-Apply after existing 5.3.14 scripts in CI. Do NOT publish a GitHub Release.
+Apply after existing 5.3.14 scripts in CI. Preserve the native 5.3.12 Activity browser initialization.
 """
 from pathlib import Path
 P=Path('owntv_tdt/app/src/main/java/tv/own/owntv')
@@ -23,9 +23,14 @@ once(service,
     '''root.setAlpha(show ? 1f : 0f);
         // Invisible alpha alone leaves the TCL browser's full-screen view over
         // Compose, retaining hardware-remote focus even after a Back/Red exit.
-        root.setVisibility(show ? View.VISIBLE : View.GONE);
-        root.setDescendantFocusability(show ? ViewGroup.FOCUS_AFTER_DESCENDANTS : ViewGroup.FOCUS_BLOCK_DESCENDANTS);
-        if(show) root.bringToFront(); else {
+        // TCL Tbrowser must stay ATTACHED and VISIBLE throughout initTbrowser.
+        // Alpha 0 is the vendor-compatible startup state (working in 5.3.14).
+        // Hiding the view before browserReady prevents the original LOVEStv AIT prompt.
+        // Only detach its input surface when the user explicitly leaves LOVEStv.
+        root.setVisibility(hidden ? View.GONE : View.VISIBLE);
+        root.setDescendantFocusability(hidden ? ViewGroup.FOCUS_BLOCK_DESCENDANTS : ViewGroup.FOCUS_AFTER_DESCENDANTS);
+        if(show) root.bringToFront();
+        if(hidden) {
             root.clearFocus();
             if(activityParent!=null) {
                 View content=activityParent.findViewById(android.R.id.content);
