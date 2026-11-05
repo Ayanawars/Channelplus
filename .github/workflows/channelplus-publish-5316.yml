@@ -1,0 +1,164 @@
+name: Publish Channel+ 5.3.16 for in-app updates
+
+on:
+  push:
+    branches:
+      - codex/channelplus-5.3.7-lovestv-ci
+    paths:
+      - .github/workflows/channelplus-publish-5316.yml
+
+permissions:
+  contents: write
+  actions: read
+  issues: write
+
+jobs:
+  sign-and-publish:
+    if: github.repository == 'Ayanawars/Channelplus'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      BUILD_RUN_ID: '41975428121'
+      BUILD_SHA: '61c5980b905de17479e2be43b5019cd55b39e7c2'
+    steps:
+      - name: Check release is not already published
+        run: |
+          if gh release view v5.3.16 -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo 'v5.3.16 already exists; refusing to overwrite a release'
+            exit 1
+          fi
+      - name: Download exactly the 5.3.16 CI build
+        run: |
+          mkdir -p "$RUNNER_TEMP/built"
+          gh run watch "$BUILD_RUN_ID" -R "$GITHUB_REPOSITORY" --exit-status --interval 10
+          actual_sha="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN_ID" --jq .head_sha)"
+          conclusion="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN_ID" --jq .conclusion)"
+          test "$actual_sha" = "$BUILD_SHA" && test "$conclusion" = success
+          gh run download "$BUILD_RUN_ID" -R "$GITHUB_REPOSITORY" \
+            --name Channelplus-5.3.16-RELEASE-hbbtv32-CI --dir "$RUNNER_TEMP/built"
+          find "$RUNNER_TEMP/built" -name '*.apk' -type f -print
+          test "$(find "$RUNNER_TEMP/built" -name '*.apk' -type f | wc -l)" -eq 1
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - name: Install Android apksigner
+        run: sdkmanager 'build-tools;37.0.0'
+      - name: Request one-time encrypted signing material
+        shell: bash
+        run: |
+          set -euo pipefail
+          # New private transport key lives only on this ephemeral runner. No
+          # permanent GitHub secret, personal keystore, or password is committed.
+          openssl req -new -x509 -nodes -newkey rsa:3072 -days 1 \
+            -keyout "$RUNNER_TEMP/transport-private.pem" \
+            -out "$RUNNER_TEMP/transport-certificate.pem" \
+            -subj "/CN=Channelplus-5316-OneTime-$GITHUB_RUN_ID" >/dev/null 2>&1
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          out=Path(os.environ['RUNNER_TEMP'])
+          txt='CHANNELPLUS_5316_CERT_'+os.environ['GITHUB_RUN_ID']+'\n'+(out/'transport-certificate.pem').read_text()
+          (out/'public-cert-comment.txt').write_text(txt)
+          PY
+          gh issue comment 10 -R "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/public-cert-comment.txt"
+          echo 'One-time signing certificate published; waiting for encrypted material.'
+          python3 - <<'PY'
+          import os, json, time, urllib.request
+          from pathlib import Path
+          repo=os.environ['GITHUB_REPOSITORY'];token=os.environ['GH_TOKEN'];run=os.environ['GITHUB_RUN_ID']
+          marker='CHANNELPLUS_5316_ENVELOPE_'+run+'\n'
+          url=f'https://api.github.com/repos/{repo}/issues/10/comments?per_page=100'
+          headers={'Authorization':f'Bearer {token}','Accept':'application/vnd.github+json','User-Agent':'Channelplus-signing-runner'}
+          for attempt in range(135):
+              request=urllib.request.Request(url,headers=headers)
+              try:
+                  with urllib.request.urlopen(request,timeout=20) as response:
+                      comments=json.load(response)
+              except Exception as e:
+                  print('Poll transient error:',type(e).__name__,flush=True)
+                  time.sleep(5);continue
+              matches=[(x.get('id'),x.get('body','')[len(marker):]) for x in comments if x.get('body','').startswith(marker)]
+              if matches:
+                  comment_id,encrypted=matches[-1]
+                  if not encrypted.lstrip().startswith('-----BEGIN CMS-----') or len(encrypted)>25000:
+                      raise RuntimeError('Invalid encrypted transport')
+                  dest=Path(os.environ['RUNNER_TEMP'])
+                  (dest/'signing-cms.pem').write_text(encrypted.strip()+'\n')
+                  (dest/'envelope-comment-id.txt').write_text(str(comment_id))
+                  print('One-time encrypted signing envelope received',flush=True)
+                  break
+              time.sleep(5)
+          else:
+              raise RuntimeError('Signing envelope not supplied for this one-time run')
+          PY
+      - name: Sign with original Channel+ certificate, verify, release
+        shell: bash
+        run: |
+          set -euo pipefail
+          openssl cms -decrypt -binary -inform PEM -in "$RUNNER_TEMP/signing-cms.pem" \
+            -inkey "$RUNNER_TEMP/transport-private.pem" -out "$RUNNER_TEMP/key-bundle.tar.gz"
+          mkdir "$RUNNER_TEMP/signing"
+          tar -xzf "$RUNNER_TEMP/key-bundle.tar.gz" -C "$RUNNER_TEMP/signing"
+          test -s "$RUNNER_TEMP/signing/channelplus.jks"
+          test -s "$RUNNER_TEMP/signing/password.txt"
+          cp "$RUNNER_TEMP/signing/password.txt" "$RUNNER_TEMP/signing/key-password.txt"
+          APKSIGNER="$ANDROID_HOME/build-tools/37.0.0/lib/apksigner.jar"
+          unsigned="$(find "$RUNNER_TEMP/built" -name '*.apk' -type f -print -quit)"
+          signed="$RUNNER_TEMP/Channelplus-5.3.16.apk"
+          java -jar "$APKSIGNER" sign --ks "$RUNNER_TEMP/signing/channelplus.jks" \
+            --ks-key-alias tunerprobe \
+            --ks-pass "file:$RUNNER_TEMP/signing/password.txt" \
+            --key-pass "file:$RUNNER_TEMP/signing/key-password.txt" \
+            --v1-signing-enabled true --v2-signing-enabled true \
+            --out "$signed" "$unsigned"
+          java -jar "$APKSIGNER" verify --print-certs "$signed" > "$RUNNER_TEMP/signature-verification.txt"
+          grep -iq '801bde35b2bcefcfe4fa65348b59d8e9b7053600b88842116e22f1979724be2f' "$RUNNER_TEMP/signature-verification.txt"
+          unzip -t "$signed" | tail -1
+          sha256sum "$signed"
+          cat > "$RUNNER_TEMP/release-notes.md" <<'EOF'
+          ### Channel+ 5.3.16 — LOVEStv reparado
+          - Corrige la regresión de la 5.3.15 que ocultaba el navegador TCL antes de terminar su arranque.
+          - Conserva visible y preparado el contenedor HbbTV durante la inicialización, restaurando los avisos laterales originales de LOVEStv.
+          - Solo oculta completamente la ventana de LOVEStv al salir, devolviendo el foco al mando de Channel+.
+          - Mantiene el salto de anuncios con el botón verde y los controles de reproducción.
+
+          ### Mejoras de TV en directo conservadas
+          - Nueva lista horizontal de canales sobre el vídeo al pulsar izquierda, con logos, EPG y progreso; conserva la lista de historial de la derecha.
+          - Restaura el foco del reproductor y los controles de OK tras salir de LOVEStv.
+          - Timeshifting IPTV activado para perfiles sin elección previa, respetando la preferencia desactivada y las restricciones de cada fuente y del almacenamiento.
+          - Timeshifting TDT con comprobación del soporte nativo que anuncia el sintonizador TCL; no fuerza funciones que el fabricante no exponga.
+
+          La corrección de LOVEStv y el timeshifting TDT aún deben comprobarse en una TCL real.
+          EOF
+          gh release create v5.3.16 "$signed" \
+            -R "$GITHUB_REPOSITORY" \
+            --target "$BUILD_SHA" \
+            --title 'Channel+ 5.3.16 — Reparación urgente LOVEStv' \
+            --notes-file "$RUNNER_TEMP/release-notes.md" --latest
+          echo 'PUBLISHED v5.3.16 with original Channel+ signature'
+      - name: Remove temporary signing messages from GitHub issue
+        if: always()
+        continue-on-error: true
+        run: |
+          python3 - <<'PY'
+          import os,json,urllib.request
+          repo=os.environ['GITHUB_REPOSITORY']; token=os.environ['GH_TOKEN'];run=os.environ['GITHUB_RUN_ID']
+          prefixes=('CHANNELPLUS_5316_CERT_'+run+'\n','CHANNELPLUS_5316_ENVELOPE_'+run+'\n')
+          base=f'https://api.github.com/repos/{repo}'
+          headers={'Authorization':f'Bearer {token}','Accept':'application/vnd.github+json','User-Agent':'Channelplus-signing-runner'}
+          with urllib.request.urlopen(urllib.request.Request(base+'/issues/10/comments?per_page=100',headers=headers)) as response:
+              comments=json.load(response)
+          for comment in comments:
+              if (comment.get('body') or '').startswith(prefixes):
+                  req=urllib.request.Request(base+'/issues/comments/'+str(comment['id']),headers=headers,method='DELETE')
+                  try:
+                      with urllib.request.urlopen(req,timeout=15):pass
+                  except Exception as error:print('Comment cleanup unsuccessful',type(error).__name__)
+          PY
+          rm -rf "$RUNNER_TEMP/signing" "$RUNNER_TEMP/signing-cms.pem" \
+            "$RUNNER_TEMP/transport-private.pem" "$RUNNER_TEMP/key-bundle.tar.gz" 2>/dev/null || true
