@@ -1,9 +1,9 @@
-name: Build Channel+ 5.3.17 restore repeated LOVEStv launches
+name: Build Channel+ 5.3.19 restore working LOVEStv (revert 5.3.18 focus changes)
 
 on:
   push:
     branches:
-      - codex/channelplus-5.3.7-lovestv-ci
+      - codex/channelplus-5.3.19-restore-lovestv
   workflow_dispatch:
 
 permissions:
@@ -200,6 +200,22 @@ jobs:
           assert 'stopAsync' in s and 'destoryPage' in s
           print('PASS: HIDE transitions re-create only the native browser, no tuner reset')
           PY
+      - name: Regression guard: restore exact working LOVEStv 5.3.17 lifecycle
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          v=Path('owntv_tdt/app/src/main/java/tv/own/owntv/features/hbbtv/HbbTvPlayerView.java').read_text()
+          native=Path('owntv_tdt/app/src/main/java/tv/own/channelplus/lovestvprobe/HbbTvRuntimeService.java').read_text()
+          activity=Path('owntv_tdt/app/src/main/java/tv/own/owntv/MainActivity.kt').read_text()
+          assert 'rearmAfterExit("LOVEStv BACK exited")' in v
+          assert 'rearmAfterExit("LOVEStv returned to TDT")' in v
+          assert 'root.setVisibility(hidden ? View.GONE : View.VISIBLE)' in native
+          assert 'root.setDescendantFocusability(hidden ? ViewGroup.FOCUS_BLOCK_DESCENDANTS : ViewGroup.FOCUS_AFTER_DESCENDANTS)' in native
+          assert 'hbbOwnsRemote' not in native
+          assert 'exitInteractiveOnBack' not in v
+          assert 'hbbBackOwnedUntilKeyUp' not in activity
+          print('PASS: 5.3.18 remote-focus blocking and forced Back interception fully reverted')
+          PY
       - name: Classify TCL native timeshift status logs
         working-directory: owntv_core_tdt
         run: |
@@ -233,8 +249,8 @@ jobs:
         working-directory: owntv_tdt
         env:
           CHANNELPLUS_TEST_KEYSTORE: ${{ runner.temp }}/ci.jks
-          VERSION_CODE: '100028'
-          VERSION_NAME: '5.3.17'
+          VERSION_CODE: '100030'
+          VERSION_NAME: '5.3.19'
         run: |
           chmod +x gradlew
           ./gradlew :app:assembleHbbtv32Debug --no-daemon --stacktrace --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g -Dfile.encoding=UTF-8" -Pkotlin.daemon.jvmargs=-Xmx3g
@@ -242,7 +258,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: Channelplus-5.3.17-RELEASE-hbbtv32-CI
+          name: Channelplus-5.3.19-ROLLBACK-hbbtv32-CI
           path: owntv_tdt/app/build/outputs/apk/hbbtv32/debug/*.apk
           if-no-files-found: error
       - name: Upload Android signing tool
