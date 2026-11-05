@@ -200,7 +200,7 @@ jobs:
           assert 'stopAsync' in s and 'destoryPage' in s
           print('PASS: HIDE transitions re-create only the native browser, no tuner reset')
           PY
-      - name: Regression guard: restore exact working LOVEStv 5.3.17 lifecycle
+      - name: Regression guard - restore exact working LOVEStv 5.3.17 lifecycle
         run: |
           python3 - <<'PY'
           from pathlib import Path
