@@ -1,9 +1,9 @@
-name: Build Channel+ 5.3.17 restore repeated LOVEStv launches
+name: Build Channel+ 5.3.18 HbbTV remote focus candidate (CI only)
 
 on:
   push:
     branches:
-      - codex/channelplus-5.3.7-lovestv-ci
+      - codex/channelplus-5.3.18-hbbtv-navigation
   workflow_dispatch:
 
 permissions:
@@ -200,6 +200,22 @@ jobs:
           assert 'stopAsync' in s and 'destoryPage' in s
           print('PASS: HIDE transitions re-create only the native browser, no tuner reset')
           PY
+      - name: Restore Channel+ player remote focus and one-BACK HbbTV exit
+        run: |
+          python3 tools/hbbtv/fix_5318_restore_channel_ui.py
+          python3 - <<'PY'
+          from pathlib import Path
+          v=Path('owntv_tdt/app/src/main/java/tv/own/owntv/features/hbbtv/HbbTvPlayerView.java').read_text()
+          a=Path('owntv_tdt/app/src/main/java/tv/own/owntv/MainActivity.kt').read_text()
+          h=Path('owntv_tdt/app/src/main/java/tv/own/channelplus/lovestvprobe/HbbTvRuntimeService.java').read_text()
+          c=Path('owntv_tdt/app/src/main/java/tv/own/owntv/features/shell/OwnTVShell.kt').read_text()
+          assert 'exitInteractiveOnBack(event) || host.key(event)' in v
+          assert 'hbbBackOwnedUntilKeyUp' in a
+          assert 'hidden || !hbbOwnsRemote' in h
+          assert 'HorizontalChannelOverlay(' in c
+          assert 'rearmAfterExit("LOVEStv BACK: restore full-screen Channel+")' in v
+          print('PASS: BACK returns directly to TDT; LEFT can open horizontal channels; BLUE can reopen LOVEStv')
+          PY
       - name: Classify TCL native timeshift status logs
         working-directory: owntv_core_tdt
         run: |
@@ -233,8 +249,8 @@ jobs:
         working-directory: owntv_tdt
         env:
           CHANNELPLUS_TEST_KEYSTORE: ${{ runner.temp }}/ci.jks
-          VERSION_CODE: '100028'
-          VERSION_NAME: '5.3.17'
+          VERSION_CODE: '100029'
+          VERSION_NAME: '5.3.18'
         run: |
           chmod +x gradlew
           ./gradlew :app:assembleHbbtv32Debug --no-daemon --stacktrace --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g -Dfile.encoding=UTF-8" -Pkotlin.daemon.jvmargs=-Xmx3g
@@ -242,7 +258,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: Channelplus-5.3.17-RELEASE-hbbtv32-CI
+          name: Channelplus-5.3.18-NAVIGATION-CI-UNSIGNED-FOR-UPDATES
           path: owntv_tdt/app/build/outputs/apk/hbbtv32/debug/*.apk
           if-no-files-found: error
       - name: Upload Android signing tool
