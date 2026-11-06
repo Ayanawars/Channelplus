@@ -23,7 +23,7 @@ def decode(text):
 
 def payload_start(input_file, info):
     input_file.seek(info.header_offset)
-    if input_file.read(4) != b"PK\\x03\\x04":
+    if input_file.read(4) != bytes((80, 75, 3, 4)):
         raise ValueError("Unexpected ZIP local header")
     input_file.seek(info.header_offset + 26)
     namelen, extralen = struct.unpack("<HH", input_file.read(4))
