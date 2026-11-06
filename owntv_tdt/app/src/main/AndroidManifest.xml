@@ -293,13 +293,13 @@
 
         <activity
             android:name=".MainActivityOliveCream"
-            android:banner="@drawable/stayon_banner_green_cream"
+            android:banner="@drawable/stayon_banner_green"
             android:enabled="false"
             android:exported="true"
-            android:icon="@mipmap/stayon_icon_green_cream"
+            android:icon="@mipmap/stayon_icon_green"
             android:configChanges="keyboard|keyboardHidden|navigation|screenSize|smallestScreenSize|screenLayout|orientation|uiMode|density|colorMode"
             android:launchMode="singleTop"
-            android:roundIcon="@mipmap/stayon_icon_green_cream"
+            android:roundIcon="@mipmap/stayon_icon_green"
             android:theme="@style/Theme.OwnTV.Starting.OliveCream"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
