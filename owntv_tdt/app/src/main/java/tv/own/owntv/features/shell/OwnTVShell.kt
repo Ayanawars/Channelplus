@@ -224,6 +224,7 @@ fun OwnTVShell(
     val sportsMatchRequests = koinInject<tv.own.owntv.features.sports.SportsPlayback>()
     // More › Settings opens Settings at a group, or with its search open.
     var settingsStart by remember { mutableStateOf<tv.own.owntv.features.shell.components.SettingsStart?>(null) }
+    var staySettingsOpened by remember { mutableStateOf(false) }
     // The playlist pill's place on screen, where the playlist menu redraws it above its scrim.
     var playlistPillBounds by remember { mutableStateOf<androidx.compose.ui.geometry.Rect?>(null) }
     var miniHasFocus by remember { mutableStateOf(false) }
@@ -1116,7 +1117,7 @@ fun OwnTVShell(
                             // edge (or beside a docked rail).
                             Modifier
                                 .padding(
-                                    start = if (navStyle == tv.own.owntv.core.settings.SettingsRepository.NavStyle.DOCKED) {
+                                    start = if (selectedSection != MainSection.HOME && navStyle == tv.own.owntv.core.settings.SettingsRepository.NavStyle.DOCKED) {
                                         tv.own.owntv.features.shell.components.railDockedReserve(navSize)
                                     } else 0.dp,
                                 )
@@ -1173,7 +1174,11 @@ fun OwnTVShell(
                             onOpenPlaylist = {},
                             // Settings is reached through More now, so Back out of its root goes
                             // back there rather than to the rail — one level out, not two.
-                            onBack = { restoreFocus = true; onSelectSection(MainSection.MORE) },
+                            onBack = {
+                                restoreFocus = true
+                                onSelectSection(if (staySettingsOpened) MainSection.HOME else MainSection.MORE)
+                                staySettingsOpened = false
+                            },
                             openEpgAdd = openEpgAdd,
                             onEpgAddConsumed = { openEpgAdd = false },
                             start = settingsStart,
@@ -1184,62 +1189,22 @@ fun OwnTVShell(
                                 .focusGroup(),
                         )
 
-                        selectedSection == MainSection.HOME -> HomeScreen(
+                        selectedSection == MainSection.HOME -> tv.own.owntv.features.home.StayOnDashboard(
                             vm = homeVm,
-                            // Skip the fullscreen player when the global external-player toggle is on
-                            // (mounting it spins up mpv even though playback went to the external app).
-                            onPlayMovie = { id, pos -> scope.launch { if (movieVm.playByIdAsync(id, pos) && !movieVm.externalPlayerOn.value) openFullscreen(MainSection.MOVIES) } },
-                            onPlayEpisode = { seriesId, epId, pos -> scope.launch { if (seriesVm.playFromHomeAsync(seriesId, epId, pos) && !seriesVm.externalPlayerOn.value) openFullscreen(MainSection.SERIES) } },
-                            onPlayChannel = { id, zap -> scope.launch { if (liveVm.ensurePlayingByIdAsync(id, zap)) openFullscreen(MainSection.LIVE_TV) } },
-                            onActivateTrending = { selected, onUnavailable ->
+                            onWatchChannel = { id ->
                                 scope.launch {
-                                    when (val current = homeVm.revalidateTrendingItem(selected)) {
-                                        is TrendingHomeItem.Movie -> {
-                                            val played = movieVm.playByIdAsync(current.movie.id)
-                                            if (!played) onUnavailable()
-                                            else if (!movieVm.externalPlayerOn.value) openFullscreen(MainSection.MOVIES)
-                                        }
-                                        is TrendingHomeItem.Series -> {
-                                            seriesVm.openSeries(current.series)
-                                            restoreFocus = true
-                                            onSelectSection(MainSection.SERIES)
-                                        }
-                                        null -> onUnavailable()
-                                    }
+                                    if (liveVm.ensurePlayingByIdAsync(id)) openFullscreen(MainSection.LIVE_TV)
                                 }
                             },
-                            onOpenMovie = { movie ->
-                                restoreFocus = false
-                                movieVm.revealMovie(movie)
-                                onSelectSection(MainSection.MOVIES)
+                            onOpenTv = { onSelectSection(MainSection.LIVE_TV) },
+                            onOpenGuide = { onSelectSection(MainSection.EPG) },
+                            onOpenSettings = {
+                                staySettingsOpened = true
+                                onSelectSection(MainSection.SETTINGS)
                             },
-                            onOpenSeries = { series ->
-                                seriesVm.openSeries(series)
-                                restoreFocus = true
-                                onSelectSection(MainSection.SERIES)
-                            },
-                            onOpenTrendingSearch = { query ->
-                                searchVm.setQuery(query)
-                                trendingSearchActive = true
-                                restoreTrendingSearchFocus = false
-                                onSelectSection(MainSection.SEARCH)
-                            },
-                            onChildFocused = { focusedLayer = ShellLayer.CONTENT },
-                            restoreFocus = restoreFocus,
-                            restoreTrendingSearchFocus = restoreTrendingSearchFocus,
-                            onRestored = {
-                                restoreFocus = false
-                                restoreTrendingSearchFocus = false
-                            },
-                            previewEnabled = playerMode == PlayerMode.NONE,
-                            firstRowFocusRequester = homeFirstRowFocus,
-                            // Beside the resting capsule; a docked rail already reserves its own width.
-                            onEntryHook = { homeEntry = it },
-                            onOpenMatch = { m ->
-                                sportsMatchRequests.pendingMatch.value = m to null
-                                onSelectSection(MainSection.SPORTS)
-                            },
-                            contentStart = if (navStyle == tv.own.owntv.core.settings.SettingsRepository.NavStyle.DOCKED) 64.mpx else 150.mpx,
+                            onOpenSearch = { onSelectSection(MainSection.SEARCH) },
+                            onOpenMovies = { onSelectSection(MainSection.MOVIES) },
+                            onOpenSeries = { onSelectSection(MainSection.SERIES) },
                             modifier = Modifier.fillMaxSize(),
                         )
 
@@ -1365,6 +1330,8 @@ fun OwnTVShell(
                 }
             }
           }
+            // StayON+ draws its own top navigation: do not overlay the legacy rail/cluster.
+            if (selectedSection != MainSection.HOME) {
             tv.own.owntv.features.shell.components.StageStatusCluster(
                 continuePill = continueTarget?.let { target ->
                     val live = target.kind == tv.own.owntv.features.home.ContinueKind.LIVE
@@ -1426,6 +1393,7 @@ fun OwnTVShell(
                 nowPlaying = nowPlayingRail,
                 onNowPlaying = enterNowPlaying,
             )
+            }
           }
         }
         // The solid-mode wizard aura is deliberately drawn after the opaque browse surfaces so it
