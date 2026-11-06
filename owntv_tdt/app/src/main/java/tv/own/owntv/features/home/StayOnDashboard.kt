@@ -132,7 +132,7 @@ fun StayOnDashboard(
             StayIconAction(OwnTVIcon.SETTINGS, onOpenSettings)
             Spacer(Modifier.width(16.dp))
             val clockFormat = stringResource(R.string.stayon_time_format)
-            val clock by produceState("", clockFormat) {
+            val clock by produceState(SimpleDateFormat(clockFormat, Locale.getDefault()).format(Date()), clockFormat) {
                 while (true) {
                     value = SimpleDateFormat(clockFormat, Locale.getDefault()).format(Date())
                     delay(30_000L)
