@@ -45,7 +45,7 @@
         <item name="windowSplashScreenAnimatedIcon">@mipmap/stayon_icon_green</item>
     </style>
     <style name="Theme.OwnTV.Starting.OliveCream">
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/stayon_icon_green_cream</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/stayon_icon_green</item>
     </style>
     <style name="Theme.OwnTV.Starting.Pixel">
         <item name="windowSplashScreenAnimatedIcon">@mipmap/stayon_icon_sober</item>
