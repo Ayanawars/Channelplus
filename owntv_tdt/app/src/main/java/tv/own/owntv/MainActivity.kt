@@ -198,6 +198,16 @@ open class MainActivity : ComponentActivity() {
             // something else.
             @Suppress("RememberReturnType")
             remember { Perf.stamp("first-composition"); Unit }
+            // Only play on a fresh launcher entry. Never replay for resumed TV,
+            // configuration changes, profile switches, or external deep links.
+            var introVisible by remember {
+                mutableStateOf(
+                    savedInstanceState == null &&
+                        pendingDeepLink == null &&
+                        intent.action == Intent.ACTION_MAIN
+                )
+            }
+
 
             // Hold the screen on while video is actually playing, so the TV screensaver doesn't
             // start mid-channel/episode; released when paused/stopped (then the screensaver is fine).
@@ -446,6 +456,24 @@ open class MainActivity : ComponentActivity() {
                             else -> Unit
                         }
                         } // end foreground Box (above the background layer)
+                        // Foreground startup intro; rendered above every other UI.
+                        // The native splash is released when profiles load, so the
+                        // five-second clip is not played behind Android's splash.
+                        if (introVisible) {
+                            BackHandler { introVisible = false } // Back skips the intro.
+                            if (destinationReady) {
+                                tv.own.owntv.ui.components.StayOnIntroVideo(
+                                    onFinished = { introVisible = false },
+                                    modifier = Modifier.fillMaxSize(),
+                                )
+                            } else {
+                                Box(
+                                    Modifier.fillMaxSize()
+                                        .background(androidx.compose.ui.graphics.Color.Black),
+                                )
+                            }
+                        }
+
                     }
                     } // end LocalizedContent
                 }
