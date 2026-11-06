@@ -457,14 +457,26 @@ private fun MusicDashboard(modifier: Modifier = Modifier) {
         Text(stringResource(R.string.stayon_music_all), fontSize = 18.sp, color = White)
         Spacer(Modifier.height(12.dp))
         Row(Modifier.fillMaxWidth().height(82.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            listOf(stringResource(R.string.stayon_spotify), stringResource(R.string.stayon_youtube_music), stringResource(R.string.stayon_amazon_music)).forEach { title ->
+            listOf(
+                R.drawable.stayon_spotify to stringResource(R.string.stayon_spotify),
+                R.drawable.stayon_youtube_music to stringResource(R.string.stayon_youtube_music),
+                R.drawable.stayon_amazon_music to stringResource(R.string.stayon_amazon_music),
+            ).forEach { (logo, label) ->
+                // These are the supplied official wordmarks, not working service integrations yet.
+                // Keep them as non-focusable placeholders until the user connects each provider.
                 Box(
                     Modifier.weight(1f).fillMaxHeight()
                         .clip(RoundedCornerShape(18.dp))
-                        .background(Color(0xFF1C1C21)),
+                        .background(Color(0xFF1C1C21))
+                        .padding(horizontal = 22.dp, vertical = 13.dp),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(title, fontSize = 23.sp, fontWeight = FontWeight.SemiBold, color = White)
+                    Image(
+                        painter = painterResource(logo),
+                        contentDescription = label,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.fillMaxWidth().height(52.dp),
+                    )
                 }
             }
         }
