@@ -1,6 +1,7 @@
 package tv.own.owntv.features.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
@@ -22,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -32,6 +34,8 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -39,6 +43,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Text
+import kotlinx.coroutines.delay
+import org.koin.androidx.compose.koinViewModel
+import tv.own.owntv.ui.components.OwnTVIcon
+import tv.own.owntv.ui.metadata.rememberExternalMetadata
 import coil3.compose.AsyncImage
 import tv.own.owntv.core.epg.displayLogoUrl
 import tv.own.owntv.R
@@ -70,11 +78,14 @@ fun StayOnDashboard(
     onOpenSearch: () -> Unit,
     onOpenMovies: () -> Unit,
     onOpenSeries: () -> Unit,
+    onOpenMatch: (tv.own.owntv.core.sports.model.Match) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val state by vm.uiState.collectAsStateWithLifecycle()
     var tab by remember { mutableStateOf(StayTab.TV) }
     val firstFocus = remember { FocusRequester() }
+    val sportsVm = koinViewModel<tv.own.owntv.features.sports.SportsViewModel>()
+    val matches by sportsVm.homeRow.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) { runCatching { firstFocus.requestFocus() } }
 
     Column(
@@ -116,12 +127,17 @@ fun StayOnDashboard(
                 }
             }
             Spacer(Modifier.weight(1f))
-            StayTextAction(stringResource(R.string.stayon_search_icon), onOpenSearch)
+            StayIconAction(OwnTVIcon.SEARCH, onOpenSearch)
             Spacer(Modifier.width(10.dp))
-            StayTextAction(stringResource(R.string.stayon_settings_icon), onOpenSettings)
+            StayIconAction(OwnTVIcon.SETTINGS, onOpenSettings)
             Spacer(Modifier.width(16.dp))
             val clockFormat = stringResource(R.string.stayon_time_format)
-            val clock = remember(clockFormat) { SimpleDateFormat(clockFormat, Locale.getDefault()).format(Date()) }
+            val clock by produceState(SimpleDateFormat(clockFormat, Locale.getDefault()).format(Date()), clockFormat) {
+                while (true) {
+                    value = SimpleDateFormat(clockFormat, Locale.getDefault()).format(Date())
+                    delay(30_000L)
+                }
+            }
             Text(clock, color = White, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
         }
         Spacer(Modifier.height(24.dp))
@@ -131,6 +147,8 @@ fun StayOnDashboard(
                 onWatchChannel = onWatchChannel,
                 onOpenTv = onOpenTv,
                 onOpenGuide = onOpenGuide,
+                match = matches.firstOrNull(),
+                onOpenMatch = { match -> onOpenMatch(match) },
                 modifier = Modifier.weight(1f),
             )
             StayTab.MUSIC -> MusicDashboard(modifier = Modifier.weight(1f))
@@ -184,90 +202,200 @@ private fun StayButton(label: String, onClick: () -> Unit, modifier: Modifier = 
 }
 
 @Composable
+private fun StayIconAction(icon: OwnTVIcon, onClick: () -> Unit) {
+    var focused by remember { mutableStateOf(false) }
+    Box(
+        Modifier
+            .onFocusChanged { focused = it.isFocused }
+            .clip(CircleShape)
+            .background(if (focused) Color(0xFF303238) else Color.Transparent)
+            .clickable(onClick = onClick)
+            .focusable()
+            .size(44.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        OwnTVIcon(icon, tint = if (focused) Yellow else White, modifier = Modifier.size(24.dp))
+    }
+}
+
+@Composable
 private fun TvDashboard(
     state: HomeUiState,
     onWatchChannel: (Long) -> Unit,
     onOpenTv: () -> Unit,
     onOpenGuide: () -> Unit,
+    match: tv.own.owntv.core.sports.model.Match?,
+    onOpenMatch: (tv.own.owntv.core.sports.model.Match) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val last = state.recentLive.firstOrNull()
-    val fav = state.favoriteLive.firstOrNull()
+    val favorite = state.favoriteLive.firstOrNull()
     val now = System.currentTimeMillis()
-    val guide = last?.let { ch ->
-        state.recentGuide.programmes[ch.id]?.firstOrNull { it.startMs <= now && it.stopMs > now }
-    }
+    val guide = last?.let { state.recentGuide.programmes[it.id]?.firstOrNull { p -> p.startMs <= now && p.stopMs > now } }
+    val metadata = rememberExternalMetadata(guide?.title)
+    val artwork = metadata?.tvdbArtwork ?: metadata?.posterUrl
+    val timeFormat = stringResource(R.string.stayon_time_format)
+
     Column(modifier.fillMaxWidth()) {
-        Row(Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Column(
-                Modifier.weight(2f).fillMaxHeight()
-                    .clip(RoundedCornerShape(22.dp))
-                    .background(Brush.horizontalGradient(listOf(Panel, Color(0xFF262022), Color(0xFF151317))))
-                    .padding(28.dp),
-                verticalArrangement = Arrangement.SpaceBetween,
+        Row(Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(22.dp)) {
+            Box(
+                Modifier.weight(2.17f).fillMaxHeight()
+                    .background(Brush.horizontalGradient(listOf(Color(0xFF141319), Color(0xFF1C1A1E), Ink))),
             ) {
-                Text(stringResource(R.string.stayon_last_channel), letterSpacing = 3.sp, fontSize = 12.sp, color = Muted)
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (last != null && !last.displayLogoUrl.isNullOrBlank()) {
-                        AsyncImage(model = last.displayLogoUrl, contentDescription = null, modifier = Modifier.size(64.dp))
-                        Spacer(Modifier.width(12.dp))
-                    }
-                    Column {
-                        Text(last?.name ?: stringResource(R.string.stayon_no_history), fontSize = 27.sp, color = White, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                        if (guide != null) {
-                            Spacer(Modifier.height(8.dp))
-                            Text(guide.title, fontSize = 22.sp, color = White, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                if (!artwork.isNullOrBlank()) {
+                    AsyncImage(
+                        model = artwork,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        alignment = Alignment.Center,
+                        modifier = Modifier.align(Alignment.CenterEnd).fillMaxWidth(.78f).fillMaxHeight(),
+                    )
+                    Box(
+                        Modifier.fillMaxSize().background(
+                            Brush.horizontalGradient(
+                                0f to Ink, .28f to Ink.copy(alpha = .94f),
+                                .60f to Ink.copy(alpha = .38f), 1f to Color.Transparent,
+                            ),
+                        ),
+                    )
+                    Box(
+                        Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Ink.copy(alpha = .28f)))),
+                    )
+                }
+                Column(
+                    Modifier.fillMaxSize().padding(start = 14.dp, top = 12.dp, bottom = 28.dp, end = 14.dp),
+                    verticalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(stringResource(R.string.stayon_last_channel), letterSpacing = 3.sp, fontSize = 12.sp, color = Muted)
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth(.74f)) {
+                        if (last != null) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                if (!last.displayLogoUrl.isNullOrBlank()) {
+                                    AsyncImage(model = last.displayLogoUrl, contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier.size(42.dp))
+                                    Spacer(Modifier.width(12.dp))
+                                }
+                                Text(last.name, fontSize = 20.sp, color = White, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            }
+                            Text(guide?.title ?: stringResource(R.string.stayon_tv_hint), fontSize = if (guide != null) 36.sp else 28.sp, lineHeight = 40.sp, color = White, fontWeight = FontWeight.Bold, maxLines = 3, overflow = TextOverflow.Ellipsis)
                         } else {
-                            Text(stringResource(R.string.stayon_tv_hint), fontSize = 17.sp, color = Muted)
+                            Text(stringResource(R.string.stayon_no_history), fontSize = 30.sp, color = White, fontWeight = FontWeight.Bold)
+                        }
+                        if (guide != null) {
+                            val startTime = remember(guide.startMs, timeFormat) { SimpleDateFormat(timeFormat, Locale.getDefault()).format(Date(guide.startMs)) }
+                            val endTime = remember(guide.stopMs, timeFormat) { SimpleDateFormat(timeFormat, Locale.getDefault()).format(Date(guide.stopMs)) }
+                            Text(stringResource(R.string.stayon_epg_schedule, startTime, endTime), fontSize = 17.sp, color = White)
+                            val progress = ((now - guide.startMs).toFloat() / (guide.stopMs - guide.startMs).coerceAtLeast(1L)).coerceIn(0f,1f)
+                            Box(Modifier.fillMaxWidth(.68f).height(5.dp).background(Color(0xFF444448), RoundedCornerShape(9.dp))) {
+                                Box(Modifier.fillMaxWidth(progress).fillMaxHeight().background(Yellow, RoundedCornerShape(9.dp)))
+                            }
+                        }
+                        Spacer(Modifier.height(6.dp))
+                        if (last != null) {
+                            StayButton(stringResource(R.string.stayon_watch), { onWatchChannel(last.id) })
+                        } else {
+                            StayButton(stringResource(R.string.stayon_browse_tv), onOpenTv)
                         }
                     }
                 }
-                if (guide != null) {
-                    val progress = ((now - guide.startMs).toFloat() / (guide.stopMs - guide.startMs).coerceAtLeast(1L)).coerceIn(0f, 1f)
-                    Box(Modifier.fillMaxWidth(.63f).height(5.dp).background(Color(0xFF444448), RoundedCornerShape(9.dp))) {
-                        Box(Modifier.fillMaxWidth(progress).fillMaxHeight().background(Yellow, RoundedCornerShape(9.dp)))
-                    }
-                }
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                    if (last != null) StayButton(stringResource(R.string.stayon_watch), { onWatchChannel(last.id) })
-                    StayTextAction(stringResource(R.string.stayon_browse_tv), onOpenTv)
-                }
             }
             Column(
-                Modifier.weight(1f).fillMaxHeight().padding(vertical = 4.dp),
+                Modifier.weight(1f).fillMaxHeight()
+                    .padding(top = 8.dp, bottom = 12.dp)
+                    .border(width = 0.dp, color = Color.Transparent)
+                    .padding(start = 12.dp),
                 verticalArrangement = Arrangement.SpaceEvenly,
             ) {
                 StayLineItem(stringResource(R.string.stayon_guide_icon), stringResource(R.string.stayon_guide), stringResource(R.string.stayon_guide_desc), onOpenGuide)
-                Box(Modifier.fillMaxWidth().height(1.dp).background(Color(0xFF444448)))
-                Text(stringResource(R.string.stayon_favorite_title), fontSize = 12.sp, letterSpacing = 2.sp, color = Muted)
-                if (fav != null) {
-                    StayLineItem(stringResource(R.string.stayon_star_icon), fav.name, stringResource(R.string.stayon_open_channel), { onWatchChannel(fav.id) })
+                StayDivider()
+                Text(stringResource(R.string.stayon_favorite_title), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = White)
+                if (favorite != null) {
+                    StayLineItem(stringResource(R.string.stayon_star_icon), favorite.name, stringResource(R.string.stayon_open_channel), { onWatchChannel(favorite.id) })
                 } else {
-                    Text(stringResource(R.string.stayon_add_favorites), color = White, fontSize = 17.sp)
+                    Text(stringResource(R.string.stayon_add_favorites), color = Muted, fontSize = 16.sp)
                 }
-                Box(Modifier.fillMaxWidth().height(1.dp).background(Color(0xFF444448)))
+                StayDivider()
                 Text(stringResource(R.string.stayon_next_match), fontSize = 12.sp, letterSpacing = 2.sp, color = Muted)
-                Text(stringResource(R.string.stayon_set_team), fontSize = 17.sp, color = White)
-                Text(stringResource(R.string.stayon_sports_pending), fontSize = 13.sp, color = Muted, maxLines = 2)
+                if (match != null) {
+                    val home = match.home?.team
+                    val away = match.away?.team
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (home?.logoUrl != null) {
+                            AsyncImage(model = home.logoUrl, contentDescription = home.name, contentScale = ContentScale.Fit, modifier = Modifier.size(40.dp))
+                        }
+                        Spacer(Modifier.width(10.dp))
+                        Text(stringResource(R.string.stayon_vs), color = White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        Spacer(Modifier.width(10.dp))
+                        if (away?.logoUrl != null) {
+                            AsyncImage(model = away.logoUrl, contentDescription = away.name, contentScale = ContentScale.Fit, modifier = Modifier.size(40.dp))
+                        }
+                    }
+                    StayTextAction(match.title, onClick = { onOpenMatch(match) })
+                    val dateFormat = stringResource(R.string.stayon_match_date_format)
+                    val time = remember(match.startMs, dateFormat) { SimpleDateFormat(dateFormat, Locale.getDefault()).format(Date(match.startMs)) }
+                    Text(time, fontSize = 14.sp, color = Muted)
+                } else {
+                    Text(stringResource(R.string.stayon_no_match), fontSize = 16.sp, color = Muted, maxLines = 2)
+                }
             }
         }
-        Spacer(Modifier.height(24.dp))
-        Box(Modifier.fillMaxWidth().height(1.dp).background(Color(0xFF3B3B40)))
-        Spacer(Modifier.height(14.dp))
-        Row(Modifier.fillMaxWidth().height(76.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-            Column(Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(stringResource(R.string.stayon_love_l), fontSize = 28.sp, fontWeight = FontWeight.Black, color = White)
-                    Text(stringResource(R.string.stayon_love_o), fontSize = 28.sp, fontWeight = FontWeight.Black, color = Yellow)
-                    Text(stringResource(R.string.stayon_love_tail), fontSize = 28.sp, fontWeight = FontWeight.Black, color = White)
-                }
-                Text(stringResource(R.string.stayon_interactive_tv), fontSize = 12.sp, color = Muted)
+        Spacer(Modifier.height(20.dp))
+        StayDivider()
+        Spacer(Modifier.height(12.dp))
+        Row(
+            Modifier.fillMaxWidth().height(91.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Column(Modifier.weight(1.05f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Image(
+                    painterResource(R.drawable.stayon_lovestv_logo),
+                    contentDescription = stringResource(R.string.stayon_lovestv_content_description),
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.width(175.dp).height(50.dp),
+                )
+                Text(stringResource(R.string.stayon_lovestv_tagline), fontSize = 12.sp, color = Muted, maxLines = 1)
             }
-            StayServiceLabel(stringResource(R.string.stayon_mediaset), stringResource(R.string.stayon_telecinco), Modifier.weight(1f))
-            StayServiceLabel(stringResource(R.string.stayon_rtve), stringResource(R.string.stayon_la1), Modifier.weight(1f))
-            StayServiceLabel(stringResource(R.string.stayon_atresmedia), stringResource(R.string.stayon_antena3), Modifier.weight(1f))
+            StayVerticalDivider()
+            Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    painterResource(R.drawable.stayon_atresmedia_mark),
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.width(56.dp).height(72.dp),
+                )
+                Spacer(Modifier.width(7.dp))
+                Text(stringResource(R.string.stayon_atresmedia), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = White, maxLines = 1)
+            }
+            StayVerticalDivider()
+            Box(Modifier.weight(1.05f), contentAlignment = Alignment.Center) {
+                Image(
+                    painterResource(R.drawable.stayon_mediaset_logo),
+                    contentDescription = stringResource(R.string.stayon_mediaset),
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.fillMaxWidth(.95f).height(63.dp),
+                )
+            }
+            StayVerticalDivider()
+            Box(Modifier.weight(.72f), contentAlignment = Alignment.Center) {
+                Image(
+                    painterResource(R.drawable.stayon_rtve_logo),
+                    contentDescription = stringResource(R.string.stayon_rtve),
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.width(115.dp).height(75.dp),
+                )
+            }
         }
     }
+}
+
+@Composable
+private fun StayDivider() {
+    Box(Modifier.fillMaxWidth().height(1.dp).background(Color(0xFF414147)))
+}
+
+@Composable
+private fun StayVerticalDivider() {
+    Box(Modifier.width(1.dp).height(58.dp).background(Color(0xFF414147)))
 }
 
 @Composable
@@ -289,15 +417,6 @@ private fun StayLineItem(icon: String, title: String, desc: String, onClick: () 
             Text(title, fontSize = 20.sp, color = White, fontWeight = FontWeight.Bold)
             Text(desc, fontSize = 13.sp, color = Muted)
         }
-    }
-}
-
-@Composable
-private fun StayServiceLabel(name: String, subtitle: String, modifier: Modifier = Modifier) {
-    // Deliberately not interactive until this provider's integration is approved.
-    Column(modifier.padding(start = 12.dp)) {
-        Text(name, fontSize = 21.sp, color = White, fontWeight = FontWeight.Bold, maxLines = 1)
-        Text(subtitle, fontSize = 15.sp, color = Yellow)
     }
 }
 

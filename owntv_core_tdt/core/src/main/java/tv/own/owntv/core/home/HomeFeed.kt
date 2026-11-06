@@ -253,11 +253,9 @@ class HomeFeedReader(
             val heroItems = buildHeroItems(items, liveWithTs, config)
             // The two guide slices read different channel sets and never depend on each other.
             val recentGuideAsync = async {
-                if (HomeRow.RECENT_CHANNELS in config.visibleOrder && config.recentLiveMode == HomeLiveRowMode.ON_NOW) {
-                    liveGuide(profileId, liveIds, live)
-                } else {
-                    GuideSliceState()
-                }
+                // StayON+ always needs the last watched channel's current programme even if the
+                // legacy configurable Home row was hidden or switched to cards mode.
+                if (live.isNotEmpty()) liveGuide(profileId, liveIds, live) else GuideSliceState()
             }
             val favoriteGuideAsync = async {
                 if (HomeRow.FAVORITE_CHANNELS in config.visibleOrder && config.favoriteLiveMode == HomeLiveRowMode.ON_NOW) {

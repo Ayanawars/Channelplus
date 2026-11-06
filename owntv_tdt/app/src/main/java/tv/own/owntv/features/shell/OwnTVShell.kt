@@ -1205,6 +1205,10 @@ fun OwnTVShell(
                             onOpenSearch = { onSelectSection(MainSection.SEARCH) },
                             onOpenMovies = { onSelectSection(MainSection.MOVIES) },
                             onOpenSeries = { onSelectSection(MainSection.SERIES) },
+                            onOpenMatch = { match ->
+                                sportsMatchRequests.pendingMatch.value = match to null
+                                onSelectSection(MainSection.SPORTS)
+                            },
                             modifier = Modifier.fillMaxSize(),
                         )
 
