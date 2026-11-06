@@ -38,9 +38,9 @@
         <item name="android:windowSplashScreenBrandingImage">@drawable/stayon_banner_green</item>
     </style>
     <style name="Theme.OwnTV.Starting.OliveCream">
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/stayon_icon_green_cream</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/stayon_icon_green</item>
         <item name="windowSplashScreenAnimationDuration">800</item>
-        <item name="android:windowSplashScreenBrandingImage">@drawable/stayon_banner_green_cream</item>
+        <item name="android:windowSplashScreenBrandingImage">@drawable/stayon_banner_green</item>
     </style>
     <style name="Theme.OwnTV.Starting.Pixel">
         <item name="windowSplashScreenAnimatedIcon">@mipmap/stayon_icon_sober</item>
@@ -71,7 +71,7 @@
         <item name="windowSplashScreenAnimatedIcon">@mipmap/stayon_icon_green</item>
     </style>
     <style name="Theme.OwnTV.Starting.OliveCream.Still">
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/stayon_icon_green_cream</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/stayon_icon_green</item>
     </style>
     <style name="Theme.OwnTV.Starting.Pixel.Still">
         <item name="windowSplashScreenAnimatedIcon">@mipmap/stayon_icon_sober</item>
