@@ -47,4 +47,10 @@
     <string name="stayon_spotify">Spotify</string>
     <string name="stayon_youtube_music">YouTube Music</string>
     <string name="stayon_amazon_music">Amazon Music</string>
+    <string name="stayon_lovestv_content_description">LOVEStv</string>
+    <string name="stayon_lovestv_tagline">Your TV, whenever you want</string>
+    <string name="stayon_no_match">No upcoming match from your followed teams</string>
+    <string name="stayon_vs">VS</string>
+    <string name="stayon_epg_schedule">%1$s — %2$s</string>
+    <string name="stayon_match_date_format">EEE d MMM · HH:mm</string>
 </resources>
