@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ce_title">Channel editor</string>
-    <string name="ce_count">%1$d channels · %2$d selected</string>
+    <string name="ce_count">Channels: %1$d · Selected: %2$d</string>
     <string name="ce_sources">Sources</string>
     <string name="ce_all_sources">All profile sources</string>
     <string name="ce_search">Search</string>
@@ -51,7 +51,7 @@
     <string name="ce_discard">Discard changes</string>
     <string name="ce_discard_body">Leave without saving the pending changes?</string>
     <string name="ce_review">Review changes</string>
-    <string name="ce_review_body">%1$d affected rows, including shifted positions. Preview shows the first eight. Changes affect Channel+ only; the provider and TV channel list stay unchanged.</string>
+    <string name="ce_review_body">Affected rows: %1$d (including shifted positions). Preview shows the first eight. Changes affect StayON+ only; the provider and TV channel list stay unchanged.</string>
     <string name="ce_preview_row">%4$d → %5$d · %1$s → %2$s · %3$s</string>
     <string name="ce_load_error">Unable to load channels. Close the editor and try again.</string>
     <string name="ce_too_large">This session exceeds 20,000 channels. No partial list was opened and no changes were made.</string>
