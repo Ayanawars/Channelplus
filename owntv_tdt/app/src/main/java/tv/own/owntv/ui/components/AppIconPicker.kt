@@ -17,6 +17,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.border
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,37 +47,37 @@ fun AppIconPicker(
     modifier: Modifier = Modifier,
     firstFocus: FocusRequester? = null,
 ) {
-    var focusedIcon by remember { mutableStateOf<AppIcon?>(null) }
-    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        // Two rows of five (the 8 colours, Signal, Pixel): ten tiles in one row are wider than the panel.
-        AppIcon.entries.chunked(5).forEachIndexed { row, icons ->
-            if (row > 0) Spacer(Modifier.height(12.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                icons.forEach { icon ->
-                    tv.own.owntv.ui.stage.StageSurface(
-                        onClick = { onPick(icon) },
-                        radius = 20.dp,
-                        modifier = Modifier
-                            .size(84.dp)
-                            .then(if (icon == selected && firstFocus != null) Modifier.focusRequester(firstFocus) else Modifier),
-                        focusStyle = tv.own.owntv.ui.stage.StageFocus.FX,
-                        // The chosen icon keeps an accent ring while focus is elsewhere.
-                        idle = if (icon == selected) Modifier.border(3.mpx, tv.own.owntv.ui.theme.stageAccent.accent, RoundedCornerShape(20.dp)) else Modifier,
-                        contentAlignment = Alignment.Center,
-                    ) { focused ->
-                        LaunchedEffect(focused) { if (focused) focusedIcon = icon }
-                        BrandMark(icon, 56.dp, followAccent = false)
-                    }
-                }
+    // Five StayON+ icons, without visible labels as chosen for the TV UI.
+    // Keep the legacy enum values for persisted installations / safe alias migration.
+    val choices = listOf(
+        AppIcon.EGGSHELL to R.mipmap.stayon_icon_blue,
+        AppIcon.PETROL to R.mipmap.stayon_icon_green,
+        AppIcon.SUNFLOWER to R.mipmap.stayon_icon_violet,
+        AppIcon.COBALT to R.mipmap.stayon_icon_red,
+        AppIcon.TOMATO to R.mipmap.stayon_icon_sober,
+    )
+    val visibleSelection = selected.takeIf { icon -> choices.any { it.first == icon } } ?: AppIcon.EGGSHELL
+    Row(modifier, horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
+        choices.forEach { (icon, imageRes) ->
+            tv.own.owntv.ui.stage.StageSurface(
+                onClick = { onPick(icon) },
+                radius = 20.dp,
+                modifier = Modifier
+                    .size(96.dp)
+                    .then(if (icon == visibleSelection && firstFocus != null) Modifier.focusRequester(firstFocus) else Modifier),
+                focusStyle = tv.own.owntv.ui.stage.StageFocus.FX,
+                idle = if (icon == visibleSelection) Modifier.border(
+                    3.mpx, tv.own.owntv.ui.theme.stageAccent.accent, RoundedCornerShape(20.dp),
+                ) else Modifier,
+                contentAlignment = Alignment.Center,
+            ) { _ ->
+                Image(
+                    painter = painterResource(imageRes),
+                    contentDescription = stringResource(icon.label),
+                    modifier = Modifier.size(82.dp),
+                )
             }
         }
-        Spacer(Modifier.height(8.dp))
-        Text(
-            stringResource((focusedIcon ?: selected).label),
-            style = tv.own.owntv.ui.theme.stageText(19, 500),
-            color = tv.own.owntv.ui.theme.StageColors.Text,
-            textAlign = TextAlign.Center,
-        )
     }
 }
 
