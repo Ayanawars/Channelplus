@@ -32,6 +32,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -40,6 +41,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
 import tv.own.owntv.core.epg.displayLogoUrl
+import tv.own.owntv.R
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -82,13 +84,13 @@ fun StayOnDashboard(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("StayON", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = White)
-                Text("+", fontSize = 32.sp, fontWeight = FontWeight.Bold, color = Yellow)
+                Text(stringResource(R.string.stayon_wordmark), fontSize = 28.sp, fontWeight = FontWeight.Bold, color = White)
+                Text(stringResource(R.string.stayon_plus), fontSize = 32.sp, fontWeight = FontWeight.Bold, color = Yellow)
             }
             Spacer(Modifier.width(38.dp))
             val tabs = listOf(
-                StayTab.TV to "TV", StayTab.MUSIC to "Música",
-                StayTab.MOVIES to "Películas", StayTab.SERIES to "Series", StayTab.APPS to "Apps",
+                StayTab.TV to stringResource(R.string.stayon_tv), StayTab.MUSIC to stringResource(R.string.stayon_music),
+                StayTab.MOVIES to stringResource(R.string.stayon_movies), StayTab.SERIES to stringResource(R.string.stayon_series), StayTab.APPS to stringResource(R.string.stayon_apps),
             )
             tabs.forEach { (value, label) ->
                 val callback: () -> Unit = {
@@ -114,11 +116,12 @@ fun StayOnDashboard(
                 }
             }
             Spacer(Modifier.weight(1f))
-            StayTextAction("⌕", onOpenSearch)
+            StayTextAction(stringResource(R.string.stayon_search_icon), onOpenSearch)
             Spacer(Modifier.width(10.dp))
-            StayTextAction("⚙", onOpenSettings)
+            StayTextAction(stringResource(R.string.stayon_settings_icon), onOpenSettings)
             Spacer(Modifier.width(16.dp))
-            val clock = remember { SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()) }
+            val clockFormat = stringResource(R.string.stayon_time_format)
+            val clock = remember(clockFormat) { SimpleDateFormat(clockFormat, Locale.getDefault()).format(Date()) }
             Text(clock, color = White, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
         }
         Spacer(Modifier.height(24.dp))
@@ -132,7 +135,7 @@ fun StayOnDashboard(
             )
             StayTab.MUSIC -> MusicDashboard(modifier = Modifier.weight(1f))
             else -> Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text("Próximamente en StayON+", fontSize = 27.sp, color = Muted)
+                Text(stringResource(R.string.stayon_coming_soon), fontSize = 27.sp, color = Muted)
             }
         }
     }
@@ -203,19 +206,19 @@ private fun TvDashboard(
                     .padding(28.dp),
                 verticalArrangement = Arrangement.SpaceBetween,
             ) {
-                Text("ÚLTIMO CANAL VISTO", letterSpacing = 3.sp, fontSize = 12.sp, color = Muted)
+                Text(stringResource(R.string.stayon_last_channel), letterSpacing = 3.sp, fontSize = 12.sp, color = Muted)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (last != null && !last.displayLogoUrl.isNullOrBlank()) {
                         AsyncImage(model = last.displayLogoUrl, contentDescription = null, modifier = Modifier.size(64.dp))
                         Spacer(Modifier.width(12.dp))
                     }
                     Column {
-                        Text(last?.name ?: "Todavía no has visto ningún canal", fontSize = 27.sp, color = White, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        Text(last?.name ?: stringResource(R.string.stayon_no_history), fontSize = 27.sp, color = White, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
                         if (guide != null) {
                             Spacer(Modifier.height(8.dp))
                             Text(guide.title, fontSize = 22.sp, color = White, maxLines = 2, overflow = TextOverflow.Ellipsis)
                         } else {
-                            Text("Televisión TDT e IPTV", fontSize = 17.sp, color = Muted)
+                            Text(stringResource(R.string.stayon_tv_hint), fontSize = 17.sp, color = Muted)
                         }
                     }
                 }
@@ -226,26 +229,26 @@ private fun TvDashboard(
                     }
                 }
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                    if (last != null) StayButton("▶  Continuar viendo", { onWatchChannel(last.id) })
-                    StayTextAction("Ver canales  →", onOpenTv)
+                    if (last != null) StayButton(stringResource(R.string.stayon_watch), { onWatchChannel(last.id) })
+                    StayTextAction(stringResource(R.string.stayon_browse_tv), onOpenTv)
                 }
             }
             Column(
                 Modifier.weight(1f).fillMaxHeight().padding(vertical = 4.dp),
                 verticalArrangement = Arrangement.SpaceEvenly,
             ) {
-                StayLineItem("▦", "Guía TV", "Explora la programación", onOpenGuide)
+                StayLineItem(stringResource(R.string.stayon_guide_icon), stringResource(R.string.stayon_guide), stringResource(R.string.stayon_guide_desc), onOpenGuide)
                 Box(Modifier.fillMaxWidth().height(1.dp).background(Color(0xFF444448)))
-                Text("TU CANAL FAVORITO", fontSize = 12.sp, letterSpacing = 2.sp, color = Muted)
+                Text(stringResource(R.string.stayon_favorite_title), fontSize = 12.sp, letterSpacing = 2.sp, color = Muted)
                 if (fav != null) {
-                    StayLineItem("★", fav.name, "Abrir canal", { onWatchChannel(fav.id) })
+                    StayLineItem(stringResource(R.string.stayon_star_icon), fav.name, stringResource(R.string.stayon_open_channel), { onWatchChannel(fav.id) })
                 } else {
-                    Text("Añade canales a favoritos", color = White, fontSize = 17.sp)
+                    Text(stringResource(R.string.stayon_add_favorites), color = White, fontSize = 17.sp)
                 }
                 Box(Modifier.fillMaxWidth().height(1.dp).background(Color(0xFF444448)))
-                Text("PRÓXIMO PARTIDO", fontSize = 12.sp, letterSpacing = 2.sp, color = Muted)
-                Text("Configura tu equipo favorito", fontSize = 17.sp, color = White)
-                Text("Los partidos y canales se mostrarán al conectar el servicio.", fontSize = 13.sp, color = Muted, maxLines = 2)
+                Text(stringResource(R.string.stayon_next_match), fontSize = 12.sp, letterSpacing = 2.sp, color = Muted)
+                Text(stringResource(R.string.stayon_set_team), fontSize = 17.sp, color = White)
+                Text(stringResource(R.string.stayon_sports_pending), fontSize = 13.sp, color = Muted, maxLines = 2)
             }
         }
         Spacer(Modifier.height(24.dp))
@@ -254,15 +257,15 @@ private fun TvDashboard(
         Row(Modifier.fillMaxWidth().height(76.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(24.dp)) {
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("L", fontSize = 28.sp, fontWeight = FontWeight.Black, color = White)
-                    Text("O", fontSize = 28.sp, fontWeight = FontWeight.Black, color = Yellow)
-                    Text("VEStv", fontSize = 28.sp, fontWeight = FontWeight.Black, color = White)
+                    Text(stringResource(R.string.stayon_love_l), fontSize = 28.sp, fontWeight = FontWeight.Black, color = White)
+                    Text(stringResource(R.string.stayon_love_o), fontSize = 28.sp, fontWeight = FontWeight.Black, color = Yellow)
+                    Text(stringResource(R.string.stayon_love_tail), fontSize = 28.sp, fontWeight = FontWeight.Black, color = White)
                 }
-                Text("Televisión interactiva", fontSize = 12.sp, color = Muted)
+                Text(stringResource(R.string.stayon_interactive_tv), fontSize = 12.sp, color = Muted)
             }
-            StayServiceLabel("Mediaset", "Telecinco", Modifier.weight(1f))
-            StayServiceLabel("RTVE", "La 1", Modifier.weight(1f))
-            StayServiceLabel("Atresmedia", "Antena 3", Modifier.weight(1f))
+            StayServiceLabel(stringResource(R.string.stayon_mediaset), stringResource(R.string.stayon_telecinco), Modifier.weight(1f))
+            StayServiceLabel(stringResource(R.string.stayon_rtve), stringResource(R.string.stayon_la1), Modifier.weight(1f))
+            StayServiceLabel(stringResource(R.string.stayon_atresmedia), stringResource(R.string.stayon_antena3), Modifier.weight(1f))
         }
     }
 }
@@ -309,14 +312,14 @@ private fun MusicDashboard(modifier: Modifier = Modifier) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(Modifier.weight(1.2f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("TU EMISORA TDT", fontSize = 13.sp, letterSpacing = 3.sp, color = Muted)
-                Text("40 Urban", fontSize = 48.sp, fontWeight = FontWeight.Bold, color = White)
-                Text("Emisora de referencia · conexión pendiente", fontSize = 18.sp, color = Muted)
+                Text(stringResource(R.string.stayon_your_station), fontSize = 13.sp, letterSpacing = 3.sp, color = Muted)
+                Text(stringResource(R.string.stayon_urban), fontSize = 48.sp, fontWeight = FontWeight.Bold, color = White)
+                Text(stringResource(R.string.stayon_music_pending), fontSize = 18.sp, color = Muted)
                 Spacer(Modifier.height(12.dp))
-                Text("SONANDO AHORA", fontSize = 12.sp, letterSpacing = 3.sp, color = Muted)
-                Text("Información de la emisora al conectar Radio TDT", fontSize = 18.sp, color = White, maxLines = 2)
+                Text(stringResource(R.string.stayon_now_playing), fontSize = 12.sp, letterSpacing = 3.sp, color = Muted)
+                Text(stringResource(R.string.stayon_radio_pending), fontSize = 18.sp, color = White, maxLines = 2)
                 Spacer(Modifier.height(16.dp))
-                Text("▷  Continuar escuchando", fontSize = 17.sp, color = Muted)
+                Text(stringResource(R.string.stayon_listen), fontSize = 17.sp, color = Muted)
             }
             Box(Modifier.weight(.8f).fillMaxHeight(), contentAlignment = Alignment.Center) {
                 Box(
@@ -325,17 +328,17 @@ private fun MusicDashboard(modifier: Modifier = Modifier) {
                         .border(3.dp, Color(0xFF7C6338), CircleShape),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text("♫", color = Yellow, fontSize = 113.sp)
+                    Text(stringResource(R.string.stayon_music_symbol), color = Yellow, fontSize = 113.sp)
                 }
             }
         }
         Spacer(Modifier.height(22.dp))
         Box(Modifier.fillMaxWidth().height(1.dp).background(Color(0xFF3B3B40)))
         Spacer(Modifier.height(12.dp))
-        Text("Tu música, en un solo lugar", fontSize = 18.sp, color = White)
+        Text(stringResource(R.string.stayon_music_all), fontSize = 18.sp, color = White)
         Spacer(Modifier.height(12.dp))
         Row(Modifier.fillMaxWidth().height(82.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            listOf("Spotify", "YouTube Music", "Amazon Music").forEach { title ->
+            listOf(stringResource(R.string.stayon_spotify), stringResource(R.string.stayon_youtube_music), stringResource(R.string.stayon_amazon_music)).forEach { title ->
                 Box(
                     Modifier.weight(1f).fillMaxHeight()
                         .clip(RoundedCornerShape(18.dp))
