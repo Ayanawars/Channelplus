@@ -32,8 +32,15 @@ jobs:
         working-directory: owntv_tdt
         env:
           CHANNELPLUS_TEST_KEYSTORE: ${{ runner.temp }}/ci.jks
-        run: ./gradlew :app:testStandardDebugUnitTest :owntv_core_tdt:core:testDebugUnitTest :owntv_core_tdt:player-core:testDebugUnitTest :app:assembleStandardDebug --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g -Dfile.encoding=UTF-8" -Pkotlin.daemon.jvmargs=-Xmx3g
+        run: ./gradlew :app:testStandardDebugUnitTest :owntv_core_tdt:core:testDebugUnitTest :owntv_core_tdt:player-core:testDebugUnitTest :app:assembleStandardDebug :app:assembleStandardRelease --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g -Dfile.encoding=UTF-8" -Pkotlin.daemon.jvmargs=-Xmx3g
       - uses: actions/upload-artifact@v4
         with:
           name: Channelplus-CI-test-only
           path: owntv_tdt/app/build/outputs/apk/standard/debug/*.apk
+
+      - name: Upload unsigned release for offline signing
+        uses: actions/upload-artifact@v4
+        with:
+          name: StayON-unsigned-release
+          path: owntv_tdt/app/build/outputs/apk/standard/release/*.apk
+          if-no-files-found: error
