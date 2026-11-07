@@ -21,7 +21,7 @@ private enum class RadioForm { MANUAL, PLAYLIST }
 @Composable
 fun RadioIptvSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val radio = remember(context) { StayonRadioLibrary(context) }
+    val radio = remember(context) { StayonRadioLibrary.shared(context) }
     val playlists by radio.playlists.collectAsStateWithLifecycle()
     val stations by radio.stations.collectAsStateWithLifecycle()
     val playing by RadioAudioPlayer.playingStationId.collectAsStateWithLifecycle()
