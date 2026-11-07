@@ -452,33 +452,72 @@ private fun MusicDashboard(modifier: Modifier = Modifier) {
             }
         }
         Spacer(Modifier.height(22.dp))
-        Box(Modifier.fillMaxWidth().height(1.dp).background(Color(0xFF3B3B40)))
-        Spacer(Modifier.height(12.dp))
-        Text(stringResource(R.string.stayon_music_all), fontSize = 18.sp, color = White)
-        Spacer(Modifier.height(12.dp))
-        Row(Modifier.fillMaxWidth().height(82.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            listOf(
-                R.drawable.stayon_spotify to stringResource(R.string.stayon_spotify),
-                R.drawable.stayon_youtube_music to stringResource(R.string.stayon_youtube_music),
-                R.drawable.stayon_amazon_music to stringResource(R.string.stayon_amazon_music),
-            ).forEach { (logo, label) ->
-                // These are the supplied official wordmarks, not working service integrations yet.
-                // Keep them as non-focusable placeholders until the user connects each provider.
-                Box(
-                    Modifier.weight(1f).fillMaxHeight()
-                        .clip(RoundedCornerShape(18.dp))
-                        .background(Color(0xFF1C1C21))
-                        .padding(horizontal = 22.dp, vertical = 13.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Image(
-                        painter = painterResource(logo),
-                        contentDescription = label,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.fillMaxWidth().height(52.dp),
-                    )
-                }
+        // The music brands form one clean black strip, NOT three colored tiles.
+        // Keep the provider logos non-focusable until their services are integrated.
+        Column(
+            Modifier.fillMaxWidth()
+                .background(Color.Black)
+                .padding(top = 2.dp),
+        ) {
+            Box(Modifier.fillMaxWidth().height(1.dp).background(Color(0xFF48484B)))
+            Spacer(Modifier.height(12.dp))
+            Text(stringResource(R.string.stayon_music_all), fontSize = 18.sp, color = White)
+            Spacer(Modifier.height(8.dp))
+            Row(
+                Modifier.fillMaxWidth().height(92.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                // The three original wordmarks have very different built-in
+                // text-to-image ratios. Normalize their *visible lettering*
+                // (not their canvas height) to a similar ~26dp on Android TV.
+                StayMusicWordmark(
+                    R.drawable.stayon_spotify,
+                    stringResource(R.string.stayon_spotify),
+                    42.dp,
+                    Modifier.weight(1f),
+                )
+                StayMusicSeparator()
+                StayMusicWordmark(
+                    R.drawable.stayon_youtube_music,
+                    stringResource(R.string.stayon_youtube_music),
+                    63.dp,
+                    Modifier.weight(1.2f),
+                )
+                StayMusicSeparator()
+                StayMusicWordmark(
+                    R.drawable.stayon_amazon_music,
+                    stringResource(R.string.stayon_amazon_music),
+                    76.dp,
+                    Modifier.weight(1.5f),
+                )
             }
         }
     }
+}
+
+@Composable
+private fun StayMusicWordmark(
+    logo: Int,
+    label: String,
+    height: androidx.compose.ui.unit.Dp,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier.fillMaxHeight(), contentAlignment = Alignment.Center) {
+        Image(
+            painter = painterResource(logo),
+            contentDescription = label,
+            contentScale = ContentScale.Fit,
+            modifier = Modifier.fillMaxWidth(0.93f).height(height),
+        )
+    }
+}
+
+@Composable
+private fun StayMusicSeparator() {
+    Box(
+        Modifier
+            .width(1.dp)
+            .height(42.dp)
+            .background(Color(0xFF66666A)),
+    )
 }
