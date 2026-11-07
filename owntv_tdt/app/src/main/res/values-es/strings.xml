@@ -71,4 +71,6 @@
     <string name="stayon_radio_delete_station">¿Eliminar emisora %1$s?</string>
     <string name="stayon_radio_delete_playlist">¿Eliminar lista %1$s?</string>
     <string name="stayon_radio_delete_confirm">Solo se eliminará este elemento de radio de STAYON+, no las listas de televisión.</string>
+    <string name="stayon_radio_failed">No se pudo cargar la lista de radio. Comprueba la URL e inténtalo de nuevo.</string>
+    <string name="stayon_radio_player_error">No se pudo reproducir (%1$s).</string>
 </resources>
