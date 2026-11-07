@@ -1120,7 +1120,7 @@ fun StageSwitch(on: Boolean) {
             Modifier
                 .offset(x = if (on) 28.mpx else 4.mpx, y = 4.mpx)
                 .size(24.mpx)
-                .background(if (on) Color.White else LocalStagePalette.current.knobOff, CircleShape),
+                .background(if (on && tv.own.owntv.ui.theme.LocalSettingsAccentOverride.current != null) Color.Black else if (on) Color.White else LocalStagePalette.current.knobOff, CircleShape),
         )
     }
 }
