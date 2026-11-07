@@ -1,0 +1,56 @@
+name: Publish StayON+ 5.4.2 signed Android TV release
+on:
+  push:
+    branches: [release/stayon-542-publisher]
+    paths:
+      - .github/workflows/stayon-542-release.yml
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publish:
+    name: Publish verified existing production APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download the passed production build artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/unsigned"
+          gh run download 42320682169 \
+            --repo "$GITHUB_REPOSITORY" \
+            --name "StayON-5.4.2-unsigned-release" \
+            --dir "$RUNNER_TEMP/unsigned"
+          test -s "$RUNNER_TEMP/unsigned/app-standard-release-unsigned.apk"
+      - name: Reconstruct previously signed and verified APK (without private keys)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 .github/stayon-release/rebuild_signed_apk.py \
+            "$RUNNER_TEMP/unsigned/app-standard-release-unsigned.apk" \
+            .github/stayon-release/stayon542-reconstruction.b64 \
+            "$RUNNER_TEMP/StayONplus-5.4.2.apk"
+          sha256sum "$RUNNER_TEMP/StayONplus-5.4.2.apk"
+      - name: Publish GitHub Release for the in-app updater
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view v5.4.2 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release v5.4.2 already exists; refusing to overwrite it."
+            exit 1
+          fi
+          gh release create "v5.4.2" "$RUNNER_TEMP/StayONplus-5.4.2.apk#StayONplus-5.4.2.apk" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "9dc77a4be3697dc4aab7443c76df117e206f5d12" \
+            --title "StayON+ 5.4.2 — Música sin recuadros" \
+            --notes "StayON+ 5.4.2 para Android TV: la sección Música muestra los logotipos de Spotify, YouTube Music y Amazon Music directamente sobre fondo negro, sin recuadros, con tamaños de texto visualmente equilibrados y dos separadores finos. Los servicios siguen pendientes de integración. Sin cambios en TDT/IPTV ni LOVEStv. APK ARM firmada con el certificado original para actualizar sin borrar los datos."
+      - name: Verify published release and APK asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release view v5.4.2 --repo "$GITHUB_REPOSITORY" --json tagName,isDraft,isPrerelease,assets \
+            --jq '{tag: .tagName, draft: .isDraft, prerelease: .isPrerelease, assets: [.assets[].name]}'
