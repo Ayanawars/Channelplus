@@ -17,6 +17,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import android.content.Context
+import android.content.pm.LauncherApps
+import android.os.Process
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -61,12 +69,12 @@ import java.util.Locale
  * Service integrations intentionally remain visible but NOT clickable until wired.
  */
 private val Ink = Color.Black
-private val Panel = Color(0xFF17181D)
-private val Muted = Color(0xFFA7A7AD)
+private val Panel = Color(0xFF141414)
+private val Muted = Color(0xFFBDBCB2)
 private val White = Color(0xFFFFF8EB)
-private val Yellow = Color(0xFFFFDF32)
+private val Yellow = Color(0xFFF4F29A)
 
-private enum class StayTab { TV, MUSIC, MOVIES, SERIES, APPS }
+private enum class StayTab { TV, RADIO, MUSIC, MOVIES, SERIES, APPS }
 
 @Composable
 fun StayOnDashboard(
@@ -100,13 +108,17 @@ fun StayOnDashboard(
             }
             Spacer(Modifier.width(38.dp))
             val tabs = listOf(
-                StayTab.TV to stringResource(R.string.stayon_tv), StayTab.MUSIC to stringResource(R.string.stayon_music),
-                StayTab.MOVIES to stringResource(R.string.stayon_movies), StayTab.SERIES to stringResource(R.string.stayon_series),
+                StayTab.TV to stringResource(R.string.stayon_tv),
+                StayTab.RADIO to stringResource(R.string.stayon_nav_radio),
+                StayTab.MUSIC to stringResource(R.string.stayon_music),
+                StayTab.MOVIES to stringResource(R.string.stayon_movies),
+                StayTab.SERIES to stringResource(R.string.stayon_series),
+                StayTab.APPS to stringResource(R.string.stayon_nav_apps),
             )
             tabs.forEach { (value, label) ->
                 val callback: () -> Unit = {
                     when (value) {
-                        StayTab.TV, StayTab.MUSIC, StayTab.APPS -> tab = value
+                        StayTab.TV, StayTab.RADIO, StayTab.MUSIC, StayTab.APPS -> tab = value
                         StayTab.MOVIES -> onOpenMovies()
                         StayTab.SERIES -> onOpenSeries()
                     }
@@ -151,7 +163,10 @@ fun StayOnDashboard(
                 onOpenMatch = { match -> onOpenMatch(match) },
                 modifier = Modifier.weight(1f),
             )
+            StayTab.RADIO -> StayOnRadioDashboard(
+                onManage = onOpenSettings, modifier = Modifier.weight(1f))
             StayTab.MUSIC -> MusicDashboard(modifier = Modifier.weight(1f))
+            StayTab.APPS -> StayOnAppsDashboard(modifier = Modifier.weight(1f))
             else -> Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(stringResource(R.string.stayon_coming_soon), fontSize = 27.sp, color = Muted)
             }
@@ -413,6 +428,122 @@ private fun StayLineItem(icon: String, title: String, desc: String, onClick: () 
         Column {
             Text(title, fontSize = 20.sp, color = White, fontWeight = FontWeight.Bold)
             Text(desc, fontSize = 13.sp, color = Muted)
+        }
+    }
+}
+
+
+/**
+ * Real radio entries from dedicated Radio IPTV sources. TV playlists are never scanned here.
+ * Uses the same in-app audio controller as Sources > Radio IPTV.
+ */
+@Composable
+private fun StayOnRadioDashboard(onManage: () -> Unit, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val library = remember(context) { tv.own.owntv.features.settings.StayonRadioLibrary(context) }
+    val stations by library.stations.collectAsStateWithLifecycle()
+    val playing by tv.own.owntv.features.settings.RadioAudioPlayer.playingStationId.collectAsStateWithLifecycle()
+    Column(modifier.fillMaxWidth().background(Ink).padding(horizontal = 16.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Text(stringResource(R.string.stayon_radio_stations), fontSize = 26.sp,
+                fontWeight = FontWeight.Bold, color = White, modifier = Modifier.weight(1f))
+            StayTextAction(
+                stringResource(R.string.stayon_radio_manage), onClick = onManage,
+            )
+        }
+        Spacer(Modifier.height(14.dp))
+        if (stations.isEmpty()) {
+            Text(stringResource(R.string.stayon_radio_empty), fontSize = 19.sp, color = Muted)
+        } else LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            items(stations, key = { it.id }) { station ->
+                val active = playing == station.id
+                var focused by remember { mutableStateOf(false) }
+                Row(
+                    Modifier.fillMaxWidth()
+                        .onFocusChanged { focused = it.isFocused }
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(if (focused) Yellow else Panel)
+                        .clickable {
+                            if (active) tv.own.owntv.features.settings.RadioAudioPlayer.stop()
+                            else tv.own.owntv.features.settings.RadioAudioPlayer.play(station)
+                        }
+                        .focusable()
+                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    if (!station.logo.isNullOrBlank()) {
+                        AsyncImage(
+                            model = station.logo, contentDescription = null,
+                            contentScale = ContentScale.Fit, modifier = Modifier.size(44.dp),
+                        )
+                    } else {
+                        Text("♫", fontSize = 29.sp, color = if (focused) Ink else Yellow)
+                    }
+                    Column(Modifier.weight(1f)) {
+                        Text(station.name, fontSize = 20.sp, fontWeight = FontWeight.Bold,
+                            color = if (focused) Ink else White, maxLines = 1)
+                        Text(
+                            if (active) stringResource(R.string.stayon_radio_stop)
+                            else stringResource(R.string.stayon_radio_listen),
+                            fontSize = 14.sp, color = if (focused) Ink else Muted,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** User-launchable Android TV apps, not mockup placeholders. */
+@Composable
+private fun StayOnAppsDashboard(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val launcher = remember(context) {
+        context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
+    }
+    val apps by produceState(initialValue = emptyList<android.content.pm.LauncherActivityInfo>(), context) {
+        value = withContext(Dispatchers.IO) {
+            runCatching { launcher.getActivityList(null, Process.myUserHandle()) }
+                .getOrDefault(emptyList())
+                .filter { it.componentName.packageName != context.packageName }
+                .distinctBy { it.componentName.packageName }
+                .sortedBy { it.label.toString().lowercase() }
+        }
+    }
+    Column(modifier.fillMaxWidth().background(Ink).padding(horizontal = 16.dp)) {
+        Text(stringResource(R.string.stayon_apps_installed), fontSize = 26.sp,
+            fontWeight = FontWeight.Bold, color = White)
+        Spacer(Modifier.height(16.dp))
+        if (apps.isEmpty()) {
+            Text(stringResource(R.string.stayon_apps_empty), fontSize = 19.sp, color = Muted)
+        } else LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            items(apps, key = { it.componentName.flattenToString() }) { app ->
+                var focused by remember { mutableStateOf(false) }
+                Row(
+                    Modifier.fillMaxWidth()
+                        .onFocusChanged { focused = it.isFocused }
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(if (focused) Yellow else Panel)
+                        .clickable {
+                            runCatching {
+                                launcher.startMainActivity(app.componentName, app.user, null, null)
+                            }
+                        }
+                        .focusable()
+                        .padding(horizontal = 22.dp, vertical = 18.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(app.label.toString(), fontSize = 21.sp,
+                        fontWeight = FontWeight.SemiBold, color = if (focused) Ink else White)
+                }
+            }
         }
     }
 }
