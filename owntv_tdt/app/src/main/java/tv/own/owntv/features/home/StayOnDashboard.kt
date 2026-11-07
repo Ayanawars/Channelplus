@@ -481,7 +481,7 @@ private fun StayOnRadioDashboard(onManage: () -> Unit, modifier: Modifier = Modi
                             contentScale = ContentScale.Fit, modifier = Modifier.size(44.dp),
                         )
                     } else {
-                        Text("♫", fontSize = 29.sp, color = if (focused) Ink else Yellow)
+                        tv.own.owntv.ui.components.OwnTVIcon(OwnTVIcon.AUDIO, if (focused) Ink else Yellow, Modifier.size(32.dp))
                     }
                     Column(Modifier.weight(1f)) {
                         Text(station.name, fontSize = 20.sp, fontWeight = FontWeight.Bold,
@@ -506,12 +506,20 @@ private fun StayOnAppsDashboard(modifier: Modifier = Modifier) {
         context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
     }
     val apps by produceState(initialValue = emptyList<android.content.pm.LauncherActivityInfo>(), context) {
+        val prefs = context.getSharedPreferences("stayon_apps_settings", Context.MODE_PRIVATE)
+        val hidden = prefs.getStringSet("hidden", emptySet()).orEmpty()
+        val favorites = prefs.getStringSet("favorites", emptySet()).orEmpty()
+        val includeNonTv = prefs.getBoolean("show_non_tv", false)
         value = withContext(Dispatchers.IO) {
             runCatching { launcher.getActivityList(null, Process.myUserHandle()) }
                 .getOrDefault(emptyList())
                 .filter { it.componentName.packageName != context.packageName }
+                .filter { it.componentName.packageName !in hidden }
+                .filter { includeNonTv || context.packageManager.getLeanbackLaunchIntentForPackage(it.componentName.packageName) != null }
                 .distinctBy { it.componentName.packageName }
-                .sortedBy { it.label.toString().lowercase() }
+                .sortedWith(compareBy<android.content.pm.LauncherActivityInfo> {
+                    if (it.componentName.packageName in favorites) 0 else 1
+                }.thenBy { it.label.toString().lowercase() })
         }
     }
     Column(modifier.fillMaxWidth().background(Ink).padding(horizontal = 16.dp)) {
