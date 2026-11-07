@@ -17,4 +17,13 @@
     <string name="stayon_settings_pending_music">Music service connections will appear here once supported.</string>
     <string name="stayon_settings_pending_apps">Application management will appear here once supported.</string>
     <string name="stayon_settings_full_video">Picture, audio, live TV and recording settings</string>
+    <string name="stayon_desc_general">Startup, language, app icon, sports and notices</string>
+    <string name="stayon_desc_sources">TDT, IPTV, radio, EPG, channel logos and metadata</string>
+    <string name="stayon_desc_home">Sections, widgets, shortcuts and layout</string>
+    <string name="stayon_desc_playback">Video, sound, subtitles, timeshift and LOVEStv</string>
+    <string name="stayon_desc_appearance">Theme, sizes, channel lists and typography</string>
+    <string name="stayon_desc_remote">Remote buttons, focus and shortcuts</string>
+    <string name="stayon_desc_music">Spotify, YouTube Music and Amazon Music</string>
+    <string name="stayon_desc_apps">Installed apps, favorites and shortcuts</string>
+    <string name="stayon_desc_system">Updates, backups, network and TV integration</string>
 </resources>
