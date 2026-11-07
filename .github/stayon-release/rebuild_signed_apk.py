@@ -15,8 +15,8 @@ import zipfile
 import zlib
 from pathlib import Path
 
-EXPECTED_UNSIGNED_SHA256 = "PLACEHOLDER_UNSIGNED_SHA256"
-EXPECTED_SIGNED_SHA256 = "PLACEHOLDER_SIGNED_SHA256"
+EXPECTED_UNSIGNED_SHA256 = "e0a7b6cb623b7a30c9307078af7fac9b74007c0b45d67f78bb630bad8899b5bd"
+EXPECTED_SIGNED_SHA256 = "64da82239995bd253dfaf65d542992c0bfc1c8be1dd15b4bc069331f432adde9"
 
 def decode(text):
     return base64.b64decode(text, validate=True)
