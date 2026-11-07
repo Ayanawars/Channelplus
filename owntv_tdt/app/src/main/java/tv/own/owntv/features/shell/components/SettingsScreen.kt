@@ -992,6 +992,23 @@ internal fun SettingsContent(
         // stay translated rather than hard-coded here.
     val searchResults: List<SettingsSearchEntry> = if (searchQuery.isBlank()) emptyList() else {
         val entries = listOfNotNull(
+            // Search follows relocated and quick-access rows; no setting silently disappears.
+            SettingsSearchEntry(stringResource(R.string.stayon_settings_system),
+                stringResource(R.string.settings_backup_title),
+                stringResource(R.string.stayon_desc_system), OwnTVIcon.DOWNLOADS, TileTone.PRIMARY
+            ) { open(SettingsTab.BACKUP) },
+            SettingsSearchEntry(stringResource(R.string.stayon_settings_playback),
+                stringResource(R.string.settings_quick_preview_sound),
+                stringResource(R.string.stayon_desc_playback), OwnTVIcon.AUDIO, TileTone.SECONDARY
+            ) { settingsVm.setLivePreviewAudio(!previewAudio) },
+            SettingsSearchEntry(stringResource(R.string.stayon_settings_playback),
+                stringResource(R.string.settings_quick_autoplay),
+                stringResource(R.string.stayon_desc_playback), OwnTVIcon.AUTOPLAY_NEXT, TileTone.SECONDARY
+            ) { settingsVm.setAutoPlayNext(!autoPlayNext) },
+            SettingsSearchEntry(stringResource(R.string.stayon_settings_system),
+                stringResource(R.string.settings_quick_check_update),
+                stringResource(R.string.stayon_desc_system), OwnTVIcon.REFRESH, TileTone.SECONDARY
+            ) { settingsVm.setUpdateCheckOnStart(!updateCheckOnStart) },
             SettingsSearchEntry(stringResource(R.string.settings_app_group), stringResource(R.string.settings_language), stringResource(R.string.settings_search_keywords_language), OwnTVIcon.LANGUAGE, TileTone.PRIMARY,
                 chip = languageChip, chipTone = TileTone.PRIMARY) { open(SettingsTab.LANGUAGE) },
             SettingsSearchEntry(stringResource(R.string.settings_group_sources), stringResource(R.string.settings_playlists), stringResource(R.string.settings_search_keywords_playlists), OwnTVIcon.PLAYLIST, TileTone.PRIMARY) { open(SettingsTab.SOURCES) },
