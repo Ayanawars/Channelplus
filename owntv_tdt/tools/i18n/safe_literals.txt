@@ -1465,3 +1465,25 @@
 1	technical	app/src/main/java/tv/own/owntv/ui/theme/Glass.kt	glassPosition
 2	empty	app/src/main/java/tv/own/owntv/ui/theme/OwnTVColors.kt	\0
 2	empty	app/src/main/java/tv/own/owntv/ui/theme/Theme.kt	\0
+
+1	empty	app/src/main/java/tv/own/owntv/features/settings/RadioLibrary.kt	\0
+1	protocol	app/src/main/java/tv/own/owntv/features/settings/RadioLibrary.kt	#
+1	protocol	app/src/main/java/tv/own/owntv/features/settings/RadioLibrary.kt	#EXTINF
+2	protocol	app/src/main/java/tv/own/owntv/features/settings/RadioLibrary.kt	:
+1	protocol	app/src/main/java/tv/own/owntv/features/settings/RadioLibrary.kt	Accept
+4	json	app/src/main/java/tv/own/owntv/features/settings/RadioLibrary.kt	[]
+1	mime	app/src/main/java/tv/own/owntv/features/settings/RadioLibrary.kt	audio/x-mpegurl, application/vnd.apple.mpegurl, text/plain, */*
+1	url	app/src/main/java/tv/own/owntv/features/settings/RadioLibrary.kt	http://
+1	url	app/src/main/java/tv/own/owntv/features/settings/RadioLibrary.kt	https://
+4	json	app/src/main/java/tv/own/owntv/features/settings/RadioLibrary.kt	id
+2	json	app/src/main/java/tv/own/owntv/features/settings/RadioLibrary.kt	logo
+4	json	app/src/main/java/tv/own/owntv/features/settings/RadioLibrary.kt	name
+2	json	app/src/main/java/tv/own/owntv/features/settings/RadioLibrary.kt	null
+2	json	app/src/main/java/tv/own/owntv/features/settings/RadioLibrary.kt	playlistId
+2	json	app/src/main/java/tv/own/owntv/features/settings/RadioLibrary.kt	playlists
+2	json	app/src/main/java/tv/own/owntv/features/settings/RadioLibrary.kt	stations
+1	preference-key	app/src/main/java/tv/own/owntv/features/settings/RadioLibrary.kt	stayon_radio_library_v1
+2	json	app/src/main/java/tv/own/owntv/features/settings/RadioLibrary.kt	syncedAt
+1	regex	app/src/main/java/tv/own/owntv/features/settings/RadioLibrary.kt	tvg-logo\s*=\s*["']([^"']+)["']
+4	json	app/src/main/java/tv/own/owntv/features/settings/RadioLibrary.kt	url
+1	technical	app/src/main/java/tv/own/owntv/features/settings/RadioAudioPlayer.kt	/
