@@ -289,7 +289,6 @@
 1	technical	app/src/main/java/tv/own/owntv/features/settings/DeveloperScreen.kt	Forces a fresh TMDB trending download for every playlist, ignoring the multi-day fetch timer.
 1	technical	app/src/main/java/tv/own/owntv/features/settings/DeveloperScreen.kt	Rebuild Now Trending
 6	empty	app/src/main/java/tv/own/owntv/features/settings/EpgSourcesScreen.kt	\0
-2	technical	app/src/main/java/tv/own/owntv/features/settings/EpgSourcesScreen.kt	▶
 1	technical	app/src/main/java/tv/own/owntv/features/settings/EpgSourcesViewModel.kt	add
 1	technical	app/src/main/java/tv/own/owntv/features/settings/EpgSourcesViewModel.kt	manual_resync
 1	technical	app/src/main/java/tv/own/owntv/features/settings/EpgSourcesViewModel.kt	update
@@ -304,7 +303,6 @@
 1	technical	app/src/main/java/tv/own/owntv/features/settings/LocalSyncScreen.kt	localSyncBusyAngle
 1	technical	app/src/main/java/tv/own/owntv/features/settings/LocalSyncScreen.kt	…
 7	empty	app/src/main/java/tv/own/owntv/features/settings/ManageSourcesScreen.kt	\0
-1	technical	app/src/main/java/tv/own/owntv/features/settings/ManageSourcesScreen.kt	▶
 2	technical	app/src/main/java/tv/own/owntv/features/settings/MetadataSettingsScreen.kt	\0
 2	locale	app/src/main/java/tv/own/owntv/features/settings/MetadataSettingsScreen.kt	ar
 2	locale	app/src/main/java/tv/own/owntv/features/settings/MetadataSettingsScreen.kt	bg
@@ -1493,3 +1491,4 @@
 1	preference-key	app/src/main/java/tv/own/owntv/features/home/StayOnDashboard.kt	hidden
 1	preference-key	app/src/main/java/tv/own/owntv/features/home/StayOnDashboard.kt	favorites
 1	preference-key	app/src/main/java/tv/own/owntv/features/home/StayOnDashboard.kt	show_non_tv
+1	uri	app/src/main/java/tv/own/owntv/features/settings/RadioTdtSettingsScreen.kt	input

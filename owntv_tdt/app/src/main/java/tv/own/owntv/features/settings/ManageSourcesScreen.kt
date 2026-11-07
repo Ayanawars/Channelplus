@@ -202,11 +202,14 @@ fun ManageSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier, tuner
             when (val s = importState) {
                 SettingsViewModel.ImportState.Idle -> when (addMode) {
                     null -> if (tunerOnly) {
+                        val tunerFocus = remember { FocusRequester() }
+                        LaunchedEffect(Unit) { runCatching { tunerFocus.requestFocus() } }
                         StageFullPage(
                             parents = listOf(stringResource(R.string.stayon_tv_tdt)),
                             title = stringResource(R.string.stayon_add_tdt),
                             count = "",
                             onBack = { showAdd = false },
+                            rowsFocus = tunerFocus,
                         ) { TunerSourceOption { name, url -> vm.addM3u(name, url) } }
                     } else AddSourceChooserScreen(
                         iptvOnly = true,

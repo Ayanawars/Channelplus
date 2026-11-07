@@ -1017,7 +1017,7 @@ fun StageFieldRow(
                 Text(label, style = stageText(if (modern) 25 else 21, 700), color = if (modern && lit) accent.onAccent else StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Box(Modifier.padding(top = 3.mpx)) {
                     if (value.isEmpty() && !editing) {
-                        Text(placeholder, style = stageText(15.5f, 500), color = if (modern && lit) accent.onAccent.copy(alpha = 0.65f) else StageColors.Dim, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(placeholder, style = stageText(if (modern) 18f else 15.5f, 500), color = if (modern && lit) accent.onAccent.copy(alpha = 0.65f) else StageColors.Dim, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                     androidx.compose.foundation.text.BasicTextField(
                         value = value,
@@ -1034,7 +1034,7 @@ fun StageFieldRow(
                                     true
                                 } else false
                             },
-                        textStyle = stageText(15.5f, 500).copy(color = if (modern && lit) accent.onAccent else if (focused || editing) FocusedDesc else StageColors.Text),
+                        textStyle = stageText(if (modern) 18f else 15.5f, 500).copy(color = if (modern && lit) accent.onAccent else if (focused || editing) FocusedDesc else StageColors.Text),
                         singleLine = true,
                         cursorBrush = androidx.compose.ui.graphics.SolidColor(a.accent),
                         // A password row gets the password keyboard: the text one auto-corrects and

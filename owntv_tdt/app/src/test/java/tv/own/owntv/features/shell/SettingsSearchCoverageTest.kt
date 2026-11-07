@@ -156,7 +156,7 @@ class SettingsSearchCoverageTest {
         "settings_panel_width_dialog_title", "settings_panel_width_disable_preview_title",
         "settings_record_watching_warning_title",
         // Radio form actions and delete confirmations are not persistent settings.
-        "stayon_radio_save", "stayon_radio_delete_station", "stayon_radio_delete_playlist", "common_cancel",
+        "stayon_radio_save", "stayon_radio_delete_station", "stayon_radio_delete_playlist", "stayon_radio_tdt_remove", "common_cancel",
     )
 
     @Test
