@@ -80,7 +80,7 @@ fun RadioIptvSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                     if (form == RadioForm.MANUAL) {
                         runCatching { radio.addStation(name, url, logo) }
                             .onSuccess { form = null; status = null }
-                            .onFailure { status = it.localizedMessage }
+                            .onFailure { status = it.localizedMessage ?: context.getString(R.string.stayon_radio_failed) }
                     } else {
                         busy = true
                         scope.launch {
@@ -147,7 +147,7 @@ fun RadioIptvSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                     onLongClick = { pendingRemoveStation = station },
                 )
             }
-            if (playerError != null) StageSettingsNote(playerError.orEmpty(), null)
+            if (playerError != null) StageSettingsNote(stringResource(R.string.stayon_radio_player_error, playerError.orEmpty()), null)
         }
     }
 
