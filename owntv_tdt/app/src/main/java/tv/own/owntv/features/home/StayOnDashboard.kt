@@ -440,7 +440,7 @@ private fun StayLineItem(icon: String, title: String, desc: String, onClick: () 
 @Composable
 private fun StayOnRadioDashboard(onManage: () -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val library = remember(context) { tv.own.owntv.features.settings.StayonRadioLibrary(context) }
+    val library = remember(context) { tv.own.owntv.features.settings.StayonRadioLibrary.shared(context) }
     val stations by library.stations.collectAsStateWithLifecycle()
     val playing by tv.own.owntv.features.settings.RadioAudioPlayer.playingStationId.collectAsStateWithLifecycle()
     Column(modifier.fillMaxWidth().background(Ink).padding(horizontal = 16.dp)) {
