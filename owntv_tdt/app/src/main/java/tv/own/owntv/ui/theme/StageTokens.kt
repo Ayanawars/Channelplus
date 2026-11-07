@@ -148,6 +148,9 @@ data class StagePalette(
 /** The palette of the resolved Theme, provided by [OwnTVTheme]. */
 val LocalStagePalette = staticCompositionLocalOf { StagePalette.Dark }
 
+/** STAYON+ settings may use a restrained accent without changing the player or live TV theme. */
+val LocalSettingsAccentOverride = staticCompositionLocalOf<StageAccent?> { null }
+
 /** Stage's neutrals, read from the current [StagePalette]. */
 object StageColors {
     val Text: Color @Composable @ReadOnlyComposable get() = LocalStagePalette.current.text
@@ -233,7 +236,7 @@ val stageAccent: StageAccent
     @Composable
     @ReadOnlyComposable
     // In light the pale focus colour vanishes on white, so every ring is the accent itself.
-    get() = OwnTVTheme.colors.let {
+    get() = LocalSettingsAccentOverride.current ?: OwnTVTheme.colors.let {
         StageAccent(it.primary, it.onPrimary, if (LocalStagePalette.current.isLight) it.primary else it.focusBorder)
     }
 
