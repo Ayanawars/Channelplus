@@ -1254,7 +1254,7 @@ internal fun SettingsContent(
                 group == SettingsGroup.PROFILE -> tv.own.owntv.features.settings.ProfileSettingsRows()
                 // Only Quick can be empty, and only because the user emptied it.
                 group == SettingsGroup.MUSIC -> StageSettingsNote(stringResource(R.string.stayon_settings_music), stringResource(R.string.stayon_settings_pending_music))
-                group == SettingsGroup.APPLICATIONS -> StageSettingsNote(stringResource(R.string.stayon_settings_apps), stringResource(R.string.stayon_settings_pending_apps))
+                group == SettingsGroup.APPLICATIONS -> tv.own.owntv.features.settings.InstalledAppsSettingsRows()
                 selectedRows.isEmpty() -> StageSettingsNote(stringResource(R.string.settings_quick_empty_title), stringResource(R.string.settings_quick_empty_hint))
                 else -> {
                     stayonRelatedRows(group) { onSelectGroup(it.ordinal) }.forEach { row ->
