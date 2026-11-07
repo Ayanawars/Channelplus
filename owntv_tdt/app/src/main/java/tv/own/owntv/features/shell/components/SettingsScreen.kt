@@ -1171,7 +1171,7 @@ internal fun SettingsContent(
         group == SettingsGroup.PROFILE -> tv.own.owntv.features.settings.profileCount().let { n ->
             pluralStringResource(R.plurals.settings_profile_count, n, n)
         }
-        else -> (selectedRows.size + if (group == SettingsGroup.APP) videoGroupCount(VideoGroup.DIAGNOSTICS, settingsVm) else 0).let { n ->
+        else -> (selectedRows.size + if (group == SettingsGroup.SYSTEM) videoGroupCount(VideoGroup.DIAGNOSTICS, settingsVm) else 0).let { n ->
             pluralStringResource(R.plurals.settings_setting_count, n, n)
         }
     }
