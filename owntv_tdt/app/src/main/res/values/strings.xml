@@ -3,4 +3,18 @@
     <string name="content_search_channels">Search channels\u2026</string>
     <string name="content_search_movies">Search movies…</string>
     <string name="content_search_series">Search series…</string>
+    <string name="stayon_tv_settings">TV settings</string>
+    <string name="stayon_tv_settings_desc">Open the television system settings</string>
+    <string name="stayon_settings_home">Home</string>
+    <string name="stayon_settings_remote">Remote and navigation</string>
+    <string name="stayon_settings_music">Music and services</string>
+    <string name="stayon_settings_apps">Applications</string>
+    <string name="stayon_settings_system">System and maintenance</string>
+    <string name="stayon_settings_playback">Playback</string>
+    <string name="stayon_settings_appearance">Appearance and interface</string>
+    <string name="stayon_settings_sources">Sources</string>
+    <string name="stayon_settings_general">General</string>
+    <string name="stayon_settings_pending_music">Music service connections will appear here once supported.</string>
+    <string name="stayon_settings_pending_apps">Application management will appear here once supported.</string>
+    <string name="stayon_settings_full_video">Picture, audio, live TV and recording settings</string>
 </resources>
