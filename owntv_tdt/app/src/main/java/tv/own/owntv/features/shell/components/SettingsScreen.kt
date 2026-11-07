@@ -818,7 +818,7 @@ internal fun SettingsContent(
         ),
         // About and the error log live in More. A page of facts and a log are
         // not preferences; both are More rows now, opening the very same dialogs.
-    )
+    ) + stayonCategoryItems { open(it) }
 
     // --- Two-pane root: the flat list above is still the single source of truth for order, tone,
     // icon, chip and click of every row. Here it is only *sliced* into (heading, its rows) so the
@@ -864,11 +864,17 @@ internal fun SettingsContent(
             }
         }
         val byKey = sliced.flatMap { it.second }.associateBy { it.key }
+        // Re-home existing settings instead of duplicating them: updates and connectivity belong
+        // to System, while language, startup, icon and sports remain under General.
+        val systemKeys = setOf("check_updates", "update_startup", tabRowKey(SettingsTab.NETWORK), tabRowKey(SettingsTab.DNS))
+        val systemRows = sliced.firstOrNull { it.first.key == "stayon_system" }?.second.orEmpty()
+        val appRows = sliced.firstOrNull { it.first.key == "group_app" }?.second.orEmpty()
         sliced.map { (group, rows) ->
-            if (group.key == "group_quick") {
-                group to quickPinned.mapNotNull { byKey[it] ?: videoDeepRows[it] }
-            } else {
-                group to rows
+            when (group.key) {
+                "group_quick" -> group to quickPinned.mapNotNull { byKey[it] ?: videoDeepRows[it] }
+                "group_app" -> group to rows.filterNot { it.key in systemKeys }
+                "stayon_system" -> group to (systemRows + appRows.filter { it.key in systemKeys })
+                else -> group to rows
             }
         }
     }
@@ -971,7 +977,6 @@ internal fun SettingsContent(
         val entries = listOfNotNull(
             SettingsSearchEntry(stringResource(R.string.settings_app_group), stringResource(R.string.settings_language), stringResource(R.string.settings_search_keywords_language), OwnTVIcon.LANGUAGE, TileTone.PRIMARY,
                 chip = languageChip, chipTone = TileTone.PRIMARY) { open(SettingsTab.LANGUAGE) },
-            SettingsSearchEntry(stringResource(R.string.settings_group_profile), stringResource(R.string.profiles_title), stringResource(R.string.settings_search_keywords_profiles), OwnTVIcon.PERSON, TileTone.SECONDARY) { searchQuery = ""; searchMode = false; onSelectGroup(SettingsGroup.PROFILE.ordinal) },
             SettingsSearchEntry(stringResource(R.string.settings_group_sources), stringResource(R.string.settings_playlists), stringResource(R.string.settings_search_keywords_playlists), OwnTVIcon.PLAYLIST, TileTone.PRIMARY) { open(SettingsTab.SOURCES) },
             SettingsSearchEntry(stringResource(R.string.settings_group_sources), stringResource(R.string.settings_epg_sources), stringResource(R.string.settings_search_keywords_epg), OwnTVIcon.EPG, TileTone.PRIMARY) { open(SettingsTab.EPG) },
             SettingsSearchEntry(stringResource(R.string.settings_group_sources), stringResource(R.string.content_epg_time_offset), stringResource(R.string.settings_search_keywords_epg_offset), OwnTVIcon.EPG, TileTone.SECONDARY,
@@ -1202,6 +1207,9 @@ internal fun SettingsContent(
                     StageSearchResultRow(e.icon, e.group, e.title, e.chip, onClick = e.onClick)
                 }
                 group.video != null -> {
+                    stayonRelatedRows(group) { onSelectGroup(it.ordinal) }.forEach { row ->
+                        RootRowStage(row, pinned = false, inQuick = false, onLongClick = {})
+                    }
                     VideoPlayerGroupRows(
                         group.video, pageScroll,
                         openMiniPlayer = openMiniPlayer,
@@ -1211,8 +1219,13 @@ internal fun SettingsContent(
                 }
                 group == SettingsGroup.PROFILE -> tv.own.owntv.features.settings.ProfileSettingsRows()
                 // Only Quick can be empty, and only because the user emptied it.
+                group == SettingsGroup.MUSIC -> StageSettingsNote(stringResource(R.string.stayon_settings_music), stringResource(R.string.stayon_settings_pending_music))
+                group == SettingsGroup.APPLICATIONS -> StageSettingsNote(stringResource(R.string.stayon_settings_apps), stringResource(R.string.stayon_settings_pending_apps))
                 selectedRows.isEmpty() -> StageSettingsNote(stringResource(R.string.settings_quick_empty_title), stringResource(R.string.settings_quick_empty_hint))
                 else -> {
+                    stayonRelatedRows(group) { onSelectGroup(it.ordinal) }.forEach { row ->
+                        RootRowStage(row, pinned = false, inQuick = false, onLongClick = {})
+                    }
                     selectedRows.forEachIndexed { i, row ->
                         row.heading?.let { heading ->
                             val under = selectedRows.drop(i).let { rest -> 1 + rest.drop(1).takeWhile { it.heading == null }.size }
@@ -1228,7 +1241,7 @@ internal fun SettingsContent(
                             focus = if (row.key == menuReturnKey) menuReturnFocus else null,
                         )
                     }
-                    if (group == SettingsGroup.APP) VideoPlayerGroupRows(VideoGroup.DIAGNOSTICS, pageScroll, firstHeading = false)
+                    if (group == SettingsGroup.SYSTEM) VideoPlayerGroupRows(VideoGroup.DIAGNOSTICS, pageScroll, firstHeading = false)
                 }
             }
         }
@@ -2597,6 +2610,51 @@ private data class RootRow(
      * in [chevron]: the ones that toggle in place must not promise a screen they never open.
      */
     val showChevron: Boolean get() = chevron ?: key.startsWith("tab_")
+}
+
+/** The nine STAYON+ top-level groups, while keeping working legacy screens accessible. */
+@Composable
+private fun stayonCategoryItems(openTab: (SettingsTab) -> Unit): List<RootItem> = listOf(
+    RootGroup("stayon_home", stringResource(R.string.stayon_settings_home), OwnTVIcon.HOME, ""),
+    RootRow("tab_HOME", TileTone.PRIMARY, OwnTVIcon.HOME,
+        title = stringResource(R.string.settings_home_root),
+        desc = stringResource(R.string.settings_home_root_description), onClick = { openTab(SettingsTab.HOME) }),
+    RootGroup("stayon_remote", stringResource(R.string.stayon_settings_remote), OwnTVIcon.MENU, ""),
+    RootRow("tab_CH_NAV", TileTone.PRIMARY, OwnTVIcon.CH_NAV,
+        title = stringResource(R.string.settings_remote_shortcuts),
+        desc = stringResource(R.string.settings_remote_shortcuts_description), onClick = { openTab(SettingsTab.CH_NAV) }),
+    RootRow("tab_CONTENT_MENUS", TileTone.PRIMARY, OwnTVIcon.MENU,
+        title = stringResource(R.string.settings_content_menus_title),
+        desc = stringResource(R.string.settings_content_menus_description), onClick = { openTab(SettingsTab.CONTENT_MENUS) }),
+    RootGroup("stayon_music", stringResource(R.string.stayon_settings_music), OwnTVIcon.AUDIO, ""),
+    RootGroup("stayon_applications", stringResource(R.string.stayon_settings_apps), OwnTVIcon.GRID, ""),
+    RootGroup("stayon_system", stringResource(R.string.stayon_settings_system), OwnTVIcon.SETTINGS, ""),
+    RootRow("tab_BACKUP", TileTone.PRIMARY, OwnTVIcon.DOWNLOADS,
+        title = stringResource(R.string.settings_backup_title), onClick = { openTab(SettingsTab.BACKUP) }),
+    RootRow("tab_LOCAL_SYNC", TileTone.PRIMARY, OwnTVIcon.NETWORK,
+        title = stringResource(R.string.setup_sync_device), onClick = { openTab(SettingsTab.LOCAL_SYNC) }),
+)
+
+/** Links to existing detailed screens are retained until all settings move into the new structure. */
+@Composable
+private fun stayonRelatedRows(group: SettingsGroup, goTo: (SettingsGroup) -> Unit): List<RootRow> {
+    fun link(key: String, icon: OwnTVIcon, title: String, to: SettingsGroup) =
+        RootRow(key, TileTone.PRIMARY, icon, title = title, chevron = true, onClick = { goTo(to) })
+    return when (group) {
+        SettingsGroup.APP -> listOf(link("stayon_quick", OwnTVIcon.SPARKLE,
+            stringResource(R.string.settings_group_quick), SettingsGroup.QUICK))
+        SettingsGroup.SOURCES -> listOf(link("stayon_content", OwnTVIcon.IMAGE,
+            stringResource(R.string.settings_group_content_metadata), SettingsGroup.CONTENT))
+        SettingsGroup.PLAYER -> listOf(
+            link("stayon_picture", OwnTVIcon.VIDEO, stringResource(R.string.settings_vp_cat_picture), SettingsGroup.PICTURE),
+            link("stayon_sound", OwnTVIcon.HEADPHONES, stringResource(R.string.settings_group_sound_subtitles), SettingsGroup.SOUND),
+            link("stayon_live", OwnTVIcon.LIVE_TV, stringResource(R.string.settings_live_tv), SettingsGroup.LIVE),
+            link("stayon_watching", OwnTVIcon.REC, stringResource(R.string.settings_group_watching_recording), SettingsGroup.WATCHING),
+        )
+        SettingsGroup.APPEARANCE -> listOf(link("stayon_layout", OwnTVIcon.GRID,
+            stringResource(R.string.settings_group_layout), SettingsGroup.LAYOUT))
+        else -> emptyList()
+    }
 }
 
 /** The settings that live inside a sub-screen, findable by their own names; each opens its screen. */
