@@ -67,7 +67,7 @@ import tv.own.owntv.features.settings.BackupScreen
 import tv.own.owntv.features.settings.DeveloperScreen
 import tv.own.owntv.features.settings.LocalSyncScreen
 import tv.own.owntv.features.settings.SettingsViewModel
-import tv.own.owntv.features.shell.components.RailAvatar
+import tv.own.owntv.features.shell.components.ShellProfileAvatar
 import tv.own.owntv.player.PlaybackErrorLog
 import tv.own.owntv.ui.components.OwnTVIcon
 import tv.own.owntv.ui.stage.StageGroupItem
@@ -268,7 +268,7 @@ private fun ProfileRow(name: String, playlistLabel: String, playlists: Int, avat
         verticalAlignment = Alignment.CenterVertically,
     ) {
         StageSurface(onClick = onPickAvatar, radius = 29.mpx, modifier = Modifier.size(58.mpx), focusStyle = tv.own.owntv.ui.stage.StageFocus.POSTER, contentAlignment = Alignment.Center) {
-            RailAvatar(name.take(1).uppercase(), size = 58, textSize = 24, avatarId = avatarId, imagePath = avatarPath)
+            ShellProfileAvatar(name.take(1).uppercase(), size = 58, textSize = 24, avatarId = avatarId, imagePath = avatarPath)
         }
         Column(Modifier.weight(1f)) {
             Text(name, style = stageText(24, 800), color = StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis)

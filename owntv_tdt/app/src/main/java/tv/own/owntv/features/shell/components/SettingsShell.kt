@@ -62,6 +62,7 @@ fun SettingsScreen(
     // A full-width category hub instead of the old permanent left navigation rail.
     // Deep links may still open a category directly.
     val initialGroup = start?.group?.takeUnless { it == SettingsGroup.PROFILE.ordinal }
+        ?.let { if (it == SettingsGroup.QUICK.ordinal) SettingsGroup.APP.ordinal else it }
         ?: if (openEpgAdd) SettingsGroup.SOURCES.ordinal else -1
     var selected by rememberSaveable { mutableIntStateOf(initialGroup) }
     var navigationVersion by remember { mutableIntStateOf(0) }
@@ -175,20 +176,7 @@ private fun SettingsHub(onChoose: (SettingsGroup) -> Unit) {
             Spacer(Modifier.width(30.mpx))
             Text(stringResource(R.string.common_nav_settings), style = stageText(35, 700), color = ivory,
                 modifier = Modifier.weight(1f))
-            StageSurface(
-                onClick = { onChoose(SettingsGroup.QUICK) },
-                radius = 10.mpx, focusStyle = StageFocus.FILLED,
-                accent = StageAccent(lemon, Color.Black, lemon),
-                idle = Modifier.background(Color(0xFF171717), RoundedCornerShape(10.mpx)),
-                modifier = Modifier.height(48.mpx),
-            ) { focused ->
-                Row(Modifier.padding(horizontal = 20.mpx), verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.mpx)) {
-                    OwnTVIcon(OwnTVIcon.SPARKLE, if (focused) Color.Black else lemon, Modifier.size(21.mpx))
-                    Text(stringResource(R.string.settings_group_quick), style = stageText(18, 600),
-                        color = if (focused) Color.Black else ivory)
-                }
-            }
+
         }
         Box(Modifier.fillMaxWidth().height(2.mpx).background(lemon))
         val groups: List<SettingsGroup?> = listOf(null) + categoryOrder.map { it }

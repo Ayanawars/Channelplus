@@ -74,7 +74,7 @@ private val Muted = Color(0xFFBDBCB2)
 private val White = Color(0xFFFFF8EB)
 private val Yellow = Color(0xFFF4F29A)
 
-private enum class StayTab { TV, RADIO, MUSIC, MOVIES, SERIES, APPS }
+private enum class StayTab { TV, RADIO, MUSIC, APPS }
 
 @Composable
 fun StayOnDashboard(
@@ -84,8 +84,8 @@ fun StayOnDashboard(
     onOpenGuide: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenSearch: () -> Unit,
-    onOpenMovies: () -> Unit,
-    onOpenSeries: () -> Unit,
+    onOpenMore: () -> Unit,
+    onOpenDownloads: () -> Unit,
     onOpenMatch: (tv.own.owntv.core.sports.model.Match) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
@@ -111,23 +111,14 @@ fun StayOnDashboard(
                 StayTab.TV to stringResource(R.string.stayon_tv),
                 StayTab.RADIO to stringResource(R.string.stayon_nav_radio),
                 StayTab.MUSIC to stringResource(R.string.stayon_music),
-                StayTab.MOVIES to stringResource(R.string.stayon_movies),
-                StayTab.SERIES to stringResource(R.string.stayon_series),
                 StayTab.APPS to stringResource(R.string.stayon_nav_apps),
             )
             tabs.forEach { (value, label) ->
-                val callback: () -> Unit = {
-                    when (value) {
-                        StayTab.TV, StayTab.RADIO, StayTab.MUSIC, StayTab.APPS -> tab = value
-                        StayTab.MOVIES -> onOpenMovies()
-                        StayTab.SERIES -> onOpenSeries()
-                    }
-                }
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(end = 20.dp)) {
                     StayTextAction(
                         label = label,
                         selected = tab == value,
-                        onClick = callback,
+                        onClick = { tab = value },
                         modifier = if (value == StayTab.TV) Modifier.focusRequester(firstFocus) else Modifier,
                     )
                     Spacer(Modifier.height(3.dp))
@@ -139,6 +130,10 @@ fun StayOnDashboard(
                 }
             }
             Spacer(Modifier.weight(1f))
+            StayIconAction(OwnTVIcon.DOWNLOADS, onOpenDownloads)
+            Spacer(Modifier.width(10.dp))
+            StayIconAction(OwnTVIcon.MORE, onOpenMore)
+            Spacer(Modifier.width(10.dp))
             StayIconAction(OwnTVIcon.SEARCH, onOpenSearch)
             Spacer(Modifier.width(10.dp))
             StayIconAction(OwnTVIcon.SETTINGS, onOpenSettings)
@@ -167,9 +162,7 @@ fun StayOnDashboard(
                 onManage = onOpenSettings, modifier = Modifier.weight(1f))
             StayTab.MUSIC -> MusicDashboard(modifier = Modifier.weight(1f))
             StayTab.APPS -> StayOnAppsDashboard(modifier = Modifier.weight(1f))
-            else -> Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text(stringResource(R.string.stayon_coming_soon), fontSize = 27.sp, color = Muted)
-            }
+
         }
     }
 }
@@ -513,49 +506,8 @@ private fun StayOnAppsDashboard(modifier: Modifier = Modifier) {
 @Composable
 private fun MusicDashboard(modifier: Modifier = Modifier) {
     Column(modifier.fillMaxWidth()) {
-        Box(Modifier.weight(1f).fillMaxWidth().background(Ink)) {
-            Image(
-                painterResource(R.drawable.stayon_music_hero), contentDescription = null,
-                contentScale = ContentScale.Crop, alignment = Alignment.CenterEnd,
-                modifier = Modifier.fillMaxSize(),
-            )
-            // Keep the content region and all outside margins absolute black.
-            Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(
-                0f to Ink, .40f to Ink, .62f to Color.Transparent,
-            )))
-            Column(
-                Modifier.fillMaxHeight().fillMaxWidth(.57f).padding(start = 18.dp, top = 12.dp, bottom = 16.dp),
-                verticalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(stringResource(R.string.stayon_your_station), fontSize = 12.sp, letterSpacing = 3.sp, color = Muted)
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Column(
-                        Modifier.size(88.dp).border(1.dp, Muted, CircleShape),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                    ) {
-                        Text(stringResource(R.string.stayon_urban_number), fontSize = 40.sp, lineHeight = 40.sp, fontWeight = FontWeight.ExtraBold, color = White)
-                        Text(stringResource(R.string.stayon_urban_brand), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = White)
-                        Box(Modifier.width(43.dp).height(3.dp).background(Yellow, CircleShape))
-                    }
-                    Spacer(Modifier.width(18.dp))
-                    Column {
-                        Text(stringResource(R.string.stayon_urban), fontSize = 40.sp, fontWeight = FontWeight.Bold, color = White)
-                        Text(stringResource(R.string.stayon_music_pending), fontSize = 14.sp, color = Muted)
-                    }
-                }
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(stringResource(R.string.stayon_now_playing), fontSize = 12.sp, letterSpacing = 3.sp, color = Muted)
-                    // Do not present the mockup's song as real live metadata.
-                    Text(stringResource(R.string.stayon_radio_pending), fontSize = 20.sp, color = White, maxLines = 2)
-                }
-                // Radio integration is pending: preserve the CTA shape without a dead focus target.
-                Box(Modifier.clip(RoundedCornerShape(28.dp)).background(White).padding(horizontal = 24.dp, vertical = 12.dp)) {
-                    Text(stringResource(R.string.stayon_listen), fontSize = 16.sp, color = Ink, fontWeight = FontWeight.Bold)
-                }
-            }
-        }
-        Spacer(Modifier.height(22.dp))
+        Text(stringResource(R.string.stayon_music), fontSize = 30.sp, fontWeight = FontWeight.Bold, color = White)
+        Spacer(Modifier.height(24.dp))
         // The music brands form one clean black strip, NOT three colored tiles.
         // Keep the provider logos non-focusable until their services are integrated.
         Column(

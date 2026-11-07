@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import tv.own.owntv.core.nav.MainSection
-import tv.own.owntv.core.nav.NavVisibility
 import tv.own.owntv.core.network.ConnectivityObserver
 import tv.own.owntv.core.weather.WeatherInfo
 import tv.own.owntv.core.weather.WeatherRepository
@@ -45,7 +44,6 @@ class ShellViewModel(
     private val epgMigration: tv.own.owntv.core.epg.EpgMigration,
     private val autoRefresh: tv.own.owntv.core.sync.AutoRefresh,
     private val weatherRepository: WeatherRepository,
-    private val navVisibility: NavVisibility,
     private val profiles: tv.own.owntv.core.profile.ProfileManager,
 ) : ViewModel() {
 
@@ -197,34 +195,9 @@ class ShellViewModel(
     val selectedSection: StateFlow<MainSection> = _selectedSection.asStateFlow()
 
     fun selectSection(section: MainSection) {
-        _selectedSection.value = section
-    }
-
-    /** Which browse sections currently show as icons in the rail (v4.3.0 — Nav menu customization).
-     *  The rule itself lives in core's [NavVisibility], shared with the mobile app's bottom bar. */
-    val visibleSections: StateFlow<Set<MainSection>> = navVisibility.visibleSections()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), MainSection.allBrowse)
-
-    init {
-        // v4.3.0 — if the section the user is viewing becomes hidden (in either mode), jump to the first
-        // still-visible browse item; if every browse item is hidden, fall back to Settings (always pinned).
-        // SEARCH and SETTINGS are never auto-redirected away from.
-        visibleSections
-            .onEach { visible ->
-                val current = _selectedSection.value
-                // MORE is exempt for the same reason SETTINGS is: it is a pinned rail item, not a
-                // browse section, so it is never in `visible` and would otherwise be redirected away
-                // from the moment the user changed anything in Nav menu customization.
-                if (current in visible ||
-                    current == MainSection.SETTINGS ||
-                    current == MainSection.SEARCH ||
-                    current == MainSection.MORE
-                ) {
-                    return@onEach
-                }
-                _selectedSection.value = MainSection.browseOrder.firstOrNull { it in visible } ?: MainSection.SETTINGS
-            }
-            .launchIn(viewModelScope)
+        if (section != MainSection.MOVIES && section != MainSection.SERIES) {
+            _selectedSection.value = section
+        }
     }
 
     fun setThemeMode(mode: ThemeMode) {

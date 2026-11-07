@@ -5,6 +5,8 @@ import android.media.tv.TvContract
 import android.media.tv.TvView
 import android.net.Uri
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -24,6 +26,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import tv.own.owntv.R
 import tv.own.owntv.core.model.TifChannelUri
+import tv.own.owntv.core.sync.TunerRadioClassification
 import tv.own.owntv.features.setup.TunerSourceOption
 import tv.own.owntv.ui.components.OwnTVIcon
 import tv.own.owntv.ui.stage.StageButton
@@ -36,6 +39,9 @@ internal fun RadioTdtSettingsScreen(onBack: () -> Unit, modifier: Modifier = Mod
     val allStations by library.stations.collectAsStateWithLifecycle()
     val stations = allStations.filter { it.tunerChannel != null }
     val scope = rememberCoroutineScope()
+    val settings: SettingsViewModel = org.koin.androidx.compose.koinViewModel()
+    val sources by settings.sources.collectAsStateWithLifecycle()
+    var scan by remember { mutableStateOf<Pair<String, List<ScannedService>>?>(null) }
     val firstFocus = remember { FocusRequester() }
     var selected by remember { mutableStateOf<StayonRadioStation?>(null) }
     var removing by remember { mutableStateOf<StayonRadioStation?>(null) }
@@ -59,7 +65,7 @@ internal fun RadioTdtSettingsScreen(onBack: () -> Unit, modifier: Modifier = Mod
                 scope.launch {
                     try {
                         val rows = withContext(Dispatchers.IO) { readTunerRadio(context, inputId) }
-                        if (rows.isNotEmpty()) library.replaceTunerStations(inputId, rows)
+                        if (rows.isNotEmpty()) scan = inputId to rows
                         status = if (rows.isEmpty()) R.string.stayon_radio_tdt_empty else 0
                     } catch (e: CancellationException) {
                         throw e
@@ -82,6 +88,19 @@ internal fun RadioTdtSettingsScreen(onBack: () -> Unit, modifier: Modifier = Mod
                 onClick = { selected = station },
             )
         }
+    }
+
+    scan?.let { (inputId, rows) ->
+        ClassifyTunerServices(rows, onDismiss = { scan = null }, onSave = { radioIds ->
+            TunerRadioClassification.save(context, inputId, rows.map { it.channelId }.toSet(), radioIds)
+            library.replaceTunerStations(inputId, rows.filter { it.channelId in radioIds }.map { it.station })
+            sources.filter { source ->
+                tv.own.owntv.core.sync.TunerSourceSyncer.isSource(source.url) &&
+                    Uri.parse(source.url).getQueryParameter("input") == inputId
+            }.forEach { settings.resync(it) }
+            status = if (radioIds.isEmpty()) R.string.stayon_radio_none_selected else 0
+            scan = null
+        })
     }
 
     selected?.let { station ->
@@ -115,20 +134,58 @@ internal fun RadioTdtSettingsScreen(onBack: () -> Unit, modifier: Modifier = Mod
     playing?.let { station -> TunerRadioPlayback(station) { playing = null } }
 }
 
-private fun readTunerRadio(context: Context, inputId: String): List<StayonRadioStation> {
+private data class ScannedService(val channelId: Long, val station: StayonRadioStation, val suggestedRadio: Boolean)
+
+@Composable
+private fun ClassifyTunerServices(
+    rows: List<ScannedService>,
+    onDismiss: () -> Unit,
+    onSave: (Set<Long>) -> Unit,
+) {
+    var radioIds by remember(rows) { mutableStateOf(rows.filter { it.suggestedRadio }.map { it.channelId }.toSet()) }
+    val first = remember { FocusRequester() }
+    StagePopup(
+        onDismiss = onDismiss,
+        title = stringResource(R.string.stayon_radio_classify),
+        body = stringResource(R.string.stayon_radio_classify_desc),
+        scroll = false,
+        buttons = {
+            StageButton(stringResource(R.string.common_cancel), onDismiss)
+            StageButton(stringResource(R.string.stayon_radio_save), { onSave(radioIds) }, tinted = true)
+        },
+    ) {
+        LaunchedEffect(Unit) { runCatching { first.requestFocus() } }
+        LazyColumn(Modifier.weight(1f, fill = false).fillMaxWidth()) {
+            items(rows, key = { it.channelId }) { row ->
+                val radio = row.channelId in radioIds
+                StageSettingRow(
+                    icon = if (radio) OwnTVIcon.AUDIO else OwnTVIcon.LIVE_TV,
+                    title = row.station.name,
+                    desc = null,
+                    value = SettingValue.Choice(stringResource(if (radio) R.string.stayon_nav_radio else R.string.stayon_tv)),
+                    onClick = { radioIds = if (radio) radioIds - row.channelId else radioIds + row.channelId },
+                    modifier = if (row == rows.first()) Modifier.focusRequester(first) else Modifier,
+                )
+            }
+        }
+    }
+}
+
+private fun readTunerRadio(context: Context, inputId: String): List<ScannedService> {
     val columns = arrayOf(TvContract.Channels._ID, TvContract.Channels.COLUMN_DISPLAY_NAME,
         TvContract.Channels.COLUMN_SERVICE_TYPE)
     val uri = TvContract.buildChannelsUriForInput(inputId)
+    val saved = TunerRadioClassification.read(context, inputId)
     return context.contentResolver.query(uri, columns, null, null, null)?.use { cursor ->
         buildList {
             while (cursor.moveToNext()) {
-                if (cursor.getString(2) != TvContract.Channels.SERVICE_TYPE_AUDIO) continue
                 val id = cursor.getLong(0)
                 val name = cursor.getString(1)?.takeIf { it.isNotBlank() } ?: id.toString()
                 val channel = TifChannelUri(inputId, id).encode()
-                add(StayonRadioStation(channel, name, channel, TvContract.buildChannelLogoUri(id).toString()))
+                val station = StayonRadioStation(channel, name, channel, TvContract.buildChannelLogoUri(id).toString())
+                add(ScannedService(id, station, saved[id] ?: TunerRadioClassification.suggestRadio(name, cursor.getString(2))))
             }
-        }.sortedBy { it.name }
+        }.sortedWith(compareByDescending<ScannedService> { it.suggestedRadio }.thenBy { it.station.name })
     }.orEmpty()
 }
 

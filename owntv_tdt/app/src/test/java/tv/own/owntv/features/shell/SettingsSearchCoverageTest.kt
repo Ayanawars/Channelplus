@@ -156,7 +156,7 @@ class SettingsSearchCoverageTest {
         "settings_panel_width_dialog_title", "settings_panel_width_disable_preview_title",
         "settings_record_watching_warning_title",
         // Source import, radio form actions and delete confirmations are one-off actions.
-        "stayon_add_tdt",
+        "stayon_add_tdt", "stayon_radio_classify",
         "stayon_radio_save", "stayon_radio_delete_station", "stayon_radio_delete_playlist", "stayon_radio_tdt_remove", "common_cancel",
     )
 

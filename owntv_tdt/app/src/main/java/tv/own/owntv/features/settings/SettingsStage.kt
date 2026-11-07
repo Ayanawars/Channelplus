@@ -1113,6 +1113,30 @@ fun StageActionColumn(actions: List<StageAction>, back: FocusRequester?, first: 
     }
 }
 
+/** Actions explicitly opened from a row in the full-width settings layout. */
+@Composable
+internal fun SettingsActionPopup(title: String, actions: List<StageAction>, onDismiss: () -> Unit) {
+    val first = remember { FocusRequester() }
+    tv.own.owntv.ui.stage.StagePopup(onDismiss = onDismiss, title = title) {
+        androidx.compose.runtime.LaunchedEffect(Unit) { runCatching { first.requestFocus() } }
+        StageActionColumn(actions.map { action ->
+            StageAction(
+                action.icon,
+                action.label,
+                { onDismiss(); action.onClick() },
+                action.onLongClick?.let { longClick -> { onDismiss(); longClick() } },
+                action.danger,
+            )
+        }, back = null, first = first)
+    }
+}
+
+internal fun Modifier.openSettingsActionsOnRight(onOpen: () -> Unit): Modifier = onPreviewKeyEvent { event ->
+    if (event.key != Key.DirectionRight) return@onPreviewKeyEvent false
+    if (event.type == KeyEventType.KeyUp) onOpen()
+    true
+}
+
 /** The panel's SPAN / MULTI-SELECT block: how a span is picked, and the CH keys that reach its end. */
 @Composable
 fun SpanHelpBlock() {
@@ -1177,30 +1201,30 @@ private fun SettingsListPage(
                 if (toolbar != null) Row(Modifier.fillMaxWidth().padding(bottom = 14.mpx),
                     horizontalArrangement = Arrangement.spacedBy(8.mpx), verticalAlignment = Alignment.CenterVertically,
                     content = toolbar)
-                val help = panel.help
-                val editor = panel.editor
-                // Keep functional panels (source actions, previews and editors); plain help lives below the list.
-                val showPanel = editor != null || help?.extra != null || help?.footer != null || panelTop != null
-                Row(Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(26.mpx)) {
-                    Box(Modifier.weight(1f).fillMaxHeight()) {
-                        val listModifier = Modifier.fillMaxSize().focusRequester(navigation.contentFocus)
-                            .focusRequester(rowsFocus).focusGroup()
-                        if (list != null) list(listModifier)
-                        else CompositionLocalProvider(LocalBringIntoViewSpec provides edgeScrollSpec) {
-                            Column(listModifier.verticalScroll(scroll).padding(bottom = 24.mpx),
-                                verticalArrangement = Arrangement.spacedBy(2.mpx), content = rows)
+                Box(Modifier.weight(1f).fillMaxWidth()) {
+                    val listModifier = Modifier.fillMaxSize().focusRequester(navigation.contentFocus)
+                        .focusRequester(rowsFocus).focusGroup()
+                    if (list != null) list(listModifier)
+                    else CompositionLocalProvider(LocalBringIntoViewSpec provides edgeScrollSpec) {
+                        Column(listModifier.verticalScroll(scroll).padding(bottom = 24.mpx),
+                            verticalArrangement = Arrangement.spacedBy(2.mpx)) {
+                            panelTop?.invoke(this)
+                            rows()
                         }
                     }
-                    if (showPanel) Column(Modifier.width(490.mpx).fillMaxHeight()
-                        .verticalScroll(androidx.compose.foundation.rememberScrollState())
-                        .background(Color(0xFF141414), RoundedCornerShape(12.mpx)).padding(22.mpx)) {
-                        if (editor != null) SettingPanelEditor(editor, help,
-                            onClosed = { panel.opener?.let { runCatching { it.requestFocus() } } })
-                        else {
-                            if (panelTop != null && help?.extra == null) panelTop()
-                            if (help != null) SettingPanelBody(help)
-                        }
+                }
+                panel.editor?.let { editor ->
+                    val help = panel.help
+                    val opener = panel.opener
+                    val view = androidx.compose.ui.platform.LocalView.current
+                    androidx.compose.runtime.DisposableEffect(editor.owner) {
+                        onDispose { view.post { opener?.let { runCatching { it.requestFocus() } } } }
                     }
+                    tv.own.owntv.ui.stage.StagePopup(
+                        onDismiss = editor.onDismiss,
+                        title = help?.title?.takeIf { it.isNotBlank() },
+                        scroll = false,
+                    ) { editor.content(this, help) }
                 }
             }
         }

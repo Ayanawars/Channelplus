@@ -166,13 +166,17 @@ fun SearchScreen(
     returnToHomeOnBack: Boolean = false,
     onReturnToHome: () -> Unit = {},
     modifier: Modifier = Modifier,
+    includeVod: Boolean = true,
 ) {
     val query by vm.query.collectAsStateWithLifecycle()
     val results by vm.results.collectAsStateWithLifecycle()
     val curated by vm.curatedResults.collectAsStateWithLifecycle()
     val intent by vm.intent.collectAsStateWithLifecycle()
     val recent by vm.recentSearches.collectAsStateWithLifecycle()
-    val kinds by vm.kinds.collectAsStateWithLifecycle()
+    val activeKinds by vm.kinds.collectAsStateWithLifecycle()
+    val availableKinds = if (includeVod) SearchKind.entries else listOf(SearchKind.LIVE, SearchKind.TV_SHOWS)
+    val kinds = activeKinds.intersect(availableKinds.toSet())
+    val allowedKinds = kinds.ifEmpty { availableKinds.toSet() }
     val marks by vm.playlistMarks.collectAsStateWithLifecycle()
     val categoryNames by vm.categoryNames.collectAsStateWithLifecycle()
     val focusedMeta by vm.focusedMeta.collectAsStateWithLifecycle()
@@ -191,7 +195,7 @@ fun SearchScreen(
 
     val searching = query.trim().length >= 2
     val showingResults = searching || intent != null
-    val shown = if (searching) results.only(kinds) else curated
+    val shown = if (searching) results.only(allowedKinds) else if (includeVod) curated else curated.only(availableKinds.toSet())
     // One filter button on lists that kind alone, uncapped; otherwise the kinds are grouped under headings.
     val singleKind = searching && kinds.size == 1
     val entries = searchEntries(shown, grouped = !singleKind, capChannels = searching && !singleKind)
@@ -328,7 +332,7 @@ fun SearchScreen(
         if (searching) {
             // Filter buttons: OK switches one on or off, several can be on, none on shows everything.
             Row(Modifier.padding(start = fx(84) - 12.mpx, top = 192.mpx), horizontalArrangement = Arrangement.spacedBy(16.mpx)) {
-                SearchKind.entries.forEach { k ->
+                availableKinds.forEach { k ->
                     StageTab(
                         label = k.label(),
                         count = localizedInteger(results.count(k)),

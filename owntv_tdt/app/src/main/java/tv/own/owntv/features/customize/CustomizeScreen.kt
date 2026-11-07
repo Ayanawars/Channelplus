@@ -47,6 +47,9 @@ import tv.own.owntv.features.settings.SettingValue
 import tv.own.owntv.features.settings.SettingHelp
 import tv.own.owntv.features.settings.settingHints
 import tv.own.owntv.features.settings.StageAction
+import tv.own.owntv.features.settings.LocalSettingsNavigation
+import tv.own.owntv.features.settings.SettingsActionPopup
+import tv.own.owntv.features.settings.openSettingsActionsOnRight
 import tv.own.owntv.features.settings.StageActionColumn
 import tv.own.owntv.features.settings.SpanHelpBlock
 import tv.own.owntv.core.model.MediaType
@@ -694,6 +697,8 @@ private fun CategoryRow(
         row.renamed.takeIf { it }?.let { stringResource(R.string.settings_customize_was, row.originalName) },
         row.providerName,
     ).joinToString(stringResource(R.string.settings_customize_metadata_separator))
+    val fullWidth = LocalSettingsNavigation.current != null
+    var showActions by remember { mutableStateOf(false) }
     // A held OK on a Move, Rename or Hide action anchors a span; a normal press on a second row picks its end.
     val actions = listOf(
         StageAction(OwnTVIcon.LIST, stringResource(R.string.tdt_edit_channels), onOpenItems),
@@ -733,9 +738,11 @@ private fun CategoryRow(
         modifier = Modifier
             .focusRequester(focusRequester)
             .then(if (upFocusRequester != null) Modifier.upTo(upFocusRequester) else Modifier)
-            .focusProperties { right = actionsFocus }
+            .then(if (fullWidth) Modifier.openSettingsActionsOnRight { showActions = true }
+                else Modifier.focusProperties { right = actionsFocus })
             .onFocusChanged { if (it.isFocused) onRowFocused() },
     )
+    if (showActions) SettingsActionPopup(row.displayName, actions) { showActions = false }
 }
 
 /** PIN lock editing flow opened from the Customize header. */

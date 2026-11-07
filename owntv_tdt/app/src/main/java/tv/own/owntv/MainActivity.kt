@@ -253,7 +253,6 @@ open class MainActivity : ComponentActivity() {
             val weather by viewModel.weather.collectAsStateWithLifecycle()
             val weatherFahrenheit by viewModel.weatherFahrenheit.collectAsStateWithLifecycle()
             val selectedSection by viewModel.selectedSection.collectAsStateWithLifecycle()
-            val visibleSections by viewModel.visibleSections.collectAsStateWithLifecycle()
             val activeProfileId by viewModel.activeProfileId.collectAsStateWithLifecycle()
             val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
 
@@ -417,7 +416,6 @@ open class MainActivity : ComponentActivity() {
                             )
                             shellReady -> OwnTVShell(
                                 selectedSection = selectedSection,
-                                visibleSections = visibleSections,
                                 onSelectSection = viewModel::selectSection,
                                 themeMode = themeMode,
                                 uiZoomPercent = uiZoomPercent,

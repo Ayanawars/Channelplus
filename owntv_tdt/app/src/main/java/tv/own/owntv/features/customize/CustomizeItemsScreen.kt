@@ -41,6 +41,9 @@ import tv.own.owntv.features.settings.StageSettingRow
 import tv.own.owntv.features.settings.SettingValue
 import tv.own.owntv.features.settings.SettingHelp
 import tv.own.owntv.features.settings.StageAction
+import tv.own.owntv.features.settings.LocalSettingsNavigation
+import tv.own.owntv.features.settings.SettingsActionPopup
+import tv.own.owntv.features.settings.openSettingsActionsOnRight
 import tv.own.owntv.features.settings.StageActionColumn
 import tv.own.owntv.features.settings.SpanHelpBlock
 import tv.own.owntv.core.model.MediaType
@@ -433,6 +436,8 @@ private fun ItemRow(
         row.hidden.takeIf { it }?.let { stringResource(R.string.settings_customize_hidden) },
         row.renamed.takeIf { it }?.let { stringResource(R.string.settings_customize_item_was, row.originalName) },
     ).joinToString(stringResource(R.string.settings_customize_metadata_separator))
+    val fullWidth = LocalSettingsNavigation.current != null
+    var showActions by remember { mutableStateOf(false) }
     // A held OK on a Move, Rename or Hide action anchors a span; a normal press on a second row picks its end.
     val actions = listOfNotNull(
         StageAction(OwnTVIcon.PAGE_TOWARD_FIRST, stringResource(R.string.settings_customize_move_top), onMoveTop, onMoveLongPress),
@@ -457,7 +462,7 @@ private fun ItemRow(
         value = if (row.hidden) SettingValue.Custom {
             androidx.tv.material3.Text(stringResource(R.string.settings_customize_hidden), style = tv.own.owntv.ui.theme.stageText(18, 700), color = tv.own.owntv.ui.theme.StageColors.Dim, maxLines = 1, overflow = TextOverflow.Ellipsis)
         } else null,
-        onClick = { runCatching { actionsFocus.requestFocus() } },
+        onClick = { if (fullWidth) showActions = true else runCatching { actionsFocus.requestFocus() } },
         marked = isInSpan,
         keepPanel = keepPanel,
         help = SettingHelp(
@@ -473,7 +478,9 @@ private fun ItemRow(
         modifier = Modifier
             .focusRequester(focusRequester)
             .then(if (upFocusRequester != null) Modifier.upTo(upFocusRequester) else Modifier)
-            .focusProperties { right = actionsFocus }
+            .then(if (fullWidth) Modifier.openSettingsActionsOnRight { showActions = true }
+                else Modifier.focusProperties { right = actionsFocus })
             .onFocusChanged { if (it.isFocused) onRowFocused() },
     )
+    if (showActions) SettingsActionPopup(row.displayName, actions) { showActions = false }
 }

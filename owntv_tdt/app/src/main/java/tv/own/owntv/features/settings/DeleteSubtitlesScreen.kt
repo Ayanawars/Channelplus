@@ -43,6 +43,7 @@ fun DeleteSubtitlesScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     val rowsFocus = remember { FocusRequester() }
     val tabsFocus = remember { FocusRequester() }
     val actionsFocus = remember { FocusRequester() }
+    val fullWidth = LocalSettingsNavigation.current != null
     LaunchedEffect(Unit) {
         withFrameNanos { }
         if (!rowsFocus.requestFocus()) runCatching { tabsFocus.requestFocus() }
@@ -112,7 +113,9 @@ fun DeleteSubtitlesScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                 desc = listOfNotNull(item.languageName ?: item.language, item.releaseName).joinToString(separator),
                 value = null,
                 onClick = { confirmDelete = item },
-                modifier = Modifier.focusRequester(rowFocus).focusProperties { right = actionsFocus },
+                modifier = Modifier.focusRequester(rowFocus).focusProperties {
+                    if (!fullWidth) right = actionsFocus
+                },
                 help = SettingHelp(title, help, hints = hints, extra = { StageActionColumn(listOf(delete), rowFocus, actionsFocus) }),
             )
         }

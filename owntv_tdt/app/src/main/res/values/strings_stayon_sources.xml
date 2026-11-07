@@ -8,9 +8,12 @@
     <string name="stayon_radio_tdt">Terrestrial radio</string>
     <string name="stayon_radio_tdt_import">Import or refresh stations</string>
     <string name="stayon_radio_tdt_desc">Import audio services already tuned on the television.</string>
-    <string name="stayon_radio_tdt_empty">No terrestrial radio stations were found.</string>
+    <string name="stayon_radio_tdt_empty">No services were returned by the TV tuner.</string>
     <string name="stayon_radio_tdt_failed">Unable to access terrestrial radio stations.</string>
     <string name="stayon_radio_tdt_remove">Remove %1$s from STAYON+?</string>
     <string name="stayon_radio_tdt_remove_description">This only removes the station from the app.</string>
     <string name="stayon_epg_tv">TV guide</string>
+    <string name="stayon_radio_classify">Classify TV and radio</string>
+    <string name="stayon_radio_classify_desc">Press OK on a service to switch between TV and Radio, then save.</string>
+    <string name="stayon_radio_none_selected">No services were marked as radio.</string>
 </resources>

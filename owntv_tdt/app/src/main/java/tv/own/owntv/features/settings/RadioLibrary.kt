@@ -61,7 +61,6 @@ class StayonRadioLibrary(context: Context) {
 
     @Synchronized
     fun replaceTunerStations(inputId: String, rows: List<StayonRadioStation>) {
-        require(rows.isNotEmpty())
         saveStations(_stations.value.filterNot { it.tunerChannel?.inputId == inputId } + rows)
     }
 
