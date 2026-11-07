@@ -423,7 +423,7 @@ private fun MusicDashboard(modifier: Modifier = Modifier) {
         Box(Modifier.weight(1f).fillMaxWidth().background(Ink)) {
             Image(
                 painterResource(R.drawable.stayon_music_hero), contentDescription = null,
-                contentScale = ContentScale.Crop, alignment = Alignment.CenterRight,
+                contentScale = ContentScale.Crop, alignment = Alignment.CenterEnd,
                 modifier = Modifier.fillMaxSize(),
             )
             // Keep the content region and all outside margins absolute black.
