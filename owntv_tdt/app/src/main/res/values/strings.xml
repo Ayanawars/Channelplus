@@ -26,4 +26,20 @@
     <string name="stayon_desc_music">Spotify, YouTube Music and Amazon Music</string>
     <string name="stayon_desc_apps">Installed apps, favorites and shortcuts</string>
     <string name="stayon_desc_system">Updates, backups, network and TV integration</string>
+    <string name="stayon_apps_options">Applications display</string>
+    <string name="stayon_apps_show_non_tv">Include non-TV apps</string>
+    <string name="stayon_apps_show_non_tv_desc">Also show installed applications without an Android TV launcher.</string>
+    <string name="stayon_apps_show_hidden">Show hidden apps</string>
+    <string name="stayon_apps_show_hidden_desc">Reveal applications hidden from this list.</string>
+    <string name="stayon_apps_refresh">Refresh apps</string>
+    <string name="stayon_apps_installed">Installed applications</string>
+    <string name="stayon_apps_scanning">Loading installed apps…</string>
+    <string name="stayon_apps_empty">No matching apps. Try showing non-TV or hidden apps.</string>
+    <string name="stayon_apps_favorite">Favorite</string>
+    <string name="stayon_apps_open">Open application</string>
+    <string name="stayon_apps_add_favorite">Add to favorites</string>
+    <string name="stayon_apps_unfavorite">Remove from favorites</string>
+    <string name="stayon_apps_hide">Hide from STAYON+</string>
+    <string name="stayon_apps_unhide">Show in STAYON+</string>
+    <string name="stayon_apps_system_info">Android application settings</string>
 </resources>
