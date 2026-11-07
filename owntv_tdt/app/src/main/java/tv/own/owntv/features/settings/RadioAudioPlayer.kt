@@ -46,7 +46,7 @@ object RadioAudioPlayer {
             }
             mp.setOnErrorListener { who, what, extra ->
                 if (player === who) {
-                    _error.value = "MediaPlayer: $what/$extra"
+                    _error.value = listOf(what, extra).joinToString("/")
                     stop()
                 }
                 true
