@@ -2693,6 +2693,10 @@ private fun stayonRelatedRows(group: SettingsGroup, goTo: (SettingsGroup) -> Uni
 /** The settings that live inside a sub-screen, findable by their own names; each opens its screen. */
 @Composable
 private fun subScreenSearchEntries(open: (SettingsTab) -> Unit): List<SettingsSearchEntry> = listOf(
+        SettingsSearchEntry(stringResource(R.string.stayon_settings_sources), stringResource(R.string.stayon_epg_artwork_enabled), stringResource(R.string.stayon_epg_artwork_enabled_desc), OwnTVIcon.IMAGE, TileTone.SECONDARY) { open(SettingsTab.EPG) },
+        SettingsSearchEntry(stringResource(R.string.stayon_radio_section), stringResource(R.string.stayon_radio_iptv_title), stringResource(R.string.stayon_radio_iptv_desc), OwnTVIcon.AUDIO, TileTone.SECONDARY) { open(SettingsTab.RADIO_IPTV) },
+        SettingsSearchEntry(stringResource(R.string.stayon_radio_section), stringResource(R.string.stayon_radio_new_playlist), stringResource(R.string.stayon_radio_new_playlist_desc), OwnTVIcon.ADD, TileTone.SECONDARY) { open(SettingsTab.RADIO_IPTV) },
+        SettingsSearchEntry(stringResource(R.string.stayon_radio_section), stringResource(R.string.stayon_radio_new_station), stringResource(R.string.stayon_radio_new_station_desc), OwnTVIcon.ADD, TileTone.SECONDARY) { open(SettingsTab.RADIO_IPTV) },
         SettingsSearchEntry(stringResource(R.string.settings_group_sources), stringResource(R.string.settings_epg_sources_auto_refresh_title), stringResource(R.string.settings_search_keywords_epg), OwnTVIcon.EPG, TileTone.SECONDARY) { open(SettingsTab.EPG) },
         SettingsSearchEntry(stringResource(R.string.settings_group_layout), stringResource(R.string.home_row_now_trending), stringResource(R.string.settings_search_keywords_home), OwnTVIcon.HOME, TileTone.SECONDARY) { open(SettingsTab.HOME) },
         SettingsSearchEntry(stringResource(R.string.settings_group_layout), stringResource(R.string.home_trending_style), stringResource(R.string.settings_search_keywords_home), OwnTVIcon.HOME, TileTone.SECONDARY) { open(SettingsTab.HOME) },
