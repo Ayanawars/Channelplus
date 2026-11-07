@@ -76,7 +76,7 @@ class StayonRadioLibrary(context: Context) {
     }
 
     suspend fun refreshPlaylist(id: String): Int {
-        val source = _playlists.value.firstOrNull { it.id == id } ?: error("Missing radio playlist")
+        val source = _playlists.value.firstOrNull { it.id == id } ?: throw NoSuchElementException()
         val parsed = fetchPlaylist(source.url)
         require(parsed.isNotEmpty())
         synchronized(this) {
