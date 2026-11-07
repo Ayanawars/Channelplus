@@ -864,16 +864,33 @@ internal fun SettingsContent(
             }
         }
         val byKey = sliced.flatMap { it.second }.associateBy { it.key }
-        // Re-home existing settings instead of duplicating them: updates and connectivity belong
-        // to System, while language, startup, icon and sports remain under General.
+        // An exhaustive regrouping: keep the existing, working controls and route them to the
+        // agreed high-level sections. Their original tabs remain usable for old deep links.
         val systemKeys = setOf("check_updates", "update_startup", tabRowKey(SettingsTab.NETWORK), tabRowKey(SettingsTab.DNS))
-        val systemRows = sliced.firstOrNull { it.first.key == "stayon_system" }?.second.orEmpty()
+        val homeKey = tabRowKey(SettingsTab.HOME)
+        val remoteKeys = setOf(tabRowKey(SettingsTab.CH_NAV), tabRowKey(SettingsTab.CONTENT_MENUS))
+        val guideKey = tabRowKey(SettingsTab.GUIDE_WIDTH)
+        val sourceDetailKeys = setOf(tabRowKey(SettingsTab.CUSTOMIZE), tabRowKey(SettingsTab.METADATA))
+        val subtitleKey = tabRowKey(SettingsTab.OPEN_SUBTITLES)
+        val layoutRows = sliced.firstOrNull { it.first.key == "group_layout" }?.second.orEmpty()
+        val contentRows = sliced.firstOrNull { it.first.key == "group_content_metadata" }?.second.orEmpty()
+        val appearanceRows = sliced.firstOrNull { it.first.key == "group_appearance" }?.second.orEmpty()
         val appRows = sliced.firstOrNull { it.first.key == "group_app" }?.second.orEmpty()
         sliced.map { (group, rows) ->
             when (group.key) {
                 "group_quick" -> group to quickPinned.mapNotNull { byKey[it] ?: videoDeepRows[it] }
                 "group_app" -> group to rows.filterNot { it.key in systemKeys }
-                "stayon_system" -> group to (systemRows + appRows.filter { it.key in systemKeys })
+                "stayon_system" -> group to (rows + appRows.filter { it.key in systemKeys })
+                "stayon_home" -> group to (rows + layoutRows.filter { it.key == homeKey })
+                "stayon_remote" -> group to (rows + layoutRows.filter { it.key in remoteKeys })
+                "group_layout" -> group to rows.filterNot { it.key == homeKey || it.key in remoteKeys || it.key == guideKey }
+                "group_sources" -> group to (rows +
+                    contentRows.filter { it.key in sourceDetailKeys } +
+                    layoutRows.filter { it.key == guideKey } +
+                    appearanceRows.filter { it.key == "picons" })
+                "group_content_metadata" -> group to emptyList()
+                "group_appearance" -> group to rows.filterNot { it.key == "picons" }
+                "group_player" -> group to (rows + contentRows.filter { it.key == subtitleKey })
                 else -> group to rows
             }
         }
@@ -2616,16 +2633,7 @@ private data class RootRow(
 @Composable
 private fun stayonCategoryItems(openTab: (SettingsTab) -> Unit): List<RootItem> = listOf(
     RootGroup("stayon_home", stringResource(R.string.stayon_settings_home), OwnTVIcon.HOME, ""),
-    RootRow("tab_HOME", TileTone.PRIMARY, OwnTVIcon.HOME,
-        title = stringResource(R.string.settings_home_root),
-        desc = stringResource(R.string.settings_home_root_description), onClick = { openTab(SettingsTab.HOME) }),
     RootGroup("stayon_remote", stringResource(R.string.stayon_settings_remote), OwnTVIcon.MENU, ""),
-    RootRow("tab_CH_NAV", TileTone.PRIMARY, OwnTVIcon.CH_NAV,
-        title = stringResource(R.string.settings_remote_shortcuts),
-        desc = stringResource(R.string.settings_remote_shortcuts_description), onClick = { openTab(SettingsTab.CH_NAV) }),
-    RootRow("tab_CONTENT_MENUS", TileTone.PRIMARY, OwnTVIcon.MENU,
-        title = stringResource(R.string.settings_content_menus_title),
-        desc = stringResource(R.string.settings_content_menus_description), onClick = { openTab(SettingsTab.CONTENT_MENUS) }),
     RootGroup("stayon_music", stringResource(R.string.stayon_settings_music), OwnTVIcon.AUDIO, ""),
     RootGroup("stayon_applications", stringResource(R.string.stayon_settings_apps), OwnTVIcon.GRID, ""),
     RootGroup("stayon_system", stringResource(R.string.stayon_settings_system), OwnTVIcon.SETTINGS, ""),
@@ -2643,8 +2651,6 @@ private fun stayonRelatedRows(group: SettingsGroup, goTo: (SettingsGroup) -> Uni
     return when (group) {
         SettingsGroup.APP -> listOf(link("stayon_quick", OwnTVIcon.SPARKLE,
             stringResource(R.string.settings_group_quick), SettingsGroup.QUICK))
-        SettingsGroup.SOURCES -> listOf(link("stayon_content", OwnTVIcon.IMAGE,
-            stringResource(R.string.settings_group_content_metadata), SettingsGroup.CONTENT))
         SettingsGroup.PLAYER -> listOf(
             link("stayon_picture", OwnTVIcon.VIDEO, stringResource(R.string.settings_vp_cat_picture), SettingsGroup.PICTURE),
             link("stayon_sound", OwnTVIcon.HEADPHONES, stringResource(R.string.settings_group_sound_subtitles), SettingsGroup.SOUND),
