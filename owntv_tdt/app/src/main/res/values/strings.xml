@@ -42,4 +42,7 @@
     <string name="stayon_apps_hide">Hide from STAYON+</string>
     <string name="stayon_apps_unhide">Show in STAYON+</string>
     <string name="stayon_apps_system_info">Android application settings</string>
+    <string name="stayon_epg_artwork_section">Programme imagery</string>
+    <string name="stayon_epg_artwork_enabled">Use programme images from EPG</string>
+    <string name="stayon_epg_artwork_enabled_desc">Show artwork supplied by any compatible XMLTV guide when the channel video preview is unavailable.</string>
 </resources>
