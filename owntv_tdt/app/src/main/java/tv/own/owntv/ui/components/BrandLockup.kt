@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.koinInject
 import tv.own.owntv.R
@@ -57,19 +58,16 @@ private fun accentTriangle(): Color? {
  */
 @Composable
 fun BrandMark(icon: AppIcon, size: Dp, modifier: Modifier = Modifier, followAccent: Boolean = true) {
-    val small = size <= 32.dp
-    val accent = accentTriangle().takeIf { followAccent }
-    Box(modifier.size(size)) {
-        Image(painterResource(if (small) icon.markSmall else icon.mark), contentDescription = null, modifier = Modifier.fillMaxSize())
-        if (accent != null && icon.isCard(small)) {
-            Image(
-                painterResource(if (small) R.drawable.owntv_mark_play_small else R.drawable.owntv_mark_play),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                colorFilter = ColorFilter.tint(accent),
-            )
-        }
+    // The installed and in-app marks must match. Core's legacy owntv_mark_* vectors
+    // still exist for backward data compatibility, but they are not STAYON+ branding.
+    val drawable = when (icon) {
+        AppIcon.PETROL, AppIcon.OLIVE, AppIcon.OLIVE_CREAM -> R.mipmap.stayon_icon_green
+        AppIcon.SUNFLOWER -> R.mipmap.stayon_icon_violet
+        AppIcon.COBALT -> R.mipmap.stayon_icon_red
+        AppIcon.TOMATO, AppIcon.PIXEL -> R.mipmap.stayon_icon_sober
+        else -> R.mipmap.stayon_icon_blue
     }
+    Image(painterResource(drawable), contentDescription = null, modifier = modifier.size(size))
 }
 
 /**
@@ -102,9 +100,16 @@ private val PixelPower = Color(CorePixelMark.POWER)
  */
 @Composable
 fun Wordmark(width: Dp, modifier: Modifier = Modifier, tv: Color = stageAccent.accent, own: Color = WordmarkCream) {
-    Box(modifier.width(width).height(width * 182f / 988f)) {
-        Image(painterResource(R.drawable.owntv_wordmark_own), null, Modifier.fillMaxSize(), colorFilter = ColorFilter.tint(own))
-        Image(painterResource(R.drawable.owntv_wordmark_tv), null, Modifier.fillMaxSize(), colorFilter = ColorFilter.tint(tv))
+    // Render the STAYON+ brand, never the former "own tv" mark.
+    Box(modifier.width(width).height(width * 0.32f), contentAlignment = Alignment.CenterStart) {
+        androidx.tv.material3.Text(
+            text = androidx.compose.ui.res.stringResource(R.string.channel_brand_name),
+            fontSize = (width.value / 5.2f).coerceAtLeast(10f).sp,
+            fontWeight = androidx.compose.ui.text.font.FontWeight.ExtraBold,
+            color = own,
+            maxLines = 1,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+        )
     }
 }
 
