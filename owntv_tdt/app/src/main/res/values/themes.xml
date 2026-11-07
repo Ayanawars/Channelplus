@@ -24,30 +24,30 @@
         <item name="postSplashScreenTheme">@style/Theme.OwnTV</item>
     </style>
     <style name="Theme.OwnTV.Starting.Petrol">
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/stayon_icon_green</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/stayon_splash_green</item>
     </style>
     <style name="Theme.OwnTV.Starting.Sunflower">
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/stayon_icon_violet</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/stayon_splash_violet</item>
     </style>
     <style name="Theme.OwnTV.Starting.Cobalt">
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/stayon_icon_red</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/stayon_splash_red</item>
     </style>
     <style name="Theme.OwnTV.Starting.Tomato">
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/stayon_icon_sober</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/stayon_splash_sober</item>
     </style>
     <style name="Theme.OwnTV.Starting.Board">
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/stayon_icon_blue</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/stayon_splash_blue</item>
     </style>
     <style name="Theme.OwnTV.Starting.Eggshell">
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/stayon_icon_blue</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/stayon_splash_blue</item>
     </style>
     <style name="Theme.OwnTV.Starting.Olive">
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/stayon_icon_green</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/stayon_splash_green</item>
     </style>
     <style name="Theme.OwnTV.Starting.OliveCream">
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/stayon_icon_green</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/stayon_splash_green</item>
     </style>
     <style name="Theme.OwnTV.Starting.Pixel">
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/stayon_icon_sober</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/stayon_splash_sober</item>
     </style>
 </resources>

@@ -60,11 +60,11 @@ import java.util.Locale
  *
  * Service integrations intentionally remain visible but NOT clickable until wired.
  */
-private val Ink = Color(0xFF08090D)
+private val Ink = Color.Black
 private val Panel = Color(0xFF17181D)
 private val Muted = Color(0xFFA7A7AD)
-private val White = Color(0xFFFAF9F6)
-private val Yellow = Color(0xFFF5C927)
+private val White = Color(0xFFFFF8EB)
+private val Yellow = Color(0xFFFFDF32)
 
 private enum class StayTab { TV, MUSIC, MOVIES, SERIES, APPS }
 
@@ -90,7 +90,7 @@ fun StayOnDashboard(
 
     Column(
         modifier.fillMaxSize()
-            .background(Brush.verticalGradient(listOf(Color(0xFF111217), Ink, Color(0xFF09090C))))
+            .background(Ink)
             .padding(start = 34.dp, end = 34.dp, top = 22.dp, bottom = 24.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
@@ -101,7 +101,7 @@ fun StayOnDashboard(
             Spacer(Modifier.width(38.dp))
             val tabs = listOf(
                 StayTab.TV to stringResource(R.string.stayon_tv), StayTab.MUSIC to stringResource(R.string.stayon_music),
-                StayTab.MOVIES to stringResource(R.string.stayon_movies), StayTab.SERIES to stringResource(R.string.stayon_series), StayTab.APPS to stringResource(R.string.stayon_apps),
+                StayTab.MOVIES to stringResource(R.string.stayon_movies), StayTab.SERIES to stringResource(R.string.stayon_series),
             )
             tabs.forEach { (value, label) ->
                 val callback: () -> Unit = {
@@ -240,7 +240,7 @@ private fun TvDashboard(
         Row(Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(22.dp)) {
             Box(
                 Modifier.weight(2.17f).fillMaxHeight()
-                    .background(Brush.horizontalGradient(listOf(Color(0xFF141319), Color(0xFF1C1A1E), Ink))),
+                    .background(Ink),
             ) {
                 if (!artwork.isNullOrBlank()) {
                     AsyncImage(
@@ -309,7 +309,7 @@ private fun TvDashboard(
                 StayDivider()
                 Text(stringResource(R.string.stayon_favorite_title), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = White)
                 if (favorite != null) {
-                    StayLineItem(stringResource(R.string.stayon_star_icon), favorite.name, stringResource(R.string.stayon_open_channel), { onWatchChannel(favorite.id) })
+                    StayLineItem(stringResource(R.string.stayon_star_icon), favorite.name, stringResource(R.string.stayon_open_channel), { onWatchChannel(favorite.id) }, favorite.displayLogoUrl)
                 } else {
                     Text(stringResource(R.string.stayon_add_favorites), color = Muted, fontSize = 16.sp)
                 }
@@ -320,13 +320,13 @@ private fun TvDashboard(
                     val away = match.away?.team
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         if (home?.logoUrl != null) {
-                            AsyncImage(model = home.logoUrl, contentDescription = home.name, contentScale = ContentScale.Fit, modifier = Modifier.size(40.dp))
+                            AsyncImage(model = home.logoUrl, contentDescription = home.name, contentScale = ContentScale.Fit, modifier = Modifier.size(54.dp))
                         }
                         Spacer(Modifier.width(10.dp))
                         Text(stringResource(R.string.stayon_vs), color = White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                         Spacer(Modifier.width(10.dp))
                         if (away?.logoUrl != null) {
-                            AsyncImage(model = away.logoUrl, contentDescription = away.name, contentScale = ContentScale.Fit, modifier = Modifier.size(40.dp))
+                            AsyncImage(model = away.logoUrl, contentDescription = away.name, contentScale = ContentScale.Fit, modifier = Modifier.size(54.dp))
                         }
                     }
                     StayTextAction(match.title, onClick = { onOpenMatch(match) })
@@ -356,34 +356,27 @@ private fun TvDashboard(
                 Text(stringResource(R.string.stayon_lovestv_tagline), fontSize = 12.sp, color = Muted, maxLines = 1)
             }
             StayVerticalDivider()
-            Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    painterResource(R.drawable.stayon_atresmedia_mark),
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.width(56.dp).height(72.dp),
-                )
-                Spacer(Modifier.width(7.dp))
-                Text(stringResource(R.string.stayon_atresmedia), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = White, maxLines = 1)
-            }
+            StayBroadcaster("2da80e502149f5943de87660.svg", stringResource(R.string.stayon_mediaset), stringResource(R.string.stayon_telecinco), Modifier.weight(1f))
             StayVerticalDivider()
-            Box(Modifier.weight(1.05f), contentAlignment = Alignment.Center) {
-                Image(
-                    painterResource(R.drawable.stayon_mediaset_logo),
-                    contentDescription = stringResource(R.string.stayon_mediaset),
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxWidth(.95f).height(63.dp),
-                )
-            }
+            StayBroadcaster("ed365a20408d10ce8ad65c1e.svg", stringResource(R.string.stayon_rtve), stringResource(R.string.stayon_la1), Modifier.weight(1f))
             StayVerticalDivider()
-            Box(Modifier.weight(.72f), contentAlignment = Alignment.Center) {
-                Image(
-                    painterResource(R.drawable.stayon_rtve_logo),
-                    contentDescription = stringResource(R.string.stayon_rtve),
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.width(115.dp).height(75.dp),
-                )
-            }
+            StayBroadcaster("dcd4717ba694dc4af37f8610.svg", stringResource(R.string.stayon_atresmedia), stringResource(R.string.stayon_antena3), Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+private fun StayBroadcaster(asset: String, group: String, channel: String, modifier: Modifier) {
+    Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+        AsyncImage(
+            model = "file:///android_asset/channel-logos/wikimedia/$asset",
+            contentDescription = null, contentScale = ContentScale.Fit,
+            modifier = Modifier.size(54.dp),
+        )
+        Spacer(Modifier.width(10.dp))
+        Column {
+            Text(group, color = Muted, fontSize = 11.sp, maxLines = 1)
+            Text(channel, color = White, fontSize = 17.sp, fontWeight = FontWeight.Bold, maxLines = 1)
         }
     }
 }
@@ -399,7 +392,7 @@ private fun StayVerticalDivider() {
 }
 
 @Composable
-private fun StayLineItem(icon: String, title: String, desc: String, onClick: () -> Unit) {
+private fun StayLineItem(icon: String, title: String, desc: String, onClick: () -> Unit, logoUrl: String? = null) {
     var focused by remember { mutableStateOf(false) }
     Row(
         Modifier.fillMaxWidth()
@@ -411,7 +404,11 @@ private fun StayLineItem(icon: String, title: String, desc: String, onClick: () 
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(icon, fontSize = 27.sp, color = if (focused) Yellow else White)
+        if (logoUrl != null) {
+            AsyncImage(model = logoUrl, contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier.size(42.dp))
+        } else {
+            Text(icon, fontSize = 27.sp, color = if (focused) Yellow else White)
+        }
         Spacer(Modifier.width(14.dp))
         Column {
             Text(title, fontSize = 20.sp, color = White, fontWeight = FontWeight.Bold)
@@ -423,31 +420,45 @@ private fun StayLineItem(icon: String, title: String, desc: String, onClick: () 
 @Composable
 private fun MusicDashboard(modifier: Modifier = Modifier) {
     Column(modifier.fillMaxWidth()) {
-        Row(
-            Modifier.weight(1f).fillMaxWidth()
-                .clip(RoundedCornerShape(24.dp))
-                .background(Brush.horizontalGradient(listOf(Panel, Color(0xFF181613), Color(0xFF292019))))
-                .padding(34.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(Modifier.weight(1.2f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(stringResource(R.string.stayon_your_station), fontSize = 13.sp, letterSpacing = 3.sp, color = Muted)
-                Text(stringResource(R.string.stayon_urban), fontSize = 48.sp, fontWeight = FontWeight.Bold, color = White)
-                Text(stringResource(R.string.stayon_music_pending), fontSize = 18.sp, color = Muted)
-                Spacer(Modifier.height(12.dp))
-                Text(stringResource(R.string.stayon_now_playing), fontSize = 12.sp, letterSpacing = 3.sp, color = Muted)
-                Text(stringResource(R.string.stayon_radio_pending), fontSize = 18.sp, color = White, maxLines = 2)
-                Spacer(Modifier.height(16.dp))
-                Text(stringResource(R.string.stayon_listen), fontSize = 17.sp, color = Muted)
-            }
-            Box(Modifier.weight(.8f).fillMaxHeight(), contentAlignment = Alignment.Center) {
-                Box(
-                    Modifier.size(218.dp).clip(CircleShape)
-                        .background(Brush.radialGradient(listOf(Color(0xFF6D5129), Color(0xFF171614), Color(0xFF101013))))
-                        .border(3.dp, Color(0xFF7C6338), CircleShape),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(stringResource(R.string.stayon_music_symbol), color = Yellow, fontSize = 113.sp)
+        Box(Modifier.weight(1f).fillMaxWidth().background(Ink)) {
+            Image(
+                painterResource(R.drawable.stayon_music_hero), contentDescription = null,
+                contentScale = ContentScale.Crop, alignment = Alignment.CenterEnd,
+                modifier = Modifier.fillMaxSize(),
+            )
+            // Keep the content region and all outside margins absolute black.
+            Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(
+                0f to Ink, .40f to Ink, .62f to Color.Transparent,
+            )))
+            Column(
+                Modifier.fillMaxHeight().fillMaxWidth(.57f).padding(start = 18.dp, top = 12.dp, bottom = 16.dp),
+                verticalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(stringResource(R.string.stayon_your_station), fontSize = 12.sp, letterSpacing = 3.sp, color = Muted)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(
+                        Modifier.size(88.dp).border(1.dp, Muted, CircleShape),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        Text(stringResource(R.string.stayon_urban_number), fontSize = 40.sp, lineHeight = 40.sp, fontWeight = FontWeight.ExtraBold, color = White)
+                        Text(stringResource(R.string.stayon_urban_brand), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = White)
+                        Box(Modifier.width(43.dp).height(3.dp).background(Yellow, CircleShape))
+                    }
+                    Spacer(Modifier.width(18.dp))
+                    Column {
+                        Text(stringResource(R.string.stayon_urban), fontSize = 40.sp, fontWeight = FontWeight.Bold, color = White)
+                        Text(stringResource(R.string.stayon_music_pending), fontSize = 14.sp, color = Muted)
+                    }
+                }
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringResource(R.string.stayon_now_playing), fontSize = 12.sp, letterSpacing = 3.sp, color = Muted)
+                    // Do not present the mockup's song as real live metadata.
+                    Text(stringResource(R.string.stayon_radio_pending), fontSize = 20.sp, color = White, maxLines = 2)
+                }
+                // Radio integration is pending: preserve the CTA shape without a dead focus target.
+                Box(Modifier.clip(RoundedCornerShape(28.dp)).background(White).padding(horizontal = 24.dp, vertical = 12.dp)) {
+                    Text(stringResource(R.string.stayon_listen), fontSize = 16.sp, color = Ink, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -480,15 +491,15 @@ private fun MusicDashboard(modifier: Modifier = Modifier) {
                 StayMusicWordmark(
                     R.drawable.stayon_youtube_music,
                     stringResource(R.string.stayon_youtube_music),
-                    63.dp,
-                    Modifier.weight(1.2f),
+                    49.dp,
+                    Modifier.weight(1f),
                 )
                 StayMusicSeparator()
                 StayMusicWordmark(
                     R.drawable.stayon_amazon_music,
                     stringResource(R.string.stayon_amazon_music),
-                    76.dp,
-                    Modifier.weight(1.5f),
+                    42.dp,
+                    Modifier.weight(1f),
                 )
             }
         }
@@ -507,7 +518,8 @@ private fun StayMusicWordmark(
             painter = painterResource(logo),
             contentDescription = label,
             contentScale = ContentScale.Fit,
-            modifier = Modifier.fillMaxWidth(0.93f).height(height),
+            modifier = Modifier.fillMaxWidth(0.86f).height(height),
+            colorFilter = if (logo == R.drawable.stayon_amazon_music) androidx.compose.ui.graphics.ColorFilter.tint(White) else null,
         )
     }
 }
