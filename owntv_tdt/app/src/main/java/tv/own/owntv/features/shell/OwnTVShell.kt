@@ -106,6 +106,7 @@ internal enum class PlayerMode { NONE, FULLSCREEN, MINI, AUDIO }
 @Composable
 fun OwnTVShell(
     selectedSection: MainSection,
+    launcherEntry: Boolean = false,
     onSelectSection: (MainSection) -> Unit,
     themeMode: ThemeMode,
     uiZoomPercent: Int,
@@ -410,6 +411,11 @@ fun OwnTVShell(
     val historyChannels = remember(historyEntries) { historyEntries.map { it.channel } }
     val historyWatchedAt = remember(historyEntries) { historyEntries.associate { it.channel.id to it.watchedAt } }
     val historyNowPlaying = overlayNowPlaying // one shared map; the history rail adds to it below
+    LaunchedEffect(selectedSection, playerMode) {
+        if (selectedSection == MainSection.LIVE_TV || selectedSection == MainSection.EPG || playerMode != PlayerMode.NONE) {
+            tv.own.owntv.features.settings.RadioAudioPlayer.stop()
+        }
+    }
     LaunchedEffect(historyChannels) { liveVm.ensureNowPlaying(historyChannels) }
     // The single most-recent resumable item, surfaced as a shared top-bar "Continue" chip.
     val continueTarget by homeVm.continueTarget.collectAsStateWithLifecycle()
@@ -419,7 +425,7 @@ fun OwnTVShell(
     val resumeSettings = koinInject<tv.own.owntv.core.settings.SettingsRepository>()
     val startupChannelUnavailable = androidx.compose.ui.res.stringResource(tv.own.owntv.R.string.settings_startup_channel_unavailable)
     LaunchedEffect(Unit) {
-        if (playerMode != PlayerMode.NONE) return@LaunchedEffect
+        if (launcherEntry || playerMode != PlayerMode.NONE) return@LaunchedEffect
         val pid = resumeSettings.activeProfileId.first()
         when (resumeSettings.startupMode(pid).first()) {
             tv.own.owntv.core.settings.StartupMode.LAST_CHANNEL -> {

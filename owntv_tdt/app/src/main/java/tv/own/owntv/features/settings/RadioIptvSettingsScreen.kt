@@ -36,8 +36,11 @@ fun RadioIptvSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     var status by remember { mutableStateOf<String?>(null) }
     var pendingRemoveStation by remember { mutableStateOf<StayonRadioStation?>(null) }
     var pendingRemovePlaylist by remember { mutableStateOf<StayonRadioPlaylist?>(null) }
+    var editPlaylist by remember { mutableStateOf<StayonRadioPlaylist?>(null) }
+    var playlistActions by remember { mutableStateOf<StayonRadioPlaylist?>(null) }
 
     fun openForm(newForm: RadioForm) {
+        editPlaylist = null
         name = ""; url = ""; logo = ""
         status = null
         form = newForm
@@ -85,9 +88,12 @@ fun RadioIptvSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                     } else {
                         busy = true
                         scope.launch {
-                            runCatching { radio.addPlaylist(name, url) }
+                            runCatching {
+                                val existing = editPlaylist
+                                if (existing == null) radio.addPlaylist(name, url) else radio.editPlaylist(existing.id, name, url)
+                            }
                                 .onSuccess { form = null; status = null }
-                                .onFailure { status = it.localizedMessage }
+                                .onFailure { status = context.getString(R.string.stayon_radio_failed) }
                             busy = false
                         }
                     }
@@ -117,17 +123,9 @@ fun RadioIptvSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                     icon = OwnTVIcon.REFRESH,
                     title = list.name,
                     desc = list.url,
-                    value = SettingValue.Action(stringResource(R.string.stayon_radio_refresh)),
+                    value = SettingValue.Opens(null),
                     enabled = !busy,
-                    onClick = {
-                        busy = true
-                        scope.launch {
-                            runCatching { radio.refreshPlaylist(list.id) }
-                                .onSuccess { status = context.getString(R.string.stayon_radio_updated, it) }
-                                .onFailure { status = it.localizedMessage }
-                            busy = false
-                        }
-                    },
+                    onClick = { playlistActions = list },
                     onLongClick = { pendingRemovePlaylist = list },
                 )
             }
@@ -143,7 +141,7 @@ fun RadioIptvSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                         if (isCurrent) R.string.stayon_radio_stop else R.string.stayon_radio_listen)),
                     onClick = {
                         if (isCurrent) RadioAudioPlayer.stop()
-                        else RadioAudioPlayer.play(station)
+                        else RadioPlaybackService.play(context, station)
                     },
                     onLongClick = { pendingRemoveStation = station },
                 )
@@ -152,6 +150,26 @@ fun RadioIptvSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
         }
     }
 
+    playlistActions?.let { list ->
+        SettingsActionPopup(list.name, listOf(
+            StageAction(OwnTVIcon.PENCIL, stringResource(R.string.common_edit), {
+                openForm(RadioForm.PLAYLIST)
+                editPlaylist = list
+                name = list.name
+                url = list.url
+            }),
+            StageAction(OwnTVIcon.REFRESH, stringResource(R.string.stayon_radio_refresh), {
+                busy = true
+                scope.launch {
+                    runCatching { radio.refreshPlaylist(list.id) }
+                        .onSuccess { status = context.getString(R.string.stayon_radio_updated, it) }
+                        .onFailure { status = context.getString(R.string.stayon_radio_failed) }
+                    busy = false
+                }
+            }),
+            StageAction(OwnTVIcon.TRASH, stringResource(R.string.common_delete), { pendingRemovePlaylist = list }, danger = true),
+        )) { playlistActions = null }
+    }
     pendingRemoveStation?.let { station ->
         ConfirmDialog(
             title = stringResource(R.string.stayon_radio_delete_station, station.name),

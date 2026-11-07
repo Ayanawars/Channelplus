@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Text
 import org.koin.androidx.compose.koinViewModel
+import kotlinx.coroutines.launch
 import tv.own.owntv.R
 import tv.own.owntv.core.model.HeroKind
 import tv.own.owntv.core.model.HomeRow
@@ -45,6 +46,10 @@ import tv.own.owntv.ui.theme.stageText
 @Composable
 fun HomeSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     val vm: HomeSettingsViewModel = koinViewModel()
+    val repo = org.koin.compose.koinInject<tv.own.owntv.core.settings.SettingsRepository>()
+    val stayonLayout by repo.stayonHomeLayout.collectAsStateWithLifecycle(tv.own.owntv.core.settings.StayonHomeLayout())
+    val editScope = androidx.compose.runtime.rememberCoroutineScope()
+    var editStayonHome by remember { mutableStateOf(false) }
     val settingsVm: SettingsViewModel = koinViewModel()
     val config by vm.config.collectAsStateWithLifecycle()
     val trendingAvailability by vm.trendingAvailability.collectAsStateWithLifecycle()
@@ -77,6 +82,13 @@ fun HomeSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
         rowsFocus = rowsFocus,
         handleBack = moving == null,
     ) {
+        StageSettingRow(OwnTVIcon.HOME, stringResource(R.string.stayon_home_edit), null,
+            SettingValue.Opens(null), onClick = { editStayonHome = true })
+        if (editStayonHome) {
+            tv.own.owntv.features.home.StayonHomeEditor(stayonLayout, onPreview = {}, onSave = { layout ->
+                editScope.launch { repo.setStayonHomeLayout(layout); editStayonHome = false }
+            }, onDismiss = { editStayonHome = false })
+        }
         StageSettingsHeading(stringResource(R.string.home_row_now_trending), null, first = true)
         val trendingTitle = stringResource(R.string.home_row_now_trending)
         val trendingValue = SettingValue.Switch(trendingEnabled)

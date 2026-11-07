@@ -8,8 +8,12 @@
          from there — see core/src/main/AndroidManifest.xml. -->
 
     <uses-permission android:name="android.permission.READ_TV_LISTINGS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="com.android.providers.tv.permission.READ_EPG_DATA" />
     <queries>
+        <package android:name="com.spotify.tv.android" />
+        <package android:name="com.google.android.youtube.tvmusic" />
+        <package android:name="com.amazon.music.tv" />
         <intent><action android:name="android.media.tv.TvInputService" /></intent>
     </queries>
 
@@ -88,6 +92,26 @@
              (uiMode/colorMode/screen*) or a density change must not rebuild the Activity mid-film — that
              closed the player and re-ran the startup popups. locale|layoutDirection are left out on
              purpose: a script-family language switch still needs its one recreate (LocalizedContent). -->
+        <service
+            android:name=".features.settings.RadioPlaybackService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+
+        <activity
+            android:name=".StayonHomeActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:configChanges="keyboard|keyboardHidden|navigation|screenSize|smallestScreenSize|screenLayout|orientation|uiMode|density|colorMode"
+            android:theme="@style/Theme.OwnTV.Starting.Eggshell">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".MainActivityPetrol"
             android:banner="@drawable/stayon_banner_green"

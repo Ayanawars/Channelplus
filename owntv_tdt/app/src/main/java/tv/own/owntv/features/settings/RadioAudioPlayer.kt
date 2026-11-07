@@ -16,6 +16,8 @@ object RadioAudioPlayer {
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
+    fun reportStartFailure(message: String) { _error.value = message }
+
     @Synchronized
     fun stop() {
         val old = player
@@ -32,6 +34,7 @@ object RadioAudioPlayer {
         require(StayonRadioLibrary.isStreamUrl(station.url))
         try {
             val mp = MediaPlayer()
+            player = mp
             mp.setAudioAttributes(AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_MEDIA)
                 .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
@@ -52,7 +55,6 @@ object RadioAudioPlayer {
                 true
             }
             mp.setOnCompletionListener { if (player === it) stop() }
-            player = mp
             _playingStationId.value = station.id
             mp.prepareAsync()
         } catch (e: Exception) {

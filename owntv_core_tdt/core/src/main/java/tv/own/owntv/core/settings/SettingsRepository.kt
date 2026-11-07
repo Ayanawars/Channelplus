@@ -3206,6 +3206,13 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         }
     }
 
+    private val stayonHomeLayoutKey = stringPreferencesKey("stayon_home_layout")
+    val stayonHomeLayout: Flow<StayonHomeLayout> = prefsFlow { StayonHomeLayout.decode(it[stayonHomeLayoutKey]) }
+
+    suspend fun setStayonHomeLayout(layout: StayonHomeLayout) {
+        context.dataStore.edit { it[stayonHomeLayoutKey] = layout.encode() }
+    }
+
     private val backupStringKeys = BackupKeys.strings + ContentMenu.entries.map { menuOrderKey(it.name.lowercase()) }
     private val backupStringSetKeys = BackupKeys.stringSets
     private val backupIntKeys = BackupKeys.ints
@@ -3234,6 +3241,7 @@ class SettingsRepository(private val context: Context, private val localeStore: 
         val p = context.dataStore.data.first()
         return org.json.JSONObject().apply {
             backupStringKeys.forEach { k -> p[k]?.let { put(k.name, it) } }
+            p[stayonHomeLayoutKey]?.let { put(stayonHomeLayoutKey.name, it) }
             val positions = context.positionStore.data.first()
             backupLastCategoryKeys.forEach { k -> positions[k]?.takeIf(::isPortableCategoryKey)?.let { put(k.name, it) } }
             backupStringSetKeys.forEach { k -> p[k]?.let { put(k.name, org.json.JSONArray(it)) } }
@@ -3279,6 +3287,9 @@ class SettingsRepository(private val context: Context, private val localeStore: 
             fun each(k: Preferences.Key<*>, apply: () -> Unit) {
                 if (keepDeviceSettings && k.name in deviceSpecificSettings) return
                 if (o.has(k.name)) runCatching(apply).onFailure { android.util.Log.w("OwnTV-Settings", "settings import: skipped ${k.name}") }
+            }
+            each(stayonHomeLayoutKey) {
+                prefs[stayonHomeLayoutKey] = StayonHomeLayout.decode(o.getString(stayonHomeLayoutKey.name)).encode()
             }
             backupStringKeys.forEach { k ->
                 each(k) { SettingsImportRules.string(k.name, o.getString(k.name))?.let { prefs[k] = it } }

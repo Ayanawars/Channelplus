@@ -3348,6 +3348,7 @@
 1	technical	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	startup_mode_
 1	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	startup_mode_$pid
 4	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	startup_mode_$profileId
+1	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	stayon_home_layout
 1	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sub_font
 1	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sub_scale
 1	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sub_scale_exo
@@ -3380,6 +3381,8 @@
 1	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	weather_location
 2	technical	core/src/main/java/tv/own/owntv/core/settings/SourceOverrides.kt	Referer
 1	technical	core/src/main/java/tv/own/owntv/core/settings/SourceOverrides.kt	catchup
+4	technical	core/src/main/java/tv/own/owntv/core/settings/StayonHomeLayout.kt	,
+1	technical	core/src/main/java/tv/own/owntv/core/settings/StayonHomeLayout.kt	|
 1	empty	core/src/main/java/tv/own/owntv/core/setup/SetupText.kt	\0
 1	protocol	core/src/main/java/tv/own/owntv/core/setup/SetupText.kt	Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG250 stbapp ver: 2 rev: 250 Safari/533.3
 1	protocol	core/src/main/java/tv/own/owntv/core/setup/SetupText.kt	Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG254 stbapp ver: 2 rev: 250 Safari/533.3
@@ -5409,8 +5412,11 @@
 1	technical	core/src/main/java/tv/own/owntv/core/ui/stage/StageGlyph.kt	M9 18l6-6-6-6
 1	technical	core/src/main/java/tv/own/owntv/core/ui/stage/StageGlyph.kt	M9.5 2.5H14.5A2.5 2.5 0 0 1 17 5V19A2.5 2.5 0 0 1 14.5 21.5H9.5A2.5 2.5 0 0 1 7 19V5A2.5 2.5 0 0 1 9.5 2.5zM11 18.5h2
 1	technical	core/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	.apk
+1	technical	core/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	APK signing certificate mismatch
+1	technical	core/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	APK version code is not newer
 1	technical	core/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	Accept
 2	technical	core/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	Channelplus
+1	technical	core/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	DEPRECATION
 1	log	core/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	UpdateManager
 2	technical	core/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	User-Agent
 1	mime	core/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	application/vnd.github+json

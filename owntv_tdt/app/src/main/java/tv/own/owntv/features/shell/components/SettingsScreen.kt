@@ -106,7 +106,7 @@ import tv.own.owntv.ui.theme.primary
 
 internal enum class TileTone { PRIMARY, SECONDARY, TERTIARY }
 
-private enum class SettingsTab { ROOT, LANGUAGE, SOURCES, TDT, RADIO_TDT, EPG, RADIO_IPTV, BACKUP, LOCAL_SYNC, CUSTOMIZE, HOME, NETWORK, DNS, METADATA, OPEN_SUBTITLES, WEATHER, CH_NAV, PANEL_WIDTH, GUIDE_WIDTH, GLASS_EFFECT, CONTENT_MENUS, FONTS, BROWSING, SUBTITLE_STYLE, SPORTS }
+private enum class SettingsTab { ROOT, LANGUAGE, SOURCES, TDT, RADIO_TDT, EPG, RADIO_IPTV, RADIO_EPG, BACKUP, LOCAL_SYNC, CUSTOMIZE, HOME, NETWORK, DNS, METADATA, OPEN_SUBTITLES, WEATHER, CH_NAV, PANEL_WIDTH, GUIDE_WIDTH, GLASS_EFFECT, CONTENT_MENUS, FONTS, BROWSING, SUBTITLE_STYLE, SPORTS }
 
 @Composable
 internal fun surroundModeLabel(mode: SurroundMode): String = stringResource(
@@ -418,6 +418,7 @@ internal fun SettingsContent(
         SettingsTab.TDT -> { ManageSourcesScreen(onBack = { tab = SettingsTab.ROOT }, modifier = modifier, tunerOnly = true) }
         SettingsTab.RADIO_TDT -> { tv.own.owntv.features.settings.RadioTdtSettingsScreen(onBack = { tab = SettingsTab.ROOT }, modifier = modifier) }
         SettingsTab.EPG -> { tv.own.owntv.features.settings.EpgSourcesScreen(onBack = { tab = SettingsTab.ROOT; consumeEpgAdd = false }, modifier = modifier, startOnAdd = consumeEpgAdd) }
+        SettingsTab.RADIO_EPG -> { tv.own.owntv.features.settings.RadioGuideSettingsScreen(onBack = { tab = SettingsTab.ROOT }, modifier = modifier) }
             SettingsTab.RADIO_IPTV -> { tv.own.owntv.features.settings.RadioIptvSettingsScreen(onBack = { tab = SettingsTab.ROOT }, modifier = modifier) }
         SettingsTab.BACKUP -> { BackupScreen(onBack = { tab = SettingsTab.ROOT }, modifier = sub) }
         SettingsTab.LOCAL_SYNC -> { LocalSyncScreen(onBack = { tab = SettingsTab.ROOT }, modifier = sub) }
@@ -537,6 +538,13 @@ internal fun SettingsContent(
             title = stringResource(R.string.stayon_epg_tv), desc = stringResource(R.string.settings_epg_sources_nav_description),
             focus = rowFocus.getValue(SettingsTab.EPG),
             onClick = { open(SettingsTab.EPG) },
+        ),
+        RootRow(
+            tabRowKey(SettingsTab.RADIO_EPG), TileTone.PRIMARY, OwnTVIcon.EPG,
+            title = stringResource(R.string.stayon_radio_epg),
+            desc = stringResource(R.string.stayon_radio_epg_desc),
+            focus = rowFocus.getValue(SettingsTab.RADIO_EPG),
+            onClick = { open(SettingsTab.RADIO_EPG) },
         ),
         // The guide's own settings, under a divider of their own: they tune the guide, they are not
         // sources, and sitting straight under the two source lists they read as if they were.
@@ -964,6 +972,7 @@ internal fun SettingsContent(
             SettingsSearchEntry(stringResource(R.string.settings_group_sources), stringResource(R.string.stayon_radio_tdt), stringResource(R.string.stayon_radio_tdt_desc), OwnTVIcon.AUDIO, TileTone.PRIMARY) { open(SettingsTab.RADIO_TDT) },
             SettingsSearchEntry(stringResource(R.string.settings_group_sources), stringResource(R.string.stayon_tv_iptv), stringResource(R.string.settings_search_keywords_playlists), OwnTVIcon.PLAYLIST, TileTone.PRIMARY) { open(SettingsTab.SOURCES) },
             SettingsSearchEntry(stringResource(R.string.settings_group_sources), stringResource(R.string.stayon_epg_tv), stringResource(R.string.settings_search_keywords_epg), OwnTVIcon.EPG, TileTone.PRIMARY) { open(SettingsTab.EPG) },
+            SettingsSearchEntry(stringResource(R.string.stayon_settings_sources), stringResource(R.string.stayon_radio_epg), stringResource(R.string.stayon_radio_epg_desc), OwnTVIcon.EPG, TileTone.PRIMARY) { open(SettingsTab.RADIO_EPG) },
             SettingsSearchEntry(stringResource(R.string.stayon_settings_sources), stringResource(R.string.stayon_radio_iptv_title), stringResource(R.string.stayon_radio_iptv_desc), OwnTVIcon.AUDIO, TileTone.PRIMARY) { open(SettingsTab.RADIO_IPTV) },
             SettingsSearchEntry(stringResource(R.string.settings_group_sources), stringResource(R.string.content_epg_time_offset), stringResource(R.string.settings_search_keywords_epg_offset), OwnTVIcon.EPG, TileTone.SECONDARY,
                 chip = epgShiftLabel(epgOffset), chipTone = if (epgOffset == 0) TileTone.SECONDARY else TileTone.PRIMARY) { saveScroll(); dialogReturn = searchFieldFocus; showEpgOffset = true },
@@ -1203,7 +1212,7 @@ internal fun SettingsContent(
                 }
                 group == SettingsGroup.PROFILE -> tv.own.owntv.features.settings.ProfileSettingsRows()
                 // Only Quick can be empty, and only because the user emptied it.
-                group == SettingsGroup.MUSIC -> StageSettingsNote(stringResource(R.string.stayon_settings_music), stringResource(R.string.stayon_settings_pending_music))
+                group == SettingsGroup.MUSIC -> tv.own.owntv.features.settings.StayonMusicRows()
                 group == SettingsGroup.APPLICATIONS -> tv.own.owntv.features.settings.InstalledAppsSettingsRows()
                 selectedRows.isEmpty() -> StageSettingsNote(stringResource(R.string.settings_quick_empty_title), stringResource(R.string.settings_quick_empty_hint))
                 else -> {
@@ -1223,7 +1232,10 @@ internal fun SettingsContent(
                             onLongClick = {},
                         )
                     }
-                    if (group == SettingsGroup.SYSTEM) VideoPlayerGroupRows(VideoGroup.DIAGNOSTICS, pageScroll, firstHeading = false)
+                    if (group == SettingsGroup.SYSTEM) {
+                        tv.own.owntv.features.settings.StayonLauncherRows()
+                        VideoPlayerGroupRows(VideoGroup.DIAGNOSTICS, pageScroll, firstHeading = false)
+                    }
                 }
             }
         }

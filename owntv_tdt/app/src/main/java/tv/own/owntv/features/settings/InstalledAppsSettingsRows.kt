@@ -73,6 +73,8 @@ fun InstalledAppsSettingsRows() {
     var favorites by remember { mutableStateOf(prefs.getStringSet("favorites", emptySet()).orEmpty().toSet()) }
     var hidden by remember { mutableStateOf(prefs.getStringSet("hidden", emptySet()).orEmpty().toSet()) }
     var selected by remember { mutableStateOf<InstalledTvApp?>(null) }
+    var order by remember { mutableStateOf(prefs.getString("order", "").orEmpty().split(',').filter(String::isNotBlank)) }
+    var reset by remember { mutableStateOf(false) }
 
     // Update the list if the user installs/uninstalls an app while Settings is open.
     DisposableEffect(context) {
@@ -120,9 +122,21 @@ fun InstalledAppsSettingsRows() {
         prefs.edit().putStringSet("hidden", hidden).apply()
     }
 
-    val visible = apps.filter { (showNonTv || it.tvOptimized) && (showHidden || it.packageName !in hidden) }
-        .sortedWith(compareBy<InstalledTvApp> { if (it.packageName in favorites) 0 else 1 }
+    val ranks = order.withIndex().associate { it.value to it.index }
+    val visible = apps.filter { it.packageName != context.packageName && (showNonTv || it.tvOptimized) && (showHidden || it.packageName !in hidden) }
+        .sortedWith(compareBy<InstalledTvApp> { ranks[it.packageName] ?: Int.MAX_VALUE }
+            .thenBy { if (it.packageName in favorites) 0 else 1 }
             .thenBy(String.CASE_INSENSITIVE_ORDER) { it.label })
+
+    fun move(app: InstalledTvApp, step: Int) {
+        val rows = visible.map { it.packageName }.toMutableList()
+        val index = rows.indexOf(app.packageName)
+        if (index >= 0 && index + step in rows.indices) {
+            rows.add(index + step, rows.removeAt(index))
+            order = rows + order.filterNot { it in rows }
+            prefs.edit().putString("order", order.joinToString(",")).apply()
+        }
+    }
 
     StageSettingsHeading(stringResource(R.string.stayon_apps_options), null, first = true)
     StageSettingRow(OwnTVIcon.LIST, stringResource(R.string.stayon_apps_show_non_tv),
@@ -139,6 +153,15 @@ fun InstalledAppsSettingsRows() {
         })
     StageSettingRow(OwnTVIcon.REFRESH, stringResource(R.string.stayon_apps_refresh),
         null, SettingValue.Action(stringResource(R.string.stayon_apps_refresh)), onClick = { refresh++ })
+
+    StageSettingRow(OwnTVIcon.REFRESH, stringResource(R.string.stayon_apps_reset_order), null, null,
+        enabled = order.isNotEmpty(), onClick = { reset = true })
+    if (reset) ConfirmDialog(
+        title = stringResource(R.string.stayon_apps_reset_order),
+        message = stringResource(R.string.stayon_apps_reset_order_desc),
+        onConfirm = { order = emptyList(); prefs.edit().remove("order").apply(); reset = false },
+        onDismiss = { reset = false }, confirmLabel = R.string.common_reset,
+    )
 
     StageSettingsHeading(stringResource(R.string.stayon_apps_installed), visible.size)
     if (busy) StageSettingsNote(stringResource(R.string.stayon_apps_scanning), null)
@@ -178,6 +201,11 @@ fun InstalledAppsSettingsRows() {
                         R.string.stayon_apps_unhide else R.string.stayon_apps_hide),
                         onClick = { updateHidden(app.packageName); selected = null },
                         icon = OwnTVIcon.EYE_OFF)
+                    val index = visible.indexOf(app)
+                    if (index > 0) StageMenuItem(stringResource(R.string.settings_row_menu_move_up),
+                        onClick = { move(app, -1); selected = null }, icon = OwnTVIcon.CHEVRON_UP)
+                    if (index in 0 until visible.lastIndex) StageMenuItem(stringResource(R.string.settings_row_menu_move_down),
+                        onClick = { move(app, 1); selected = null }, icon = OwnTVIcon.CHEVRON_DOWN)
                     StageMenuItem(stringResource(R.string.stayon_apps_system_info),
                         onClick = {
                             val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,

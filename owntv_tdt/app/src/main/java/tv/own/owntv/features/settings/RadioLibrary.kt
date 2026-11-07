@@ -19,6 +19,7 @@ data class StayonRadioStation(
     val url: String,
     val logo: String?,
     val playlistId: String? = null,
+    val guideId: String? = null,
 ) {
     val tunerChannel: TifChannelUri? get() = TifChannelUri.parse(url)
 }
@@ -84,18 +85,31 @@ class StayonRadioLibrary(context: Context) {
     }
 
     suspend fun refreshPlaylist(id: String): Int {
-        val source = _playlists.value.firstOrNull { it.id == id } ?: throw NoSuchElementException()
-        val parsed = fetchPlaylist(source.url)
+        val source = _playlists.value.first { it.id == id }
+        return replacePlaylist(source, source.name, source.url)
+    }
+
+    suspend fun editPlaylist(id: String, name: String, url: String): Int {
+        require(name.isNotBlank() && isStreamUrl(url))
+        return replacePlaylist(_playlists.value.first { it.id == id }, name.trim(), url.trim())
+    }
+
+    private suspend fun replacePlaylist(source: StayonRadioPlaylist, name: String, url: String): Int {
+        val parsed = fetchPlaylist(url)
         require(parsed.isNotEmpty())
         synchronized(this) {
-            check(_playlists.value.any { it.id == id })
-            val surviving = _stations.value.filterNot { it.playlistId == id }
-            val updated = parsed.mapIndexed { index, station ->
-                station.copy(id = id + ":" + index, playlistId = id)
+            check(_playlists.value.firstOrNull { it.id == source.id } == source)
+            require(_playlists.value.none { it.id != source.id && it.url.equals(url, true) })
+            val oldStations = _stations.value.filter { it.playlistId == source.id }
+            val oldByUrl = oldStations.associateBy { it.url }
+            val updated = parsed.map { station ->
+                station.copy(id = oldByUrl[station.url]?.id ?: UUID.randomUUID().toString(), playlistId = source.id)
             }
-            saveStations(surviving + updated)
+            val playing = RadioAudioPlayer.playingStationId.value
+            if (oldStations.any { it.id == playing } && updated.none { it.id == playing }) RadioAudioPlayer.stop()
+            saveStations(_stations.value.filterNot { it.playlistId == source.id } + updated)
             savePlaylists(_playlists.value.map {
-                if (it.id == id) it.copy(syncedAt = System.currentTimeMillis()) else it
+                if (it.id == source.id) it.copy(name = name, url = url, syncedAt = System.currentTimeMillis()) else it
             })
         }
         return parsed.size
@@ -111,7 +125,7 @@ class StayonRadioLibrary(context: Context) {
         prefs.edit().putString("stations", JSONArray().apply {
             rows.forEach { row -> put(JSONObject().apply {
                 put("id", row.id); put("name", row.name); put("url", row.url)
-                put("logo", row.logo); put("playlistId", row.playlistId)
+                put("logo", row.logo); put("playlistId", row.playlistId); put("guideId", row.guideId)
             }) }
         }.toString()).apply()
         _stations.value = rows
@@ -174,12 +188,15 @@ class StayonRadioLibrary(context: Context) {
             val items = ArrayList<StayonRadioStation>()
             var pendingName: String? = null
             var pendingLogo: String? = null
+            var pendingGuideId: String? = null
+            val idPattern = Regex("""tvg-id\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
             val logoPattern = Regex("""tvg-logo\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
             for (raw in text.lineSequence()) {
                 val line = raw.trim().removePrefix('\uFEFF'.toString())
                 if (line.startsWith("#EXTINF", true)) {
                     pendingName = line.substringAfterLast(',', "").trim().ifBlank { null }
                     pendingLogo = logoPattern.find(line)?.groupValues?.getOrNull(1)
+                    pendingGuideId = idPattern.find(line)?.groupValues?.getOrNull(1)
                     continue
                 }
                 if (line.isBlank() || line.startsWith("#")) continue
@@ -193,10 +210,12 @@ class StayonRadioLibrary(context: Context) {
                         name = name,
                         url = line,
                         logo = pendingLogo?.takeIf(::isStreamUrl),
+                        guideId = pendingGuideId,
                     )
                 }
                 pendingName = null
                 pendingLogo = null
+                pendingGuideId = null
             }
             return items.distinctBy { it.url }
         }
@@ -209,6 +228,7 @@ class StayonRadioLibrary(context: Context) {
                     item.getString("id"), item.getString("name"), item.getString("url"),
                     item.optString("logo").takeUnless { it.isBlank() || it == "null" },
                     item.optString("playlistId").takeUnless { it.isBlank() || it == "null" },
+                    item.optString("guideId").takeUnless { it.isBlank() || it == "null" },
                 )
             }
         }.getOrDefault(emptyList())
