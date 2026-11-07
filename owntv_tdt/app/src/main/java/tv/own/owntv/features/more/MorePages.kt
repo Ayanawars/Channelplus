@@ -216,6 +216,7 @@ internal fun FavouritesPage(
     onPlayChannel: (Long) -> Unit,
     onPlayMovie: (Long) -> Unit,
     onOpenSeries: (Long) -> Unit,
+    includeVod: Boolean,
 ) {
     val counts by vm.favorites.collectAsStateWithLifecycle()
     val lists by vm.favouriteLists.collectAsStateWithLifecycle()
@@ -231,8 +232,8 @@ internal fun FavouritesPage(
         if (menu == null && move == null) returnTo?.let { withFrameNanos { }; runCatching { it.requestFocus() }; returnTo = null }
     }
 
-    val showLive = filter == FavFilter.ALL || filter == FavFilter.LIVE
-    val vodShown = when (filter) {
+    val showLive = !includeVod || filter == FavFilter.ALL || filter == FavFilter.LIVE
+    val vodShown = if (!includeVod) emptyList() else when (filter) {
         FavFilter.ALL -> lists.movies.map { MediaType.MOVIE to it } + lists.series.map { MediaType.SERIES to it }
         FavFilter.MOVIES -> lists.movies.map { MediaType.MOVIE to it }
         FavFilter.SERIES -> lists.series.map { MediaType.SERIES to it }
@@ -247,7 +248,7 @@ internal fun FavouritesPage(
 
     Column(Modifier.fillMaxSize().focusGroup()) {
         PageHead(stringResource(R.string.content_category_favorites)) {
-            StageSegmented(
+            if (includeVod) StageSegmented(
                 options = listOf(
                     counted(R.string.content_epg_all, counts.total), counted(R.string.common_nav_live_tv, counts.live),
                     counted(R.string.common_nav_movies, counts.movies), counted(R.string.common_nav_series, counts.series),
@@ -258,7 +259,7 @@ internal fun FavouritesPage(
             )
         }
         androidx.compose.runtime.SideEffect { setEntry { runCatching { firstTarget.requestFocus() }.getOrDefault(false) } }
-        if (counts.total == 0) {
+        if ((if (includeVod) counts.total else counts.live) == 0) {
             EmptyNote(stringResource(R.string.more_fav_empty_title), stringResource(R.string.more_fav_empty_body))
             return@Column
         }
@@ -359,6 +360,7 @@ internal fun HistoryPage(
     onPlayMovie: (Long, Long) -> Unit,
     onPlayEpisode: (Long, Long, Long) -> Unit,
     onOpenSeries: (Long) -> Unit,
+    includeVod: Boolean,
 ) {
     val counts by vm.history.collectAsStateWithLifecycle()
     val lists by vm.historyLists.collectAsStateWithLifecycle()
@@ -369,7 +371,7 @@ internal fun HistoryPage(
         lists.series.firstOrNull()?.let { MediaType.SERIES to it.watchedAt },
     ).maxByOrNull { it.second }?.first ?: MediaType.MOVIE
     var tab by rememberSaveable { mutableStateOf<MediaType?>(null) }
-    val type = tab ?: latest
+    val type = if (includeVod) tab ?: latest else MediaType.LIVE
     val rows = when (type) { MediaType.LIVE -> lists.live; MediaType.MOVIE -> lists.movies; else -> lists.series }
     var showClear by remember { mutableStateOf(false) }
     val clearFocus = remember { FocusRequester() }
@@ -391,16 +393,16 @@ internal fun HistoryPage(
     Column(Modifier.fillMaxSize().focusGroup()) {
         PageHead(stringResource(R.string.content_category_history)) {
             val order = listOf(MediaType.LIVE, MediaType.MOVIE, MediaType.SERIES)
-            StageSegmented(
+            if (includeVod) StageSegmented(
                 options = listOf(counted(R.string.common_nav_live_tv, counts.live), counted(R.string.common_nav_movies, counts.movies), counted(R.string.common_nav_series, counts.series)),
                 selected = order.indexOf(type),
                 onSelect = { tab = order[it] },
                 modifier = Modifier.focusRequester(segFocus),
             )
             Spacer(Modifier.weight(1f))
-            if (counts.total > 0) StageTool(stringResource(R.string.settings_clear_history), onClick = { showClear = true }, icon = OwnTVIcon.TRASH, danger = true, modifier = Modifier.focusRequester(clearFocus))
+            if ((if (includeVod) counts.total else counts.live) > 0) StageTool(stringResource(R.string.settings_clear_history), onClick = { showClear = true }, icon = OwnTVIcon.TRASH, danger = true, modifier = Modifier.focusRequester(clearFocus))
         }
-        androidx.compose.runtime.SideEffect { setEntry { runCatching { (rows.firstOrNull()?.let { r -> focusOf(r.id) } ?: segFocus).requestFocus() }.getOrDefault(false) } }
+        androidx.compose.runtime.SideEffect { setEntry { runCatching { (rows.firstOrNull()?.let { r -> focusOf(r.id) } ?: if (includeVod) segFocus else clearFocus).requestFocus() }.getOrDefault(false) } }
         if (rows.isEmpty()) {
             EmptyNote(stringResource(R.string.more_history_empty))
             return@Column
@@ -456,7 +458,18 @@ internal fun HistoryPage(
         }
     }
     if (showClear) {
-        ClearHistoryDialog(onClear = { t -> onClearHistory(t); showClear = false }, onDismiss = { showClear = false })
+        if (includeVod) {
+            ClearHistoryDialog(onClear = { type -> onClearHistory(type); showClear = false }, onDismiss = { showClear = false })
+        } else {
+            tv.own.owntv.ui.stage.StageConfirm(
+                title = stringResource(R.string.settings_clear_history_confirm, stringResource(R.string.common_nav_live_tv)),
+                body = stringResource(R.string.settings_cannot_undo),
+                confirm = stringResource(R.string.settings_yes_clear),
+                cancel = stringResource(R.string.common_cancel),
+                onConfirm = { onClearHistory(MediaType.LIVE); showClear = false },
+                onCancel = { showClear = false },
+            )
+        }
     }
 }
 

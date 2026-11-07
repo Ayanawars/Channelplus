@@ -243,11 +243,13 @@ fun MoreScreen(
                 MoreItem.FAVORITES -> FavouritesPage(
                     vm = vm, setEntry = setEntry,
                     onPlayChannel = onPlayChannel, onPlayMovie = { onPlayMovie(it, 0L) }, onOpenSeries = onOpenSeries,
+                    includeVod = false,
                 )
                 MoreItem.HISTORY -> HistoryPage(
                     vm = vm, setEntry = setEntry,
                     onClearHistory = { settingsVm.clearWatchHistory(it) },
                     onPlayChannel = onPlayChannel, onPlayMovie = onPlayMovie, onPlayEpisode = onPlayEpisode, onOpenSeries = onOpenSeries,
+                    includeVod = false,
                 )
                 MoreItem.BACKUP -> BackupScreen(entry = pageTarget, modifier = Modifier.fillMaxSize())
                 MoreItem.LOCAL_SYNC -> LocalSyncScreen(entry = pageTarget, modifier = Modifier.fillMaxSize())

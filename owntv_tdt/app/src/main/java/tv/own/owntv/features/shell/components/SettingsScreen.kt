@@ -190,7 +190,6 @@ internal fun SettingsContent(
     var showEpgOffset by remember { mutableStateOf(false) }
     var showGuideDays by remember { mutableStateOf(false) }
     var showAnimations by remember { mutableStateOf(false) }
-    var showVodLayout by remember { mutableStateOf(false) }
     var showLiveLayout by remember { mutableStateOf(false) }
     // The three Stage pickers (Live TV opens in, Programme reminders, Reminder time): their state, rows,
     // search entries and dialogs live outside this function, which sits at the JVM's 64 KB method limit.
@@ -234,7 +233,6 @@ internal fun SettingsContent(
     val epgOffsetRowFocus = remember { FocusRequester() }
     val guideDaysRowFocus = remember { FocusRequester() }
     val animationsRowFocus = remember { FocusRequester() }
-    val vodLayoutRowFocus = remember { FocusRequester() }
     val liveLayoutRowFocus = remember { FocusRequester() }
     val startupRowFocus = remember { FocusRequester() }
     val livePreviewQuickFocus = remember { FocusRequester() }
@@ -267,13 +265,13 @@ internal fun SettingsContent(
         }
         onStartConsumed()
     }
-    val anyDialogOpen = showPicons || showDownloadableThemes || showZoom || showPopupSize || showTheme || showAccent || showUpdate || showCatchupTime || showCatchupSources || showCatchupSourceValue || showEpgOffset || showGuideDays || showAnimations || showStartup || showStartupChannelPicker || showAfrWarning || showLivePreviewPanelWarning || showBgImageChooser || showBgPicker || showAmbientGlow || showFocusHighlight || showBgRemote || showVodLayout || showLiveLayout || stageSettings.open != null
+    val anyDialogOpen = showPicons || showDownloadableThemes || showZoom || showPopupSize || showTheme || showAccent || showUpdate || showCatchupTime || showCatchupSources || showCatchupSourceValue || showEpgOffset || showGuideDays || showAnimations || showStartup || showStartupChannelPicker || showAfrWarning || showLivePreviewPanelWarning || showBgImageChooser || showBgPicker || showAmbientGlow || showFocusHighlight || showBgRemote || showLiveLayout || stageSettings.open != null
     // When a dialog closes, restore focus to the row that opened it. NOTE: this restore crosses
     // INTO the root focus group from outside (the dialog), but onEnter does NOT fire for programmatic
     // requestsFocus (only for directional entry) — so dialogReturn must be cleared HERE, not in onEnter.
     // If it's left set, the next directional entry (e.g. sidebar→here) would re-route to a stale row.
     var dialogReturn by remember { mutableStateOf<FocusRequester?>(null) }
-    LaunchedEffect(showPicons, showDownloadableThemes, showZoom, showPopupSize, showTheme, showAccent, showUpdate, showCatchupTime, showCatchupSources, showCatchupSourceValue, showEpgOffset, showGuideDays, showAnimations, showStartup, showStartupChannelPicker, showAfrWarning, showLivePreviewPanelWarning, showBgImageChooser, showBgPicker, showAmbientGlow, showFocusHighlight, showBgRemote, showVodLayout, showLiveLayout, stageSettings.open) {
+    LaunchedEffect(showPicons, showDownloadableThemes, showZoom, showPopupSize, showTheme, showAccent, showUpdate, showCatchupTime, showCatchupSources, showCatchupSourceValue, showEpgOffset, showGuideDays, showAnimations, showStartup, showStartupChannelPicker, showAfrWarning, showLivePreviewPanelWarning, showBgImageChooser, showBgPicker, showAmbientGlow, showFocusHighlight, showBgRemote, showLiveLayout, stageSettings.open) {
         // Only after a popup really closed: on first composition there is no opener, and holding a stale
         // offset for the settle frames bounced the page.
         if (!anyDialogOpen && dialogReturn != null) {
@@ -315,7 +313,6 @@ internal fun SettingsContent(
     val glassConfig by settingsVm.glassConfig.collectAsStateWithLifecycle()
     val glassOn = glassConfig.enabled
     val animationLevel by settingsVm.animationLevel.collectAsStateWithLifecycle()
-    val vodLayout by settingsVm.vodLayout.collectAsStateWithLifecycle()
     val ambientGlowEnabled by settingsVm.ambientGlowEnabled.collectAsStateWithLifecycle()
     val ambientGlowPulse by settingsVm.ambientGlowPulse.collectAsStateWithLifecycle()
     LaunchedEffect(glassOn, themeMode) {
@@ -685,15 +682,6 @@ internal fun SettingsContent(
         liveLayoutRootRow(settingsVm, liveLayoutRowFocus) { saveScroll(); dialogReturn = liveLayoutRowFocus; showLiveLayout = true },
         *stageLayoutRows(settingsVm, stageSettings) { saveScroll(); dialogReturn = it }.toTypedArray(),
         RootRow(
-            "vod_layout", TileTone.PRIMARY, OwnTVIcon.LIST_GRID,
-            title = stringResource(R.string.settings_vod_layout),
-            desc = stringResource(R.string.settings_vod_layout_description),
-            chip = stringResource(vodLayoutLabelRes(vodLayout)),
-            chipTone = if (vodLayout == tv.own.owntv.core.settings.SettingsRepository.VodLayout.CINEMATIC) TileTone.PRIMARY else TileTone.SECONDARY,
-            focus = vodLayoutRowFocus,
-            onClick = { saveScroll(); dialogReturn = vodLayoutRowFocus; showVodLayout = true },
-        ),
-        RootRow(
             tabRowKey(SettingsTab.PANEL_WIDTH), TileTone.PRIMARY, OwnTVIcon.PANEL_WIDTH,
             title = stringResource(R.string.settings_panel_width),
             desc = stringResource(R.string.settings_panel_width_description),
@@ -992,8 +980,6 @@ internal fun SettingsContent(
             SettingsSearchEntry(stringResource(R.string.settings_group_sources), stringResource(R.string.settings_reminders), stringResource(R.string.settings_search_keywords_reminders), OwnTVIcon.BELL, TileTone.SECONDARY) { saveScroll(); dialogReturn = searchFieldFocus; stageSettings.open = StageSettingsDialog.REMINDERS },
             SettingsSearchEntry(stringResource(R.string.settings_group_layout), stringResource(R.string.settings_ch_paging), stringResource(R.string.settings_search_keywords_ch), OwnTVIcon.CH_NAV, TileTone.PRIMARY,
                 chip = if (chNavEnabled) stringResource(R.string.common_on) else stringResource(R.string.common_off), chipTone = if (chNavEnabled) TileTone.PRIMARY else TileTone.SECONDARY) { open(SettingsTab.CH_NAV) },
-            SettingsSearchEntry(stringResource(R.string.settings_group_layout), stringResource(R.string.settings_vod_layout), stringResource(R.string.settings_search_keywords_vod_layout), OwnTVIcon.LIST_GRID, TileTone.PRIMARY,
-                chip = stringResource(vodLayoutLabelRes(vodLayout)), chipTone = if (vodLayout == tv.own.owntv.core.settings.SettingsRepository.VodLayout.CINEMATIC) TileTone.PRIMARY else TileTone.SECONDARY) { saveScroll(); dialogReturn = searchFieldFocus; showVodLayout = true },
             SettingsSearchEntry(stringResource(R.string.settings_group_layout), stringResource(R.string.settings_panel_width), stringResource(R.string.settings_search_keywords_panel_width), OwnTVIcon.PANEL_WIDTH, TileTone.PRIMARY,
                 chip = if (panelWidthCustom) stringResource(R.string.settings_live_latency_custom) else stringResource(R.string.settings_subtitle_default), chipTone = if (panelWidthCustom) TileTone.PRIMARY else TileTone.SECONDARY) { open(SettingsTab.PANEL_WIDTH) },
         SettingsSearchEntry(stringResource(R.string.settings_group_layout), stringResource(R.string.settings_guide_width), stringResource(R.string.settings_search_keywords_guide_width), OwnTVIcon.EPG, TileTone.PRIMARY,
@@ -1269,7 +1255,6 @@ internal fun SettingsContent(
     if (showStartup) StartupDialogHost(settingsVm, startupMode, onClose = { showStartup = false }, onPickChannel = { showStartupChannelPicker = true })
     if (showStartupChannelPicker) StartupChannelPickerHost(settingsVm, startupChannel, onClose = { showStartupChannelPicker = false })
     if (showAnimations) AnimationsDialogHost(settingsVm, animationLevel, onClose = { showAnimations = false })
-    if (showVodLayout) VodLayoutDialog(settingsVm, vodLayout, onClose = { showVodLayout = false })
     if (showLiveLayout) LiveLayoutDialog(settingsVm, onClose = { showLiveLayout = false })
     StageSettingsDialogHost(settingsVm, stageSettings)
     if (showFocusHighlight) {
@@ -1782,51 +1767,6 @@ private fun ReminderLeadDialog(settingsVm: SettingsViewModel, onClose: () -> Uni
         onSelect = { settingsVm.setReminderLeadMinutes(it.toInt()); onClose() },
         onDismiss = onClose,
     )
-}
-
-/** Chip and option label for the Movies & Series layout choice. */
-private fun vodLayoutLabelRes(layout: tv.own.owntv.core.settings.SettingsRepository.VodLayout): Int =
-    if (layout == tv.own.owntv.core.settings.SettingsRepository.VodLayout.CINEMATIC) {
-        R.string.settings_vod_layout_cinematic
-    } else {
-        R.string.settings_vod_layout_separate
-    }
-
-/**
- * The little bar diagram under each layout option, so the choice is legible at TV distance without
- * reading the description.
- *
- * Separate panels is three plain bars — categories, the list, the preview. Cinematic is two: the
- * category rail, dimmed because it floats as glass, and one wide block carrying the artwork's own
- * colour, because in that layout the picture IS the background.
- */
-@Composable
-private fun VodLayoutPreviewBars(layout: tv.own.owntv.core.settings.SettingsRepository.VodLayout) {
-    val bar = tv.own.owntv.ui.theme.StageColors.Text.copy(alpha = 0.13f)
-    val shape = RoundedCornerShape(4.dp)
-    Row(
-        modifier = Modifier.fillMaxWidth().height(30.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        if (layout == tv.own.owntv.core.settings.SettingsRepository.VodLayout.CINEMATIC) {
-            Box(Modifier.width(48.dp).fillMaxHeight().clip(shape).background(bar.copy(alpha = 0.07f)))
-            Box(
-                Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .clip(shape)
-                    .background(
-                        androidx.compose.ui.graphics.Brush.horizontalGradient(
-                            listOf(tv.own.owntv.ui.theme.stageAccent.accent.copy(alpha = 0.45f), tv.own.owntv.ui.theme.stageAccent.accent.copy(alpha = 0.28f)),
-                        ),
-                    ),
-            )
-        } else {
-            Box(Modifier.width(48.dp).fillMaxHeight().clip(shape).background(bar))
-            Box(Modifier.weight(1f).fillMaxHeight().clip(shape).background(bar))
-            Box(Modifier.width(64.dp).fillMaxHeight().clip(shape).background(bar))
-        }
-    }
 }
 
 /** Chip text for the Language settings row: system-default label, or the selected locale's endonym. */
@@ -2681,7 +2621,6 @@ private fun stageRowExtras(
     val fahrenheit by vm.weatherFahrenheit.collectAsStateWithLifecycle()
     val liveLayout by vm.liveLayout.collectAsStateWithLifecycle()
     val liveView by vm.liveView.collectAsStateWithLifecycle()
-    val vodLayout by vm.vodLayout.collectAsStateWithLifecycle()
     val appIcon by vm.appIcon.collectAsStateWithLifecycle()
     val brandAccent by vm.brandAccentTriangle.collectAsStateWithLifecycle()
     val focusHighlight by vm.focusHighlight.collectAsStateWithLifecycle()
@@ -2694,7 +2633,6 @@ private fun stageRowExtras(
     val liveLayouts = tv.own.owntv.core.settings.SettingsRepository.LiveLayout.entries
     val liveViews = tv.own.owntv.core.settings.SettingsRepository.LiveView.entries
     // Cinematic first.
-    val vodLayouts = listOf(tv.own.owntv.core.settings.SettingsRepository.VodLayout.CINEMATIC, tv.own.owntv.core.settings.SettingsRepository.VodLayout.SEPARATE)
     val presets = tv.own.owntv.core.theme.AccentColor.entries
     val presetColors = presets.map { it.primary(true) }
     val current = tv.own.owntv.ui.theme.stageAccent.accent
@@ -2772,11 +2710,6 @@ private fun stageRowExtras(
             SettingValue.Segmented(liveViews.map { stringResource(if (it == tv.own.owntv.core.settings.SettingsRepository.LiveView.LIST) R.string.settings_view_list else R.string.settings_seg_guide) }, liveViews.indexOf(liveView)),
             onStep = { vm.setLiveView(cycle(liveViews, liveView, it)) },
             onClick = { vm.setLiveView(cycle(liveViews, liveView, 1)) },
-        ),
-        "vod_layout" to RowExtra(
-            SettingValue.Segmented(vodLayouts.map { stringResource(if (it == tv.own.owntv.core.settings.SettingsRepository.VodLayout.CINEMATIC) R.string.settings_vod_layout_cinematic else R.string.settings_seg_separate) }, vodLayouts.indexOf(vodLayout)),
-            onStep = { vm.setVodLayout(cycle(vodLayouts, vodLayout, it)) },
-            onClick = { vm.setVodLayout(cycle(vodLayouts, vodLayout, 1)) },
         ),
         "app_icon" to RowExtra(SettingValue.Opens(stringResource(appIcon.label))),
         "brand_accent" to RowExtra(SettingValue.Switch(brandAccent), onClick = { vm.setBrandAccentTriangle(!brandAccent) }),
