@@ -17,17 +17,17 @@ import tv.own.owntv.ui.components.OwnTVIcon
 
 /** Imports a read-only mirror of channels already tuned by the television. */
 @Composable
-internal fun TunerSourceOption(onImport: (name: String, url: String) -> Unit) {
+internal fun TunerSourceOption(radio: Boolean = false, onImport: (name: String, url: String) -> Unit) {
     val context = LocalContext.current
-    val title = stringResource(R.string.tuner_source_title)
-    val description = stringResource(R.string.tuner_source_description)
+    val title = stringResource(if (radio) R.string.stayon_radio_tdt_import else R.string.tuner_source_title)
+    val description = stringResource(if (radio) R.string.stayon_radio_tdt_desc else R.string.tuner_source_description)
     val noInputs = stringResource(R.string.tuner_source_missing)
     var inputs by remember { mutableStateOf<List<TunerSourceSyncer.Input>>(emptyList()) }
     var choosing by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val discover = {
         scope.launch {
-            inputs = withContext(Dispatchers.IO) { runCatching { TunerSourceSyncer.discover(context) }.getOrDefault(emptyList()) }
+            inputs = withContext(Dispatchers.IO) { runCatching { TunerSourceSyncer.discover(context).filter { !radio || it.providerPackage == null } }.getOrDefault(emptyList()) }
             if (inputs.isEmpty()) Toast.makeText(context, noInputs, Toast.LENGTH_LONG).show()
             else choosing = true
         }

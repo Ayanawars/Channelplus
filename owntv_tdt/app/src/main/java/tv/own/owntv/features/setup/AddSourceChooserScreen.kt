@@ -42,7 +42,7 @@ fun AddSourceChooserScreen(
         rowsFocus = rowsFocus,
         settingsRoot = false,
     ) {
-        onTuner?.let { TunerSourceOption(it) }
+        onTuner?.let { TunerSourceOption(onImport = it) }
         val phone = stringResource(R.string.setup_from_phone)
         StageSettingRow(
             icon = OwnTVIcon.PHONE,

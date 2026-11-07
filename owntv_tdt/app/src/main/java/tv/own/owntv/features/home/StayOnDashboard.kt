@@ -387,6 +387,7 @@ private fun StayOnRadioDashboard(onManage: () -> Unit, modifier: Modifier = Modi
     val context = LocalContext.current
     val library = remember(context) { tv.own.owntv.features.settings.StayonRadioLibrary.shared(context) }
     val stations by library.stations.collectAsStateWithLifecycle()
+    var tunerStation by remember { mutableStateOf<tv.own.owntv.features.settings.StayonRadioStation?>(null) }
     val playing by tv.own.owntv.features.settings.RadioAudioPlayer.playingStationId.collectAsStateWithLifecycle()
     Column(modifier.fillMaxWidth().background(Ink).padding(horizontal = 16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
@@ -412,7 +413,8 @@ private fun StayOnRadioDashboard(onManage: () -> Unit, modifier: Modifier = Modi
                         .clip(RoundedCornerShape(12.dp))
                         .background(if (focused) Yellow else Panel)
                         .clickable {
-                            if (active) tv.own.owntv.features.settings.RadioAudioPlayer.stop()
+                            if (station.tunerChannel != null) tunerStation = station
+                            else if (active) tv.own.owntv.features.settings.RadioAudioPlayer.stop()
                             else tv.own.owntv.features.settings.RadioAudioPlayer.play(station)
                         }
                         .focusable()
@@ -436,10 +438,17 @@ private fun StayOnRadioDashboard(onManage: () -> Unit, modifier: Modifier = Modi
                             else stringResource(R.string.stayon_radio_listen),
                             fontSize = 14.sp, color = if (focused) Ink else Muted,
                         )
+                        if (station.tunerChannel != null) {
+                            Text(stringResource(R.string.stayon_radio_tdt), fontSize = 13.sp,
+                                color = if (focused) Ink else Muted)
+                        }
                     }
                 }
             }
         }
+    }
+    tunerStation?.let { station ->
+        tv.own.owntv.features.settings.TunerRadioPlayback(station) { tunerStation = null }
     }
 }
 

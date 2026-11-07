@@ -1,6 +1,7 @@
 package tv.own.owntv.features.settings
 
 import android.content.Context
+import tv.own.owntv.core.model.TifChannelUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,7 +19,9 @@ data class StayonRadioStation(
     val url: String,
     val logo: String?,
     val playlistId: String? = null,
-)
+) {
+    val tunerChannel: TifChannelUri? get() = TifChannelUri.parse(url)
+}
 
 data class StayonRadioPlaylist(
     val id: String,
@@ -56,6 +59,12 @@ class StayonRadioLibrary(context: Context) {
         saveStations(_stations.value.filterNot { it.id == id })
     }
 
+    @Synchronized
+    fun replaceTunerStations(inputId: String, rows: List<StayonRadioStation>) {
+        require(rows.isNotEmpty())
+        saveStations(_stations.value.filterNot { it.tunerChannel?.inputId == inputId } + rows)
+    }
+
     /** Add and sync an independent radio M3U source; publish only after it has usable stations. */
     suspend fun addPlaylist(name: String, url: String): Int {
         require(name.isNotBlank())
@@ -80,6 +89,7 @@ class StayonRadioLibrary(context: Context) {
         val parsed = fetchPlaylist(source.url)
         require(parsed.isNotEmpty())
         synchronized(this) {
+            check(_playlists.value.any { it.id == id })
             val surviving = _stations.value.filterNot { it.playlistId == id }
             val updated = parsed.mapIndexed { index, station ->
                 station.copy(id = id + ":" + index, playlistId = id)

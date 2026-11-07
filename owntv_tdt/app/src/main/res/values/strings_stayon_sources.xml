@@ -5,4 +5,12 @@
     <string name="stayon_add_tdt">Add terrestrial TV</string>
     <string name="stayon_add_iptv">Add IPTV</string>
     <string name="stayon_iptv_manual">Enter IPTV details</string>
+    <string name="stayon_radio_tdt">Terrestrial radio</string>
+    <string name="stayon_radio_tdt_import">Import or refresh stations</string>
+    <string name="stayon_radio_tdt_desc">Import audio services already tuned on the television.</string>
+    <string name="stayon_radio_tdt_empty">No terrestrial radio stations were found.</string>
+    <string name="stayon_radio_tdt_failed">Unable to access terrestrial radio stations.</string>
+    <string name="stayon_radio_tdt_remove">Remove %1$s from STAYON+?</string>
+    <string name="stayon_radio_tdt_remove_description">This only removes the station from the app.</string>
+    <string name="stayon_epg_tv">TV guide</string>
 </resources>

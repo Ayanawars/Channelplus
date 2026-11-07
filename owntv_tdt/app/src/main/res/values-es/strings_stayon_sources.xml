@@ -5,4 +5,12 @@
     <string name="stayon_add_tdt">Añadir TDT</string>
     <string name="stayon_add_iptv">Añadir IPTV</string>
     <string name="stayon_iptv_manual">Introducir datos de IPTV</string>
+    <string name="stayon_radio_tdt">Canales TDT Radio</string>
+    <string name="stayon_radio_tdt_import">Importar o actualizar emisoras</string>
+    <string name="stayon_radio_tdt_desc">Importa los servicios de audio que ya están sintonizados en el televisor.</string>
+    <string name="stayon_radio_tdt_empty">No se encontraron emisoras de radio TDT.</string>
+    <string name="stayon_radio_tdt_failed">No se pudo acceder a las emisoras de radio TDT.</string>
+    <string name="stayon_radio_tdt_remove">¿Quitar %1$s de STAYON+?</string>
+    <string name="stayon_radio_tdt_remove_description">Se quitará solo de la aplicación.</string>
+    <string name="stayon_epg_tv">EPG TV</string>
 </resources>

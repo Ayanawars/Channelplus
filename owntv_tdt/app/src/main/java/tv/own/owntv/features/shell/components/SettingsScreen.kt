@@ -107,7 +107,7 @@ import tv.own.owntv.ui.theme.primary
 
 internal enum class TileTone { PRIMARY, SECONDARY, TERTIARY }
 
-private enum class SettingsTab { ROOT, LANGUAGE, SOURCES, TDT, EPG, RADIO_IPTV, BACKUP, LOCAL_SYNC, CUSTOMIZE, HOME, NETWORK, DNS, METADATA, OPEN_SUBTITLES, WEATHER, CH_NAV, PANEL_WIDTH, GUIDE_WIDTH, GLASS_EFFECT, CONTENT_MENUS, FONTS, BROWSING, SUBTITLE_STYLE, SPORTS }
+private enum class SettingsTab { ROOT, LANGUAGE, SOURCES, TDT, RADIO_TDT, EPG, RADIO_IPTV, BACKUP, LOCAL_SYNC, CUSTOMIZE, HOME, NETWORK, DNS, METADATA, OPEN_SUBTITLES, WEATHER, CH_NAV, PANEL_WIDTH, GUIDE_WIDTH, GLASS_EFFECT, CONTENT_MENUS, FONTS, BROWSING, SUBTITLE_STYLE, SPORTS }
 
 @Composable
 internal fun surroundModeLabel(mode: SurroundMode): String = stringResource(
@@ -423,6 +423,7 @@ internal fun SettingsContent(
         SettingsTab.LANGUAGE -> { LanguageSettingsScreen(onBack = { tab = SettingsTab.ROOT }, modifier = modifier) }
         SettingsTab.SOURCES -> { ManageSourcesScreen(onBack = { tab = SettingsTab.ROOT }, modifier = modifier) }
         SettingsTab.TDT -> { ManageSourcesScreen(onBack = { tab = SettingsTab.ROOT }, modifier = modifier, tunerOnly = true) }
+        SettingsTab.RADIO_TDT -> { tv.own.owntv.features.settings.RadioTdtSettingsScreen(onBack = { tab = SettingsTab.ROOT }, modifier = modifier) }
         SettingsTab.EPG -> { tv.own.owntv.features.settings.EpgSourcesScreen(onBack = { tab = SettingsTab.ROOT; consumeEpgAdd = false }, modifier = modifier, startOnAdd = consumeEpgAdd) }
             SettingsTab.RADIO_IPTV -> { tv.own.owntv.features.settings.RadioIptvSettingsScreen(onBack = { tab = SettingsTab.ROOT }, modifier = modifier) }
         SettingsTab.BACKUP -> { BackupScreen(onBack = { tab = SettingsTab.ROOT }, modifier = sub) }
@@ -517,6 +518,13 @@ internal fun SettingsContent(
             onClick = { open(SettingsTab.TDT) },
         ),
         RootRow(
+            tabRowKey(SettingsTab.RADIO_TDT), TileTone.PRIMARY, OwnTVIcon.AUDIO,
+            title = stringResource(R.string.stayon_radio_tdt),
+            desc = stringResource(R.string.stayon_radio_tdt_desc),
+            focus = rowFocus.getValue(SettingsTab.RADIO_TDT),
+            onClick = { open(SettingsTab.RADIO_TDT) },
+        ),
+        RootRow(
             tabRowKey(SettingsTab.SOURCES), TileTone.PRIMARY, OwnTVIcon.PLAYLIST,
             heading = stringResource(R.string.settings_sources_title),
             title = stringResource(R.string.stayon_tv_iptv), desc = stringResource(R.string.settings_playlists_description),
@@ -533,7 +541,7 @@ internal fun SettingsContent(
         ),
         RootRow(
             tabRowKey(SettingsTab.EPG), TileTone.PRIMARY, OwnTVIcon.EPG,
-            title = stringResource(R.string.settings_epg_sources), desc = stringResource(R.string.settings_epg_sources_nav_description),
+            title = stringResource(R.string.stayon_epg_tv), desc = stringResource(R.string.settings_epg_sources_nav_description),
             focus = rowFocus.getValue(SettingsTab.EPG),
             onClick = { open(SettingsTab.EPG) },
         ),
@@ -1027,6 +1035,8 @@ internal fun SettingsContent(
             ) { settingsVm.setUpdateCheckOnStart(!updateCheckOnStart) },
             SettingsSearchEntry(stringResource(R.string.settings_app_group), stringResource(R.string.settings_language), stringResource(R.string.settings_search_keywords_language), OwnTVIcon.LANGUAGE, TileTone.PRIMARY,
                 chip = languageChip, chipTone = TileTone.PRIMARY) { open(SettingsTab.LANGUAGE) },
+            SettingsSearchEntry(stringResource(R.string.settings_group_sources), stringResource(R.string.stayon_tv_tdt), stringResource(R.string.tuner_source_description), OwnTVIcon.LIVE_TV, TileTone.PRIMARY) { open(SettingsTab.TDT) },
+            SettingsSearchEntry(stringResource(R.string.settings_group_sources), stringResource(R.string.stayon_radio_tdt), stringResource(R.string.stayon_radio_tdt_desc), OwnTVIcon.AUDIO, TileTone.PRIMARY) { open(SettingsTab.RADIO_TDT) },
             SettingsSearchEntry(stringResource(R.string.settings_group_sources), stringResource(R.string.stayon_tv_iptv), stringResource(R.string.settings_search_keywords_playlists), OwnTVIcon.PLAYLIST, TileTone.PRIMARY) { open(SettingsTab.SOURCES) },
             SettingsSearchEntry(stringResource(R.string.settings_group_sources), stringResource(R.string.settings_epg_sources), stringResource(R.string.settings_search_keywords_epg), OwnTVIcon.EPG, TileTone.PRIMARY) { open(SettingsTab.EPG) },
             SettingsSearchEntry(stringResource(R.string.stayon_settings_sources), stringResource(R.string.stayon_radio_iptv_title), stringResource(R.string.stayon_radio_iptv_desc), OwnTVIcon.AUDIO, TileTone.PRIMARY) { open(SettingsTab.RADIO_IPTV) },
