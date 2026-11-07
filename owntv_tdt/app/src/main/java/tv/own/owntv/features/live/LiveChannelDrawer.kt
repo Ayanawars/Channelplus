@@ -50,10 +50,12 @@ internal fun LiveDrawerBackdrop(engine: LivePreviewEngine, channel: ChannelEntit
         else if (channel != null) {
             // Prefer the programme's XMLTV artwork when the video preview is disabled or unavailable.
             // Preserve the programme metadata's original URL; let Coil cache/validate the download.
-            if (!programmeImageUrl.isNullOrBlank())
+            // The channel logo stays underneath so a missing or broken artwork URL never leaves black.
+            ChannelLogoTile(channel.displayLogoUrl, Modifier.size(140.mpx), fill = Color.Transparent) {}
+            if (!programmeImageUrl.isNullOrBlank()) {
                 AsyncImage(model = programmeImageUrl, contentDescription = null,
                     modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-            else ChannelLogoTile(channel.displayLogoUrl, Modifier.size(140.mpx), fill = Color.Transparent) {}
+            }
         }
         if (enabled && state == LivePreviewEngine.State.LOADING) OwnTVSpinner(sizeDp = 28)
         if (blocked && !playing) Text(stringResource(R.string.content_preview_single_stream), color = Color.White, style = stageText(18, 500))
