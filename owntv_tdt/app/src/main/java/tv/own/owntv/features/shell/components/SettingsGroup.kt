@@ -20,10 +20,16 @@ internal enum class SettingsGroup(val titleRes: Int, val video: VideoGroup? = nu
     LIVE(R.string.settings_live_tv, VideoGroup.LIVE),
     WATCHING(R.string.settings_group_watching_recording, VideoGroup.WATCHING),
     APP(R.string.settings_group_app),
+    // New high-level STAYON+ sections. Legacy groups remain to preserve saved ordinals and links.
+    HOME(R.string.stayon_settings_home),
+    REMOTE(R.string.stayon_settings_remote),
+    MUSIC(R.string.stayon_settings_music),
+    APPLICATIONS(R.string.stayon_settings_apps),
+    SYSTEM(R.string.stayon_settings_system),
     ;
 
     companion object {
         /** The group a Video player row lives in; Diagnostics sits at the end of App. */
-        fun of(group: VideoGroup): SettingsGroup = entries.firstOrNull { it.video == group } ?: APP
+        fun of(group: VideoGroup): SettingsGroup = entries.firstOrNull { it.video == group } ?: SYSTEM
     }
 }
