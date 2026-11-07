@@ -3,4 +3,18 @@
     <string name="content_search_channels">Buscar canales…</string>
     <string name="content_search_movies">Buscar películas…</string>
     <string name="content_search_series">Buscar series…</string>
+    <string name="stayon_tv_settings">Ajustes del televisor</string>
+    <string name="stayon_tv_settings_desc">Abrir los ajustes originales del televisor</string>
+    <string name="stayon_settings_home">Home</string>
+    <string name="stayon_settings_remote">Mando y navegación</string>
+    <string name="stayon_settings_music">Música y servicios</string>
+    <string name="stayon_settings_apps">Aplicaciones</string>
+    <string name="stayon_settings_system">Sistema y mantenimiento</string>
+    <string name="stayon_settings_playback">Reproducción</string>
+    <string name="stayon_settings_appearance">Apariencia e interfaz</string>
+    <string name="stayon_settings_sources">Fuentes</string>
+    <string name="stayon_settings_general">General</string>
+    <string name="stayon_settings_pending_music">Las conexiones musicales aparecerán cuando estén disponibles.</string>
+    <string name="stayon_settings_pending_apps">La gestión de aplicaciones aparecerá cuando esté disponible.</string>
+    <string name="stayon_settings_full_video">Ajustes de imagen, audio, TV en directo y grabaciones</string>
 </resources>
