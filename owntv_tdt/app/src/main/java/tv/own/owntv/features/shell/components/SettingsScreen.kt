@@ -971,7 +971,9 @@ internal fun SettingsContent(
                 chip = pluralStringResource(R.plurals.settings_epg_guide_days_value, guideDays, guideDays), chipTone = TileTone.PRIMARY) { saveScroll(); dialogReturn = searchFieldFocus; showGuideDays = true },
             SettingsSearchEntry(stringResource(R.string.settings_group_sources), stringResource(R.string.settings_search_guide_logos), stringResource(R.string.settings_search_keywords_logos), OwnTVIcon.EPG, TileTone.SECONDARY) { open(SettingsTab.EPG) },
             SettingsSearchEntry(stringResource(R.string.settings_group_content_metadata), stringResource(R.string.settings_customize), stringResource(R.string.settings_search_keywords_customize), OwnTVIcon.SORT, TileTone.PRIMARY) { open(SettingsTab.CUSTOMIZE) },
-            liveLayoutSearchEntry(settingsVm) { saveScroll(); dialogReturn = searchFieldFocus; showLiveLayout = true },
+            liveLayoutSearchEntry(settingsVm, stringResource(R.string.settings_live_layout)) {
+                saveScroll(); dialogReturn = searchFieldFocus; showLiveLayout = true
+            },
             SettingsSearchEntry(stringResource(R.string.settings_group_layout), stringResource(R.string.settings_live_opens_in), stringResource(R.string.settings_search_keywords_live_opens_in), OwnTVIcon.LIVE_TV, TileTone.PRIMARY) { saveScroll(); dialogReturn = searchFieldFocus; stageSettings.open = StageSettingsDialog.LIVE_OPENS_IN },
             SettingsSearchEntry(stringResource(R.string.settings_group_layout), stringResource(R.string.live_hud_size_title), stringResource(R.string.live_hud_size_description), OwnTVIcon.ZOOM, TileTone.PRIMARY,
                 chip = stringResource(R.string.common_percent, settingsVm.liveHudSizePercent.collectAsStateWithLifecycle().value)) { saveScroll(); dialogReturn = searchFieldFocus; stageSettings.open = StageSettingsDialog.LIVE_HUD_SIZE },
@@ -1466,7 +1468,7 @@ private fun liveLayoutRootRow(settingsVm: SettingsViewModel, focus: FocusRequest
 }
 
 @Composable
-private fun liveLayoutSearchEntry(settingsVm: SettingsViewModel, onClick: () -> Unit): SettingsSearchEntry {
+private fun liveLayoutSearchEntry(settingsVm: SettingsViewModel, title: String, onClick: () -> Unit): SettingsSearchEntry {
     val layout by settingsVm.liveLayout.collectAsStateWithLifecycle()
     return SettingsSearchEntry(
         stringResource(R.string.settings_group_layout), stringResource(R.string.settings_live_layout),
