@@ -1,0 +1,56 @@
+name: Publish StayON+ 5.4.3 signed Android TV release
+on:
+  push:
+    branches: [release/stayon-543-publisher]
+    paths:
+      - .github/workflows/stayon-543-release.yml
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publish:
+    name: Publish verified existing production APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download the passed production build artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/unsigned"
+          gh run download 42330576736 \
+            --repo "$GITHUB_REPOSITORY" \
+            --name "StayON-5.4.3-unsigned-release" \
+            --dir "$RUNNER_TEMP/unsigned"
+          test -s "$RUNNER_TEMP/unsigned/app-standard-release-unsigned.apk"
+      - name: Reconstruct previously signed and verified APK (without private keys)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 .github/stayon-release/rebuild_signed_apk.py \
+            "$RUNNER_TEMP/unsigned/app-standard-release-unsigned.apk" \
+            .github/stayon-release/stayon543-reconstruction.b64 \
+            "$RUNNER_TEMP/StayONplus-5.4.3.apk"
+          sha256sum "$RUNNER_TEMP/StayONplus-5.4.3.apk"
+      - name: Publish GitHub Release for the in-app updater
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view v5.4.3 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release v5.4.3 already exists; refusing to overwrite it."
+            exit 1
+          fi
+          gh release create "v5.4.3" "$RUNNER_TEMP/StayONplus-5.4.3.apk#StayONplus-5.4.3.apk" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "46dc788441ea69d5837ea6a2ddb9b36ddf9d17e1" \
+            --title "StayON+ 5.4.3 — Revisión #17: pantallas negras y nueva introducción" \
+            --notes "StayON+ 5.4.3 para Android TV. Publica la revisión #17: menús de TV y Música con fondo negro puro, tipografía marfil y detalles amarillos; logotipos de canales alineados y servicios musicales centrados sin recuadros; auriculares como imagen destacada en Música. Introducción de vídeo corregida para evitar pantalla negra con audio y mostrar la imagen sin recortes, con liberación del reproductor y tiempo máximo de arranque; iconos de splash ajustados para que Android no los recorte. Los servicios de música aún no están conectados. Mantiene TDT/IPTV y LOVEStv. APK firmada con certificado original para actualizar sobre la versión instalada."
+      - name: Verify published release and APK asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release view v5.4.3 --repo "$GITHUB_REPOSITORY" --json tagName,isDraft,isPrerelease,assets \
+            --jq '{tag: .tagName, draft: .isDraft, prerelease: .isPrerelease, assets: [.assets[].name]}'
