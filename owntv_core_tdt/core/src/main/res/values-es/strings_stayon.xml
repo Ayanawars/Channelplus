@@ -53,4 +53,6 @@
     <string name="stayon_vs">VS</string>
     <string name="stayon_epg_schedule">%1$s — %2$s</string>
     <string name="stayon_match_date_format">EEE d MMM · HH:mm</string>
+    <string name="stayon_urban_number">40</string>
+    <string name="stayon_urban_brand">URBAN</string>
 </resources>
