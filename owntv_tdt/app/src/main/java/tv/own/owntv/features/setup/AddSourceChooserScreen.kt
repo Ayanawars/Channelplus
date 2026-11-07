@@ -24,17 +24,18 @@ fun AddSourceChooserScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     onTuner: ((String, String) -> Unit)? = null,
+    iptvOnly: Boolean = false,
 ) {
     val rowsFocus = remember { FocusRequester() }
     LaunchedEffect(Unit) { runCatching { rowsFocus.requestFocus() } }
-    val playlists = stringResource(R.string.settings_playlists)
+    val playlists = stringResource(if (iptvOnly) R.string.stayon_tv_iptv else R.string.settings_playlists)
     val hints = listOf(
         stringResource(R.string.common_ok) to stringResource(R.string.settings_key_open),
         stringResource(R.string.common_back) to playlists,
     )
     StageFullPage(
         parents = listOf(playlists),
-        title = stringResource(R.string.setup_add_source),
+        title = stringResource(if (iptvOnly) R.string.stayon_add_iptv else R.string.setup_add_source),
         count = "",
         onBack = onBack,
         modifier = modifier,
@@ -51,7 +52,7 @@ fun AddSourceChooserScreen(
             onClick = onRemote,
             help = SettingHelp(phone, stringResource(R.string.settings_help_add_from_phone), hints = hints),
         )
-        val here = stringResource(R.string.settings_add_type_here)
+        val here = stringResource(if (iptvOnly) R.string.stayon_iptv_manual else R.string.settings_add_type_here)
         StageSettingRow(
             icon = OwnTVIcon.PENCIL,
             title = here,

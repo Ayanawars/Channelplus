@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stayon_tv_tdt">Terrestrial TV</string>
+    <string name="stayon_tv_iptv">IPTV channels</string>
+    <string name="stayon_add_tdt">Add terrestrial TV</string>
+    <string name="stayon_add_iptv">Add IPTV</string>
+    <string name="stayon_iptv_manual">Enter IPTV details</string>
+</resources>

@@ -60,14 +60,18 @@ import tv.own.owntv.features.setup.playlistAutoRefreshLabel
 import tv.own.owntv.features.setup.AddSourceChooserScreen
 import tv.own.owntv.features.setup.AddSourceScreen
 import tv.own.owntv.features.setup.RemoteSetupScreen
+import tv.own.owntv.core.sync.TunerSourceSyncer
+import tv.own.owntv.features.setup.TunerSourceOption
+import tv.own.owntv.ui.stage.StagePopup
 import tv.own.owntv.ui.components.OwnTVSpinner
 
 /** List / add / re-sync / delete the active profile's IPTV sources. */
 @Composable
-fun ManageSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
+fun ManageSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier, tunerOnly: Boolean = false) {
     val vm: SettingsViewModel = koinViewModel()
     val withTunerPermission = tv.own.owntv.features.setup.rememberTunerPermission()
-    val sources by vm.sources.collectAsStateWithLifecycle()
+    val allSources by vm.sources.collectAsStateWithLifecycle()
+    val sources = allSources.filter { TunerSourceSyncer.isSource(it.url) == tunerOnly }
     val importState by vm.importState.collectAsStateWithLifecycle()
     val progress by vm.progress.collectAsStateWithLifecycle()
     val playlistAutoRefresh by vm.playlistAutoRefresh.collectAsStateWithLifecycle()
@@ -166,6 +170,7 @@ fun ManageSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
             val src = editingSource!!
             AddSourceScreen(
                 initial = src,
+                iptvOnly = true,
                 initialAutoRefresh = playlistAutoRefresh[src.id] ?: PlaylistRefresh.OFF,
                 initialIsDefault = src.id == defaultId,
                 onStartXtream = { n, server, u, p, ua, ref, epg, autoRefresh, live, movies, series, isDefault, preferHls ->
@@ -196,8 +201,16 @@ fun ManageSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
         } else if (showAdd) {
             when (val s = importState) {
                 SettingsViewModel.ImportState.Idle -> when (addMode) {
-                    null -> AddSourceChooserScreen(
-                        onTuner = { name, url -> vm.addM3u(name, url) },                        onRemote = { addMode = AddMode.REMOTE },
+                    null -> if (tunerOnly) {
+                        StageFullPage(
+                            parents = listOf(stringResource(R.string.stayon_tv_tdt)),
+                            title = stringResource(R.string.stayon_add_tdt),
+                            count = "",
+                            onBack = { showAdd = false },
+                        ) { TunerSourceOption { name, url -> vm.addM3u(name, url) } }
+                    } else AddSourceChooserScreen(
+                        iptvOnly = true,
+                        onRemote = { addMode = AddMode.REMOTE },
                         onManual = { addMode = AddMode.MANUAL },
                         onBack = { showAdd = false },
                         modifier = Modifier,
@@ -213,6 +226,7 @@ fun ManageSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                         modifier = Modifier,
                     )
                     AddMode.MANUAL -> AddSourceScreen(
+                        iptvOnly = true,
                         onStartXtream = { n, server, u, p, ua, ref, epg, autoRefresh, live, movies, series, isDefault, preferHls ->
                             vm.addXtream(n.ifBlank { defaultIptvName }, server, u, p, ua, epg, autoRefresh, live, movies, series, isDefault, preferHls, httpReferer = ref)
                         },
@@ -227,7 +241,7 @@ fun ManageSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                         remotePayload = vm.remotePayload,
                         onRemotePayloadConsumed = { vm.consumeRemotePayload() },
                         // A newly-added playlist can be made default only when others already exist.
-                        showDefaultToggle = sources.isNotEmpty(),
+                        showDefaultToggle = allSources.isNotEmpty(),
                         onBack = { addMode = null },
                         modifier = Modifier,
                         initial = vm.lastFailedSource, // pre-fill on retry — no re-typing after a typo
@@ -286,16 +300,15 @@ fun ManageSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
             }
         } else {
             // The playlists as rows; the focused one's Edit / Info / Re-sync / Delete in the panel.
-            val actionsFocus = remember { FocusRequester() }
             StageFullPage(
                 parents = listOf(stringResource(R.string.settings_group_sources)),
-                title = stringResource(R.string.settings_playlists),
+                title = stringResource(if (tunerOnly) R.string.stayon_tv_tdt else R.string.stayon_tv_iptv),
                 count = "",
                 onBack = onBack,
                 handleBack = false,
                 toolbar = {
                     tv.own.owntv.ui.stage.StageTool(
-                        stringResource(R.string.settings_sources_add), onClick = { showAdd = true },
+                        stringResource(if (tunerOnly) R.string.stayon_add_tdt else R.string.stayon_add_iptv), onClick = { showAdd = true },
                         icon = tv.own.owntv.ui.components.OwnTVIcon.ADD, boxed = true,
                         modifier = Modifier.focusRequester(addFocus),
                     )
@@ -320,8 +333,6 @@ fun ManageSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                         syncState = syncState,
                         isDeleting = source.id in deletingIds,
                         rowFocus = rowFocus,
-                        actionsFocus = actionsFocus,
-                        keepPanel = source.id == contextId,
                         onFocused = { contextId = source.id; contextIndex = index },
                         onCustomize = { contextId = source.id; contextIndex = index; customizingSource = source },
                         onEdit = { contextId = source.id; contextIndex = index; editingSource = source },
@@ -390,8 +401,6 @@ private fun SourceRow(
     syncState: CatalogSyncState,
     isDeleting: Boolean,
     rowFocus: FocusRequester?,
-    actionsFocus: FocusRequester,
-    keepPanel: Boolean,
     onFocused: () -> Unit,
     onCustomize: () -> Unit,
     onEdit: () -> Unit,
@@ -441,38 +450,24 @@ private fun SourceRow(
         ),
         StageAction(OwnTVIcon.TRASH, stringResource(R.string.settings_sources_delete), onDelete, danger = true),
     )
+    var showActions by remember(source.id) { mutableStateOf(false) }
     StageSettingRow(
         icon = OwnTVIcon.PLAYLIST,
         title = source.name,
         desc = line.ifBlank { typeName },
         value = status?.let { SettingValue.Action(it) },
-        onClick = { runCatching { actionsFocus.requestFocus() } },
-        keepPanel = keepPanel,
-        help = SettingHelp(
-            title = source.name,
-            // The address on one line, the counts on the next.
-            text = listOfNotNull(typeName, visibleCounts).joinToString("\n"),
-            hints = listOf(
-                "▶" to stringResource(R.string.settings_key_actions),
-                stringResource(R.string.common_back) to stringResource(R.string.common_nav_settings),
-            ),
-            extra = {
-                if (isDeleting) {
-                    Text(
-                        stringResource(R.string.settings_sources_removing_detail),
-                        style = tv.own.owntv.ui.theme.stageText(16, 500), color = tv.own.owntv.ui.theme.StageColors.Muted,
-                        modifier = Modifier.padding(top = 14.mpx),
-                    )
-                } else {
-                    StageActionColumn(actions, back, actionsFocus)
-                }
-            },
-        ),
-        modifier = Modifier
-            .focusRequester(back)
-            .focusProperties { right = actionsFocus }
-            .onFocusChanged { if (it.isFocused) onFocused() },
+        onClick = { if (!isDeleting) showActions = true },
+        modifier = Modifier.focusRequester(back).onFocusChanged { if (it.isFocused) onFocused() },
     )
+    if (showActions) {
+        val actionsFocus = remember { FocusRequester() }
+        LaunchedEffect(Unit) { runCatching { actionsFocus.requestFocus() } }
+        StagePopup(onDismiss = { showActions = false }, title = source.name, body = visibleCounts) {
+            StageActionColumn(actions.map { action ->
+                StageAction(action.icon, action.label, { showActions = false; action.onClick() }, danger = action.danger)
+            }, back = null, first = actionsFocus)
+        }
+    }
 }
 
 private fun CatalogSyncState.Syncing.countsLabel(sourceType: SourceType, stored: SyncCounts?): tv.own.owntv.core.sync.SyncProgressCounts? {

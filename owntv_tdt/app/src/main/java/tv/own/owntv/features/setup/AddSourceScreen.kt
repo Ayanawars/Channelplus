@@ -100,6 +100,7 @@ fun AddSourceScreen(
     initialAutoRefresh: PlaylistRefresh = PlaylistRefresh.OFF,
     initialIsDefault: Boolean = false,
     showDefaultToggle: Boolean = true,
+    iptvOnly: Boolean = false,
     // Stalker portal. Null = the Stalker option is hidden (e.g. the setup wizard).
     onStartStalker: ((
         name: String,
@@ -405,7 +406,7 @@ fun AddSourceScreen(
             )
         }
     }
-    val pageTitle = stringResource(if (editing) R.string.setup_edit_source else R.string.settings_add_type_here)
+    val pageTitle = stringResource(if (editing) R.string.setup_edit_source else if (iptvOnly) R.string.stayon_add_iptv else R.string.settings_add_type_here)
     val parent = stringResource(if (editing) R.string.settings_playlists else R.string.setup_add_source)
     val ok = stringResource(R.string.common_ok)
     val back = stringResource(R.string.common_back)
@@ -415,11 +416,11 @@ fun AddSourceScreen(
     val submitButton: @Composable () -> Unit = {
         if (canStart) StageActionColumn(listOf(StageAction(OwnTVIcon.DOWNLOADS, submitLabel, { submit() })), back = null, first = startImportFocus)
     }
-    val toSubmit = Modifier.focusProperties { right = startImportFocus }
+    val toSubmit = if (iptvOnly) Modifier else Modifier.focusProperties { right = startImportFocus }
     // ▶ reaches the panel's button from any row; said in the keys while the button is there.
-    val submitHint = if (canStart) "▶" to submitLabel else null
+    val submitHint = if (canStart && !iptvOnly) "▶" to submitLabel else null
     fun help(title: String, text: String, keys: List<Pair<String, String>>) =
-        SettingHelp(title, text, hints = if (submitHint != null) keys.dropLast(1) + submitHint + keys.last() else keys, extra = submitButton)
+        SettingHelp(title, text, hints = if (submitHint != null) keys.dropLast(1) + submitHint + keys.last() else keys, extra = if (iptvOnly) null else submitButton)
     val openKeys = listOf(ok to stringResource(R.string.settings_key_open), back to parent)
     val changeKeys = listOf(ok to stringResource(R.string.settings_key_change), back to parent)
     val switchKeys = listOf(ok to stringResource(R.string.settings_key_switch), back to parent)
@@ -439,7 +440,7 @@ fun AddSourceScreen(
         label = label,
         value = value,
         onValueChange = onChange,
-        help = SettingHelp(label, listOfNotNull(about, fieldHelp).joinToString(" "), extra = submitButton),
+        help = SettingHelp(label, listOfNotNull(about, fieldHelp).joinToString(" "), extra = if (iptvOnly) null else submitButton),
         placeholder = placeholder,
         password = password,
         keyboardType = keyboardType,
@@ -457,7 +458,7 @@ fun AddSourceScreen(
         rowsFocus = firstFocus,
         settingsRoot = false,
     ) {
-        if (!editing) TunerSourceOption { tunerName, tunerUrl ->
+        if (!editing && !iptvOnly) TunerSourceOption { tunerName, tunerUrl ->
             onStartM3u(tunerName, tunerUrl, "", "", "", PlaylistRefresh.OFF, false)
         }
         // Type: locked while editing (a source can't change its type).
@@ -628,6 +629,16 @@ fun AddSourceScreen(
                 onClick = { scope.launch { settings.setHideNewCategoriesDefault(hideNewCatsProfile, !hideNewCats) } },
                 modifier = toSubmit,
                 help = help(hideTitle, hideDesc, switchKeys),
+            )
+        }
+        if (iptvOnly) {
+            StageSettingRow(
+                icon = OwnTVIcon.DOWNLOADS,
+                title = submitLabel,
+                desc = null,
+                value = null,
+                enabled = canStart,
+                onClick = { submit() },
             )
         }
     }

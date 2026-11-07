@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stayon_tv_tdt">Canales TDT</string>
+    <string name="stayon_tv_iptv">Canales IPTV</string>
+    <string name="stayon_add_tdt">Añadir TDT</string>
+    <string name="stayon_add_iptv">Añadir IPTV</string>
+    <string name="stayon_iptv_manual">Introducir datos de IPTV</string>
+</resources>

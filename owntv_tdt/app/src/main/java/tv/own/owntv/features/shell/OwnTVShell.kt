@@ -1117,7 +1117,7 @@ fun OwnTVShell(
                             // edge (or beside a docked rail).
                             Modifier
                                 .padding(
-                                    start = if (selectedSection != MainSection.HOME && navStyle == tv.own.owntv.core.settings.SettingsRepository.NavStyle.DOCKED) {
+                                    start = if (selectedSection != MainSection.HOME && selectedSection != MainSection.SETTINGS && navStyle == tv.own.owntv.core.settings.SettingsRepository.NavStyle.DOCKED) {
                                         tv.own.owntv.features.shell.components.railDockedReserve(navSize)
                                     } else 0.dp,
                                 )
@@ -1335,7 +1335,7 @@ fun OwnTVShell(
             }
           }
             // StayON+ draws its own top navigation: do not overlay the legacy rail/cluster.
-            if (selectedSection != MainSection.HOME) {
+            if (selectedSection != MainSection.HOME && selectedSection != MainSection.SETTINGS) {
             tv.own.owntv.features.shell.components.StageStatusCluster(
                 continuePill = continueTarget?.let { target ->
                     val live = target.kind == tv.own.owntv.features.home.ContinueKind.LIVE

@@ -254,7 +254,7 @@ private fun TvDashboard(
     Column(modifier.fillMaxWidth()) {
         Row(Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(22.dp)) {
             Box(
-                Modifier.weight(2.17f).fillMaxHeight()
+                Modifier.fillMaxSize()
                     .background(Ink),
             ) {
                 if (!artwork.isNullOrBlank()) {
@@ -313,45 +313,17 @@ private fun TvDashboard(
                     }
                 }
             }
-            Column(
-                Modifier.weight(1f).fillMaxHeight()
-                    .padding(top = 8.dp, bottom = 12.dp)
-                    .border(width = 0.dp, color = Color.Transparent)
-                    .padding(start = 12.dp),
-                verticalArrangement = Arrangement.SpaceEvenly,
-            ) {
-                StayLineItem(stringResource(R.string.stayon_guide_icon), stringResource(R.string.stayon_guide), stringResource(R.string.stayon_guide_desc), onOpenGuide)
-                StayDivider()
-                Text(stringResource(R.string.stayon_favorite_title), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = White)
-                if (favorite != null) {
-                    StayLineItem(stringResource(R.string.stayon_star_icon), favorite.name, stringResource(R.string.stayon_open_channel), { onWatchChannel(favorite.id) }, favorite.displayLogoUrl)
-                } else {
-                    Text(stringResource(R.string.stayon_add_favorites), color = Muted, fontSize = 16.sp)
-                }
-                StayDivider()
-                Text(stringResource(R.string.stayon_next_match), fontSize = 12.sp, letterSpacing = 2.sp, color = Muted)
-                if (match != null) {
-                    val home = match.home?.team
-                    val away = match.away?.team
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        if (home?.logoUrl != null) {
-                            AsyncImage(model = home.logoUrl, contentDescription = home.name, contentScale = ContentScale.Fit, modifier = Modifier.size(54.dp))
-                        }
-                        Spacer(Modifier.width(10.dp))
-                        Text(stringResource(R.string.stayon_vs), color = White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                        Spacer(Modifier.width(10.dp))
-                        if (away?.logoUrl != null) {
-                            AsyncImage(model = away.logoUrl, contentDescription = away.name, contentScale = ContentScale.Fit, modifier = Modifier.size(54.dp))
-                        }
-                    }
-                    StayTextAction(match.title, onClick = { onOpenMatch(match) })
-                    val dateFormat = stringResource(R.string.stayon_match_date_format)
-                    val time = remember(match.startMs, dateFormat) { SimpleDateFormat(dateFormat, Locale.getDefault()).format(Date(match.startMs)) }
-                    Text(time, fontSize = 14.sp, color = Muted)
-                } else {
-                    Text(stringResource(R.string.stayon_no_match), fontSize = 16.sp, color = Muted, maxLines = 2)
-                }
+        }
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            StayButton(stringResource(R.string.stayon_guide), onOpenGuide)
+            favorite?.let { channel ->
+                StayButton(channel.name, { onWatchChannel(channel.id) })
             }
+            match?.let { event -> StayButton(event.title, { onOpenMatch(event) }) }
         }
         Spacer(Modifier.height(20.dp))
         StayDivider()
@@ -405,33 +377,6 @@ private fun StayDivider() {
 private fun StayVerticalDivider() {
     Box(Modifier.width(1.dp).height(58.dp).background(Color(0xFF414147)))
 }
-
-@Composable
-private fun StayLineItem(icon: String, title: String, desc: String, onClick: () -> Unit, logoUrl: String? = null) {
-    var focused by remember { mutableStateOf(false) }
-    Row(
-        Modifier.fillMaxWidth()
-            .onFocusChanged { focused = it.isFocused }
-            .clip(RoundedCornerShape(12.dp))
-            .background(if (focused) Panel else Color.Transparent)
-            .clickable(onClick = onClick)
-            .focusable()
-            .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (logoUrl != null) {
-            AsyncImage(model = logoUrl, contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier.size(42.dp))
-        } else {
-            Text(icon, fontSize = 27.sp, color = if (focused) Yellow else White)
-        }
-        Spacer(Modifier.width(14.dp))
-        Column {
-            Text(title, fontSize = 20.sp, color = White, fontWeight = FontWeight.Bold)
-            Text(desc, fontSize = 13.sp, color = Muted)
-        }
-    }
-}
-
 
 /**
  * Real radio entries from dedicated Radio IPTV sources. TV playlists are never scanned here.

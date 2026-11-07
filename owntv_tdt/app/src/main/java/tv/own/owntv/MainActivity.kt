@@ -396,6 +396,7 @@ open class MainActivity : ComponentActivity() {
                         Box(modifier = Modifier.fillMaxSize()) {
                         val profile = activeProfileId
                         when {
+                            introVisible -> Unit // The intro has exclusive use of the video decoder.
                             profile == null || !profilesLoaded -> Unit // active id / Room list loading
                             // Adding a profile from the gate → onboard the new profile.
                             addingProfile -> Onboarding(
