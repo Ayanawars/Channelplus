@@ -10,6 +10,8 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -40,12 +42,19 @@ private val DrawerMuted = Color(0xFFC4C6CC)
 
 /** A single video owner behind the drawer, including the native TDT surface. */
 @Composable
-internal fun LiveDrawerBackdrop(engine: LivePreviewEngine, channel: ChannelEntity?, enabled: Boolean, blocked: Boolean) {
+internal fun LiveDrawerBackdrop(engine: LivePreviewEngine, channel: ChannelEntity?, enabled: Boolean, blocked: Boolean, programmeImageUrl: String? = null) {
     val state by engine.state.collectAsStateWithLifecycle()
     val playing = enabled && state != LivePreviewEngine.State.ERROR && state != LivePreviewEngine.State.IDLE
     Box(Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
         if (playing) ExoPreviewSurface(engine, Modifier.fillMaxSize())
-        else if (channel != null) ChannelLogoTile(channel.displayLogoUrl, Modifier.size(140.mpx), fill = Color.Transparent) {}
+        else if (channel != null) {
+            // Prefer the programme's XMLTV artwork when the video preview is disabled or unavailable.
+            // Preserve the programme metadata's original URL; let Coil cache/validate the download.
+            if (!programmeImageUrl.isNullOrBlank())
+                AsyncImage(model = programmeImageUrl, contentDescription = null,
+                    modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+            else ChannelLogoTile(channel.displayLogoUrl, Modifier.size(140.mpx), fill = Color.Transparent) {}
+        }
         if (enabled && state == LivePreviewEngine.State.LOADING) OwnTVSpinner(sizeDp = 28)
         if (blocked && !playing) Text(stringResource(R.string.content_preview_single_stream), color = Color.White, style = stageText(18, 500))
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0.55f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.87f))))
