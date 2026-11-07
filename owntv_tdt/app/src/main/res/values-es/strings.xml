@@ -17,4 +17,13 @@
     <string name="stayon_settings_pending_music">Las conexiones musicales aparecerán cuando estén disponibles.</string>
     <string name="stayon_settings_pending_apps">La gestión de aplicaciones aparecerá cuando esté disponible.</string>
     <string name="stayon_settings_full_video">Ajustes de imagen, audio, TV en directo y grabaciones</string>
+    <string name="stayon_desc_general">Inicio, idioma, icono, deportes y avisos</string>
+    <string name="stayon_desc_sources">TDT, IPTV, radio, EPG, logos y metadatos</string>
+    <string name="stayon_desc_home">Secciones, widgets, accesos y disposición</string>
+    <string name="stayon_desc_playback">Vídeo, audio, subtítulos, timeshift y LOVEStv</string>
+    <string name="stayon_desc_appearance">Tema, tamaños, listas y tipografía</string>
+    <string name="stayon_desc_remote">Botones del mando, foco y atajos</string>
+    <string name="stayon_desc_music">Spotify, YouTube Music y Amazon Music</string>
+    <string name="stayon_desc_apps">Apps instaladas, favoritos y accesos</string>
+    <string name="stayon_desc_system">Actualizaciones, copias, red y televisor</string>
 </resources>
