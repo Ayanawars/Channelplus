@@ -158,7 +158,7 @@ class StayonRadioLibrary(context: Context) {
             var pendingLogo: String? = null
             val logoPattern = Regex("""tvg-logo\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
             for (raw in text.lineSequence()) {
-                val line = raw.trim().removePrefix("\uFEFF")
+                val line = raw.trim().removePrefix('\uFEFF'.toString())
                 if (line.startsWith("#EXTINF", true)) {
                     pendingName = line.substringAfterLast(',', "").trim().ifBlank { null }
                     pendingLogo = logoPattern.find(line)?.groupValues?.getOrNull(1)
