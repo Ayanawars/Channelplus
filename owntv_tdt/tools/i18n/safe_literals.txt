@@ -1487,3 +1487,9 @@
 1	regex	app/src/main/java/tv/own/owntv/features/settings/RadioLibrary.kt	tvg-logo\s*=\s*["']([^"']+)["']
 4	json	app/src/main/java/tv/own/owntv/features/settings/RadioLibrary.kt	url
 1	technical	app/src/main/java/tv/own/owntv/features/settings/RadioAudioPlayer.kt	/
+
+7	empty	app/src/main/java/tv/own/owntv/features/settings/RadioIptvSettingsScreen.kt	\0
+1	preference-key	app/src/main/java/tv/own/owntv/features/home/StayOnDashboard.kt	stayon_apps_settings
+1	preference-key	app/src/main/java/tv/own/owntv/features/home/StayOnDashboard.kt	hidden
+1	preference-key	app/src/main/java/tv/own/owntv/features/home/StayOnDashboard.kt	favorites
+1	preference-key	app/src/main/java/tv/own/owntv/features/home/StayOnDashboard.kt	show_non_tv
