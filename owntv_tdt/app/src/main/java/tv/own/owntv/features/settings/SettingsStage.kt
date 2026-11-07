@@ -722,7 +722,7 @@ fun StageSettingRow(
 @Composable
 private fun settingsRowAccent(): StageAccent =
     if (LocalSettingsNavigation.current != null && !LocalStagePalette.current.isLight)
-        StageAccent(Color(0xFFF4EBD8), Color(0xFF18202C), Color(0xFFF4EBD8)) else stageAccent
+        StageAccent(Color(0xFFF4F29A), Color.Black, Color(0xFFF4F29A)) else stageAccent
 
 private val FocusedDesc: Color @Composable get() = StageColors.FxLine
 
@@ -1198,7 +1198,7 @@ private fun SettingsListPage(
                     }
                     if (showPanel) Column(Modifier.width(490.mpx).fillMaxHeight()
                         .verticalScroll(androidx.compose.foundation.rememberScrollState())
-                        .stageGlass(16.mpx).padding(22.mpx)) {
+                        .background(Color(0xFF141414), RoundedCornerShape(12.mpx)).padding(22.mpx)) {
                         if (editor != null) SettingPanelEditor(editor, help,
                             onClosed = { panel.opener?.let { runCatching { it.requestFocus() } } })
                         else {
