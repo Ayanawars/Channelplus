@@ -27,7 +27,7 @@ internal class RadioPlaybackService : Service() {
     override fun onCreate() {
         super.onCreate()
         if (Build.VERSION.SDK_INT >= 26) {
-            getSystemService(NotificationManager::class.java).createNotificationChannel(
+            getSystemService(NotificationManager::class.java)?.createNotificationChannel(
                 NotificationChannel(CHANNEL, getString(R.string.stayon_radio_iptv_title), NotificationManager.IMPORTANCE_LOW)
             )
         }

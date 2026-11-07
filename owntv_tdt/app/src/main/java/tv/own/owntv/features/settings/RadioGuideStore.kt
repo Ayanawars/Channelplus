@@ -13,6 +13,7 @@ import org.json.JSONObject
 import tv.own.owntv.core.parser.XmltvParser
 import java.io.File
 import java.io.FilterInputStream
+import java.io.IOException
 import java.io.InputStream
 import java.io.PushbackInputStream
 import java.net.HttpURLConnection
@@ -168,7 +169,8 @@ internal class RadioGuideStore private constructor(context: Context) {
                             count++
                         }
                     })
-                    check(!bounded.exceeded && !wire.exceeded)
+                    bounded.failure?.let { throw it }
+                    wire.failure?.let { throw it }
                 }
             }
             require(channels.isNotEmpty())
@@ -189,26 +191,30 @@ internal class RadioGuideStore private constructor(context: Context) {
 private fun JSONArray.objects(): List<JSONObject> = List(length(), ::getJSONObject)
 
 private class RadioGuideLimit(input: InputStream, private var remaining: Int) : FilterInputStream(input) {
-    var exceeded = false
+    var failure: IOException? = null
         private set
 
-    override fun read(): Int {
+    override fun read(): Int = trackFailure {
         val result = super.read()
         if (result >= 0) consume(1)
-        return result
+        result
     }
 
-    override fun read(bytes: ByteArray, offset: Int, length: Int): Int {
+    override fun read(bytes: ByteArray, offset: Int, length: Int): Int = trackFailure {
         val result = super.read(bytes, offset, length)
         if (result > 0) consume(result)
-        return result
+        result
     }
 
     private fun consume(bytes: Int) {
         remaining -= bytes
-        if (remaining < 0) {
-            exceeded = true
-            throw java.io.IOException()
-        }
+        if (remaining < 0) throw IOException()
+    }
+
+    private inline fun trackFailure(read: () -> Int): Int = try {
+        read()
+    } catch (error: IOException) {
+        failure = error
+        throw error
     }
 }

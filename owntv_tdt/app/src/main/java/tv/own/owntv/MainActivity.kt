@@ -202,7 +202,7 @@ open class MainActivity : ComponentActivity() {
             // configuration changes, profile switches, or external deep links.
             var introVisible by remember {
                 mutableStateOf(
-                    this !is StayonHomeActivity &&
+                    this@MainActivity !is StayonHomeActivity &&
                         savedInstanceState == null &&
                         pendingDeepLink == null &&
                         intent.action == Intent.ACTION_MAIN
@@ -417,7 +417,7 @@ open class MainActivity : ComponentActivity() {
                             )
                             shellReady -> OwnTVShell(
                                 selectedSection = selectedSection,
-                                launcherEntry = this is StayonHomeActivity,
+                                launcherEntry = this@MainActivity is StayonHomeActivity,
                                 onSelectSection = viewModel::selectSection,
                                 themeMode = themeMode,
                                 uiZoomPercent = uiZoomPercent,
