@@ -146,6 +146,15 @@ class StayonRadioLibrary(context: Context) {
     }
 
     companion object {
+        @Volatile private var sharedInstance: StayonRadioLibrary? = null
+
+        /** Settings and Home share the same reactive radio library in this process. */
+        fun shared(context: Context): StayonRadioLibrary =
+            sharedInstance ?: synchronized(this) {
+                sharedInstance ?: StayonRadioLibrary(context.applicationContext)
+                    .also { sharedInstance = it }
+            }
+
         fun isStreamUrl(url: String): Boolean {
             val trim = url.trim()
             return trim.startsWith("https://", true) || trim.startsWith("http://", true)
