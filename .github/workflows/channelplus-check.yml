@@ -37,7 +37,7 @@ jobs:
           key: stayon-preview-signing-v1
       - name: Create preview-only signing key on first run
         if: steps.preview_signing.outputs.cache-hit != 'true'
-        run: keytool -genkeypair -keystore "$RUNNER_TEMP/stayon-preview.jks" -storepass android -keypass android -alias tunerprobe -keyalg RSA -keysize 3072 -validity 3650 -dname 'CN=STAYON+ PREVIEW DEBUG (NOT RELEASE)'
+        run: keytool -genkeypair -keystore "$RUNNER_TEMP/stayon-preview.jks" -storepass android -keypass android -alias tunerprobe -keyalg RSA -keysize 3072 -validity 3650 -dname 'CN=STAYON Preview Debug'
       - name: Check and build
         working-directory: owntv_tdt
         env:
