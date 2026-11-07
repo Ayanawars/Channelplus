@@ -376,7 +376,8 @@ private fun SettingPanelBody(help: SettingHelp) {
             }
         }
     }
-    if (help.hints.isNotEmpty()) StageKeyHints(help.hints, Modifier.padding(top = 20.mpx), textSize = 15)
+    if (help.hints.isNotEmpty() && LocalSettingsNavigation.current == null)
+        StageKeyHints(help.hints, Modifier.padding(top = 20.mpx), textSize = 15)
     help.footer?.invoke()
 }
 
@@ -1154,11 +1155,8 @@ private fun SettingsListPage(
     val eyebrow = stringResource(R.string.settings_breadcrumb_eyebrow,
         parents.lastOrNull() ?: stringResource(R.string.common_nav_settings), group).uppercase(locale)
     CompositionLocalProvider(LocalSettingsPanel provides panel, tv.own.owntv.ui.stage.LocalPopupEyebrow provides eyebrow) {
-        Row(modifier.fillMaxSize().padding(start = 54.mpx, end = 56.mpx, top = 128.mpx, bottom = 36.mpx),
-            horizontalArrangement = Arrangement.spacedBy(36.mpx)) {
-            Box(Modifier.width(350.mpx).fillMaxHeight()) { navigation.sidebar() }
-            Box(Modifier.width(1.mpx).fillMaxHeight().background(StageColors.Muted.copy(alpha = 0.2f)))
-            Column(Modifier.weight(1f).fillMaxHeight()) {
+        Column(modifier.fillMaxSize().padding(start = 54.mpx, end = 56.mpx, top = 128.mpx, bottom = 36.mpx)) {
+            Column(Modifier.fillMaxSize()) {
                 Row(Modifier.fillMaxWidth().padding(bottom = 24.mpx), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(20.mpx)) {
                     Column(Modifier.weight(1f)) {
@@ -1166,15 +1164,12 @@ private fun SettingsListPage(
                             maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(bottom = 5.mpx))
                         Text(group, style = stageText(40, 800), color = StageColors.Text,
                             maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        Text(count, style = stageText(17, 500), color = StageColors.Muted,
-                            maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 5.mpx))
                     }
                     if (tools != null) Row(horizontalArrangement = Arrangement.spacedBy(8.mpx), content = tools)
                     if (showSearch) StageSearchField(
                         query = query, onQueryChange = onQueryChange,
                         placeholder = stringResource(R.string.more_settings_search),
-                        modifier = Modifier.width(330.mpx).focusRequester(searchFocus)
-                            .focusProperties { left = navigation.categoryFocus },
+                        modifier = Modifier.width(330.mpx).focusRequester(searchFocus),
                         height = 50.mpx, radius = 12.mpx, horizontalPadding = 16.mpx,
                         autoEdit = searchAutoEdit, onActivate = onSearchActivate,
                     )
@@ -1189,7 +1184,7 @@ private fun SettingsListPage(
                 Row(Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(26.mpx)) {
                     Box(Modifier.weight(1f).fillMaxHeight()) {
                         val listModifier = Modifier.fillMaxSize().focusRequester(navigation.contentFocus)
-                            .focusRequester(rowsFocus).focusProperties { left = navigation.categoryFocus }.focusGroup()
+                            .focusRequester(rowsFocus).focusGroup()
                         if (list != null) list(listModifier)
                         else CompositionLocalProvider(LocalBringIntoViewSpec provides edgeScrollSpec) {
                             Column(listModifier.verticalScroll(scroll).padding(bottom = 24.mpx),
@@ -1207,16 +1202,6 @@ private fun SettingsListPage(
                         }
                     }
                 }
-                Box(Modifier.fillMaxWidth().height(1.mpx).background(StageColors.Muted.copy(alpha = 0.18f)))
-                Box(Modifier.fillMaxWidth().height(68.mpx).padding(top = 12.mpx)) {
-                    if (!showPanel && !help?.text.isNullOrBlank()) Text(help?.text.orEmpty(),
-                        style = stageText(17, 500), color = StageColors.Muted,
-                        maxLines = 2, overflow = TextOverflow.Ellipsis)
-                }
-                StageKeyHints(listOf(
-                    stringResource(R.string.common_ok) to stringResource(R.string.settings_menu_select),
-                    stringResource(R.string.common_back) to stringResource(R.string.settings_menu_return),
-                ), Modifier.padding(top = 16.mpx), textSize = 16)
             }
         }
     }
