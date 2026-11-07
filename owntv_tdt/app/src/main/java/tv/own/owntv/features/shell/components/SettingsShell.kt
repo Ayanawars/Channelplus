@@ -59,24 +59,17 @@ fun SettingsScreen(
     start: SettingsStart? = null,
     onStartConsumed: () -> Unit = {},
 ) {
-    var selected by rememberSaveable { mutableIntStateOf(start?.group?.takeUnless { it == SettingsGroup.PROFILE.ordinal } ?: SettingsGroup.APP.ordinal) }
+    // A full-width category hub instead of the old permanent left navigation rail.
+    // Deep links may still open a category directly.
+    val initialGroup = start?.group?.takeUnless { it == SettingsGroup.PROFILE.ordinal }
+        ?: if (openEpgAdd) SettingsGroup.SOURCES.ordinal else -1
+    var selected by rememberSaveable { mutableIntStateOf(initialGroup) }
     var navigationVersion by remember { mutableIntStateOf(0) }
-    var sidebarFocused by remember { mutableStateOf(false) }
-    val targets = remember { SettingsGroup.entries.associateWith { FocusRequester() } }
     val contentFocus = remember { FocusRequester() }
-    val active = sidebarParent(SettingsGroup.entries[selected.coerceIn(0, SettingsGroup.entries.lastIndex)])
     val navigation = SettingsNavigation(
-        categoryFocus = targets.getValue(active),
+        categoryFocus = contentFocus,
         contentFocus = contentFocus,
-        sidebar = {
-            SettingsSidebar(active, targets, contentFocus,
-                onFocus = { sidebarFocused = it },
-                onChoose = {
-                    selected = it.ordinal
-                    navigationVersion++
-                },
-            )
-        },
+        sidebar = {},
     )
     CompositionLocalProvider(
         LocalSettingsNavigation provides navigation,
@@ -88,19 +81,28 @@ fun SettingsScreen(
             ink = Color.White, glassTint = Color(0xFF141414), glassOff = Color(0xFF141414),
         ),
     ) {
-      Box(Modifier.fillMaxSize().background(Color.Black)) {
-        SettingsContent(
-            themeMode, uiZoomPercent, onSetZoom, fontCustomization, onSetFontCustomization,
-            onOpenPlaylist, modifier,
-            onBack = {
-                if (sidebarFocused) onBack?.invoke()
-                else runCatching { targets.getValue(active).requestFocus() }
-            },
-            openEpgAdd = openEpgAdd, onEpgAddConsumed = onEpgAddConsumed,
-            start = start, onStartConsumed = onStartConsumed,
-            selectedGroup = selected, onSelectGroup = { selected = it }, navigationVersion = navigationVersion,
-        )
-      }
+        Box(modifier.fillMaxSize().background(Color.Black)) {
+            if (selected < 0) {
+                androidx.activity.compose.BackHandler(enabled = onBack != null) { onBack?.invoke() }
+                SettingsHub(
+                    onChoose = { group ->
+                        selected = group.ordinal
+                        navigationVersion++
+                    },
+                )
+            } else {
+                SettingsContent(
+                    themeMode, uiZoomPercent, onSetZoom, fontCustomization, onSetFontCustomization,
+                    onOpenPlaylist, Modifier.fillMaxSize(),
+                    onBack = { selected = -1 },
+                    openEpgAdd = openEpgAdd, onEpgAddConsumed = onEpgAddConsumed,
+                    start = start, onStartConsumed = onStartConsumed,
+                    selectedGroup = selected,
+                    onSelectGroup = { selected = it },
+                    navigationVersion = navigationVersion,
+                )
+            }
+        }
     }
 }
 
@@ -149,80 +151,104 @@ internal fun settingsCategoryTitle(group: SettingsGroup): String = stringResourc
     else -> group.titleRes
 })
 
+/** The first (and only) category selector: no persistent left rail on detail pages. */
 @Composable
-private fun SettingsSidebar(
-    active: SettingsGroup,
-    targets: Map<SettingsGroup, FocusRequester>,
-    contentFocus: FocusRequester,
-    onFocus: (Boolean) -> Unit,
-    onChoose: (SettingsGroup) -> Unit,
-) {
-    val scope = rememberCoroutineScope()
+private fun SettingsHub(onChoose: (SettingsGroup) -> Unit) {
     val context = LocalContext.current
     val lemon = Color(0xFFF4F29A)
-    Column(Modifier.fillMaxSize()) {
-        Text(stringResource(R.string.channel_brand_name), style = stageText(30, 800), color = StageColors.Text,
-            maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text(stringResource(R.string.common_nav_settings), style = stageText(17, 500), color = StageColors.Muted,
-            modifier = Modifier.padding(top = 6.mpx, bottom = 30.mpx), maxLines = 1, overflow = TextOverflow.Ellipsis)
-        StageSurface(
-            onClick = {
-                val intent = Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                runCatching { context.startActivity(intent) }.onFailure {
-                    runCatching { context.startActivity(Intent(Settings.ACTION_DEVICE_INFO_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+    val ivory = Color(0xFFF5F3E8)
+    val nativeFocus = remember { FocusRequester() }
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        repeat(3) { withFrameNanos { } }
+        runCatching { nativeFocus.requestFocus() }
+    }
+    Column(
+        Modifier.fillMaxSize().padding(
+            start = 58.mpx, end = 58.mpx, top = 128.mpx, bottom = 38.mpx,
+        ),
+        verticalArrangement = Arrangement.spacedBy(20.mpx),
+    ) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.channel_brand_name), style = stageText(43, 800), color = ivory)
+            Spacer(Modifier.width(30.mpx))
+            Box(Modifier.width(2.mpx).height(43.mpx).background(Color(0xFF565650)))
+            Spacer(Modifier.width(30.mpx))
+            Text(stringResource(R.string.common_nav_settings), style = stageText(35, 700), color = ivory,
+                modifier = Modifier.weight(1f))
+            StageSurface(
+                onClick = { onChoose(SettingsGroup.QUICK) },
+                radius = 10.mpx, focusStyle = StageFocus.FILLED,
+                accent = StageAccent(lemon, Color.Black, lemon),
+                idle = Modifier.background(Color(0xFF171717), RoundedCornerShape(10.mpx)),
+                modifier = Modifier.height(48.mpx),
+            ) { focused ->
+                Row(Modifier.padding(horizontal = 20.mpx), verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.mpx)) {
+                    OwnTVIcon(OwnTVIcon.SPARKLE, if (focused) Color.Black else lemon, Modifier.size(21.mpx))
+                    Text(stringResource(R.string.settings_group_quick), style = stageText(18, 600),
+                        color = if (focused) Color.Black else ivory)
                 }
-            },
-            radius = 12.mpx, focusStyle = StageFocus.FILLED,
-            accent = StageAccent(lemon, Color.Black, lemon),
-            idle = Modifier.background(Color(0xFF151515), RoundedCornerShape(12.mpx)),
-            modifier = Modifier.fillMaxWidth().heightIn(min = 76.mpx).padding(bottom = 8.mpx),
-        ) { focused ->
-            Row(Modifier.fillMaxWidth().padding(horizontal = 14.mpx, vertical = 12.mpx),
-                horizontalArrangement = Arrangement.spacedBy(14.mpx), verticalAlignment = Alignment.CenterVertically) {
-                OwnTVIcon(OwnTVIcon.SETTINGS, if (focused) Color.Black else lemon, Modifier.size(25.mpx))
-                Column(Modifier.weight(1f)) {
-                    Text(stringResource(R.string.stayon_tv_settings), style = stageText(21, 700), color = if (focused) Color.Black else StageColors.Text)
-                    Text(stringResource(R.string.stayon_tv_settings_desc), style = stageText(14, 500), color = if (focused) Color.Black.copy(alpha = 0.74f) else StageColors.Muted)
-                }
-                OwnTVIcon(OwnTVIcon.CHEVRON, if (focused) Color.Black else StageColors.Muted, Modifier.size(18.mpx))
             }
         }
-        Column(
-            Modifier.weight(1f).focusGroup().onFocusChanged { onFocus(it.hasFocus) }
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(4.mpx),
-        ) {
-            categoryOrder.forEach { group ->
-                val selected = active == group
-                StageSurface(
-                    onClick = { onChoose(group) }, radius = 12.mpx, focusStyle = StageFocus.FILLED,
-                    accent = StageAccent(lemon, Color.Black, lemon),
-                    idle = if (selected) Modifier.background(lemon, RoundedCornerShape(12.mpx)) else Modifier,
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 62.mpx)
-                        .focusRequester(targets.getValue(group))
-                        .focusProperties { right = contentFocus }
-                        .onPreviewKeyEvent { event ->
-                            if (event.key == Key.DirectionRight) {
-                                if (event.type == KeyEventType.KeyDown) {
-                                    onChoose(group)
-                                    scope.launch {
-                                        repeat(4) { withFrameNanos { } }
-                                        runCatching { contentFocus.requestFocus() }
-                                    }
+        Box(Modifier.fillMaxWidth().height(2.mpx).background(lemon))
+        val groups: List<SettingsGroup?> = listOf(null) + categoryOrder.map { it }
+        groups.chunked(3).forEachIndexed { rowIndex, rowItems ->
+            Row(
+                Modifier.fillMaxWidth().weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(17.mpx),
+            ) {
+                rowItems.forEachIndexed { colIndex, group ->
+                    val first = rowIndex == 0 && colIndex == 0
+                    StageSurface(
+                        onClick = {
+                            if (group == null) {
+                                val nativeIntent = Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                runCatching { context.startActivity(nativeIntent) }.onFailure {
+                                    runCatching { context.startActivity(Intent(Settings.ACTION_DEVICE_INFO_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
                                 }
-                                true
-                            } else false
+                            } else onChoose(group)
                         },
-                ) { focused ->
-                    Row(Modifier.fillMaxWidth().padding(vertical = 12.mpx), verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(16.mpx)) {
-                        OwnTVIcon(group.sidebarIcon, if (selected || focused) Color.Black else StageColors.Muted, Modifier.size(25.mpx))
-                        Text(settingsCategoryTitle(group), style = stageText(21, if (selected) 700 else 500),
-                            color = if (selected || focused) Color.Black else StageColors.Muted,
-                            maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).padding(end = 12.mpx))
+                        radius = 14.mpx, focusStyle = StageFocus.FILLED,
+                        accent = StageAccent(lemon, Color.Black, lemon),
+                        idle = Modifier.background(Color(0xFF141414), RoundedCornerShape(14.mpx)),
+                        modifier = Modifier.weight(1f).fillMaxHeight()
+                            .then(if (first) Modifier.focusRequester(nativeFocus) else Modifier),
+                    ) { focused ->
+                        Column(Modifier.fillMaxSize().padding(24.mpx),
+                            verticalArrangement = Arrangement.spacedBy(12.mpx)) {
+                            OwnTVIcon(group?.sidebarIcon ?: OwnTVIcon.SETTINGS,
+                                if (focused) Color.Black else lemon, Modifier.size(29.mpx))
+                            Text(
+                                if (group == null) stringResource(R.string.stayon_tv_settings) else settingsCategoryTitle(group),
+                                style = stageText(25, 700),
+                                color = if (focused) Color.Black else ivory,
+                                maxLines = 1, overflow = TextOverflow.Ellipsis,
+                            )
+                            Text(
+                                if (group == null) stringResource(R.string.stayon_tv_settings_desc)
+                                else stringResource(settingsCategorySubtitleRes(group)),
+                                style = stageText(17, 500),
+                                color = if (focused) Color.Black.copy(alpha = 0.77f) else StageColors.Muted,
+                                maxLines = 2, overflow = TextOverflow.Ellipsis,
+                            )
+                        }
                     }
                 }
+                repeat(3 - rowItems.size) { Spacer(Modifier.weight(1f)) }
             }
         }
     }
+}
+
+private fun settingsCategorySubtitleRes(group: SettingsGroup): Int = when (group) {
+    SettingsGroup.APP -> R.string.stayon_desc_general
+    SettingsGroup.SOURCES -> R.string.stayon_desc_sources
+    SettingsGroup.HOME -> R.string.stayon_desc_home
+    SettingsGroup.PLAYER -> R.string.stayon_desc_playback
+    SettingsGroup.APPEARANCE -> R.string.stayon_desc_appearance
+    SettingsGroup.REMOTE -> R.string.stayon_desc_remote
+    SettingsGroup.MUSIC -> R.string.stayon_desc_music
+    SettingsGroup.APPLICATIONS -> R.string.stayon_desc_apps
+    SettingsGroup.SYSTEM -> R.string.stayon_desc_system
+    else -> R.string.stayon_desc_general
 }
