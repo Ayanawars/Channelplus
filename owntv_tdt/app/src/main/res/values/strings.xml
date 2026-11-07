@@ -71,4 +71,6 @@
     <string name="stayon_radio_delete_station">Delete station %1$s?</string>
     <string name="stayon_radio_delete_playlist">Delete playlist %1$s?</string>
     <string name="stayon_radio_delete_confirm">This removes only this radio item from STAYON+, not any television source.</string>
+    <string name="stayon_radio_failed">Could not load this radio list. Check the URL and try again.</string>
+    <string name="stayon_radio_player_error">Playback failed (%1$s).</string>
 </resources>
