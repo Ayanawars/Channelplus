@@ -26,12 +26,22 @@ jobs:
         with:
           name: apk-signing-tool
           path: owntv_tdt/app/apksigner.jar
-      - name: Create disposable CI signing key
-        run: keytool -genkeypair -keystore "$RUNNER_TEMP/ci.jks" -storepass android -keypass android -alias tunerprobe -keyalg RSA -validity 30 -dname 'CN=Channelplus CI'
+      # Preview-only debug key (not the production release certificate).
+      # Keep it stable across runs of this PR so testing updates does not require a reinstall.
+      # GitHub Actions cache is scoped to this workflow/branch, never committed or published.
+      - name: Recover preview signing key
+        id: preview_signing
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/stayon-preview.jks
+          key: stayon-preview-signing-v1
+      - name: Create preview-only signing key on first run
+        if: steps.preview_signing.outputs.cache-hit != 'true'
+        run: keytool -genkeypair -keystore "$RUNNER_TEMP/stayon-preview.jks" -storepass android -keypass android -alias tunerprobe -keyalg RSA -keysize 3072 -validity 3650 -dname 'CN=STAYON+ PREVIEW DEBUG (NOT RELEASE)'
       - name: Check and build
         working-directory: owntv_tdt
         env:
-          CHANNELPLUS_TEST_KEYSTORE: ${{ runner.temp }}/ci.jks
+          CHANNELPLUS_TEST_KEYSTORE: ${{ runner.temp }}/stayon-preview.jks
         run: ./gradlew :app:testStandardDebugUnitTest :owntv_core_tdt:core:testDebugUnitTest :owntv_core_tdt:player-core:testDebugUnitTest :app:assembleStandardDebug --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g -Dfile.encoding=UTF-8" -Pkotlin.daemon.jvmargs=-Xmx3g
       - uses: actions/upload-artifact@v4
         with:
