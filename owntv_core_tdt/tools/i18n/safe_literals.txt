@@ -538,6 +538,8 @@
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	ALTER TABLE `epg_channels` ADD COLUMN `normId` TEXT
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	ALTER TABLE `epg_channels` ADD COLUMN `normName` TEXT
 1	sql	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	ALTER TABLE `epg_programmes` ADD COLUMN `categories` TEXT
+1	sql	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	ALTER TABLE `epg_programmes` ADD COLUMN `imageUrl` TEXT
+1	room-schema	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	imageUrl
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	ALTER TABLE `epg_programmes` ADD COLUMN `contentHash` INTEGER NOT NULL DEFAULT 0
 1	sql	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	ALTER TABLE `epg_programmes` ADD COLUMN `episode` TEXT
 1	sql	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	ALTER TABLE `epg_programmes` ADD COLUMN `lengthMin` INTEGER
@@ -852,7 +854,7 @@
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	directSource
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	drmConfig
 4	log	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	epg_channels
-2	room-schema	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	epg_programmes
+3	room-schema	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	epg_programmes
 3	room-schema	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	episodes
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	episodesSyncedAt
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	episodes_fts
