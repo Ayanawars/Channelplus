@@ -54,6 +54,10 @@ fun EpgSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier, startOnA
     val autoRefreshMap by vm.autoRefresh.collectAsStateWithLifecycle()
     val useLogosIds by vm.useLogos.collectAsStateWithLifecycle()
     val deletingIds by vm.deletingIds.collectAsStateWithLifecycle()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val artworkEnabled by remember(context) { EpgArtworkPreferences.observe(context) }
+        .collectAsStateWithLifecycle()
+
 
     var editing by remember { mutableStateOf<EpgSource?>(null) }
     var adding by remember { mutableStateOf(startOnAdd) }
@@ -135,6 +139,15 @@ fun EpgSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier, startOnA
             )
         },
     ) {
+        StageSettingsHeading(stringResource(R.string.stayon_epg_artwork_section), null, first = true)
+        StageSettingRow(
+            icon = OwnTVIcon.IMAGE,
+            title = stringResource(R.string.stayon_epg_artwork_enabled),
+            desc = stringResource(R.string.stayon_epg_artwork_enabled_desc),
+            value = SettingValue.Switch(artworkEnabled),
+            onClick = { EpgArtworkPreferences.setEnabled(context, !artworkEnabled) },
+        )
+        StageSettingsHeading(stringResource(R.string.settings_epg_sources_title), sources.size)
         if (sources.isEmpty()) StageSettingsNote(stringResource(R.string.settings_epg_sources_empty), null)
         sources.forEachIndexed { index, source ->
             val syncState by remember(source.id) { vm.observeSync(source.id) }
