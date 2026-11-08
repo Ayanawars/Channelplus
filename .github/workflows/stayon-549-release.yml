@@ -2,7 +2,7 @@ name: Publish official STAYON+ 5.4.9
 on:
   push:
     branches: [release/stayon-549-publisher]
-    paths: [.github/workflows/stayon-549-release.yml, .github/stayon-release/stayon549-reconstruction.b64]
+    paths: [.github/workflows/stayon-549-release.yml, .github/stayon-release/stayon549-mini.b64]
 permissions:
   contents: write
   actions: read
@@ -23,7 +23,7 @@ jobs:
           set -euo pipefail
           gh run download 42504438486 --repo "$GITHUB_REPOSITORY" --name StayON-5.4.9-unsigned-release --dir "$RUNNER_TEMP/unsigned"
           gh run download 42504438486 --repo "$GITHUB_REPOSITORY" --name apk-signing-tool --dir "$RUNNER_TEMP/signing-tool"
-          python3 .github/stayon-release/rebuild_signed_apk.py "$RUNNER_TEMP/unsigned/app-standard-release-unsigned.apk" .github/stayon-release/stayon549-reconstruction.b64 "$RUNNER_TEMP/STAYONplus-5.4.9.apk"
+          python3 .github/stayon-release/rebuild_signed_apk.py "$RUNNER_TEMP/unsigned/app-standard-release-unsigned.apk" .github/stayon-release/stayon549-mini.b64 "$RUNNER_TEMP/STAYONplus-5.4.9.apk"
           printf '%s  %s\n' 580bb9aca689daab16f44d67ab616b831d17249190c867501e2a14fd962f5faf "$RUNNER_TEMP/STAYONplus-5.4.9.apk" | sha256sum -c
           java -jar "$RUNNER_TEMP/signing-tool/apksigner.jar" verify --print-certs "$RUNNER_TEMP/STAYONplus-5.4.9.apk" | grep -F 801bde35b2bcefcfe4fa65348b59d8e9b7053600b88842116e22f1979724be2f
       - name: Publish verified 5.4.9 release
