@@ -260,6 +260,7 @@ object XmltvParser {
         var inRating = false
         private var lengthMin: Int? = null
         private var episode: String? = null
+        private var imageUrl: String? = null
 
         suspend fun start(parser: XmlPullParser) {
             when (parser.name) {
@@ -287,14 +288,24 @@ object XmltvParser {
                     // xmltv_ns is normalised ("S1 E3"), so it wins over a broadcaster's own form.
                     if (parsed != null && (episode == null || system.equals("xmltv_ns", true))) episode = parsed
                 }
+                // XMLTV per-programme artwork is distinct from <channel><icon>.
+                // Accept the usual <icon src>, <image src>, <image url>, and text <image> URL.
+                "icon", "image" -> {
+                    val attr = parser.getAttributeValue(null, "src") ?: parser.getAttributeValue(null, "url")
+                    val candidate = (attr ?: readText(parser)).trim()
+                    if (imageUrl == null && candidate.length in 1..2048 &&
+                        (candidate.startsWith("https://", true) || candidate.startsWith("http://", true))) {
+                        imageUrl = candidate
+                    }
+                }
             }
         }
 
         fun result(): EpgDetails =
-            if (categories == null && year == null && rating == null && lengthMin == null && episode == null) {
+            if (categories == null && year == null && rating == null && lengthMin == null && episode == null && imageUrl == null) {
                 EpgDetails.NONE
             } else {
-                EpgDetails(categories?.let(XmltvDetailRules::categories), year, rating, lengthMin, episode)
+                EpgDetails(categories?.let(XmltvDetailRules::categories), year, rating, lengthMin, episode, imageUrl)
             }
     }
 

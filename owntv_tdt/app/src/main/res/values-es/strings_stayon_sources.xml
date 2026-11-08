@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stayon_tv_tdt">Canales TDT</string>
+    <string name="stayon_tv_iptv">Canales IPTV</string>
+    <string name="stayon_add_tdt">Añadir TDT</string>
+    <string name="stayon_add_iptv">Añadir IPTV</string>
+    <string name="stayon_iptv_manual">Introducir datos de IPTV</string>
+    <string name="stayon_radio_tdt">Canales TDT Radio</string>
+    <string name="stayon_radio_tdt_import">Importar o actualizar emisoras</string>
+    <string name="stayon_radio_tdt_desc">Importa los servicios de audio que ya están sintonizados en el televisor.</string>
+    <string name="stayon_radio_tdt_empty">El sintonizador no devolvió ningún servicio.</string>
+    <string name="stayon_radio_tdt_failed">No se pudo acceder a las emisoras de radio TDT.</string>
+    <string name="stayon_radio_tdt_remove">¿Quitar %1$s de STAYON+?</string>
+    <string name="stayon_radio_tdt_remove_description">Se quitará solo de la aplicación.</string>
+    <string name="stayon_epg_tv">EPG TV</string>
+    <string name="stayon_radio_classify">Clasificar TV y radio</string>
+    <string name="stayon_radio_classify_desc">Pulsa OK sobre un servicio para cambiar entre TV y Radio y luego guarda.</string>
+    <string name="stayon_radio_none_selected">No se marcó ningún servicio como radio.</string>
+</resources>

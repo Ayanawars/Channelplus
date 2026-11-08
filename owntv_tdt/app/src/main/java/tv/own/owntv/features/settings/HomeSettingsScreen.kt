@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Text
 import org.koin.androidx.compose.koinViewModel
+import kotlinx.coroutines.launch
 import tv.own.owntv.R
 import tv.own.owntv.core.model.HeroKind
 import tv.own.owntv.core.model.HomeRow
@@ -45,6 +46,10 @@ import tv.own.owntv.ui.theme.stageText
 @Composable
 fun HomeSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     val vm: HomeSettingsViewModel = koinViewModel()
+    val repo = org.koin.compose.koinInject<tv.own.owntv.core.settings.SettingsRepository>()
+    val stayonLayout by repo.stayonHomeLayout.collectAsStateWithLifecycle(tv.own.owntv.core.settings.StayonHomeLayout())
+    val editScope = androidx.compose.runtime.rememberCoroutineScope()
+    var editStayonHome by remember { mutableStateOf(false) }
     val settingsVm: SettingsViewModel = koinViewModel()
     val config by vm.config.collectAsStateWithLifecycle()
     val trendingAvailability by vm.trendingAvailability.collectAsStateWithLifecycle()
@@ -56,6 +61,7 @@ fun HomeSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
 
     val rowsFocus = remember { FocusRequester() }
     val actionsFocus = remember { FocusRequester() }
+    val fullWidth = LocalSettingsNavigation.current != null
     val rowFocus = remember { HomeRow.entries.associateWith { FocusRequester() } }
     // The row being moved with ▲ ▼ (Hold OK, or Move in the panel); OK or Back ends it.
     var moving by remember { mutableStateOf<HomeRow?>(null) }
@@ -76,6 +82,13 @@ fun HomeSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
         rowsFocus = rowsFocus,
         handleBack = moving == null,
     ) {
+        StageSettingRow(OwnTVIcon.HOME, stringResource(R.string.stayon_home_edit), null,
+            SettingValue.Opens(null), onClick = { editStayonHome = true })
+        if (editStayonHome) {
+            tv.own.owntv.features.home.StayonHomeEditor(stayonLayout, onPreview = {}, onSave = { layout ->
+                editScope.launch { repo.setStayonHomeLayout(layout); editStayonHome = false }
+            }, onDismiss = { editStayonHome = false })
+        }
         StageSettingsHeading(stringResource(R.string.home_row_now_trending), null, first = true)
         val trendingTitle = stringResource(R.string.home_row_now_trending)
         val trendingValue = SettingValue.Switch(trendingEnabled)
@@ -129,6 +142,7 @@ fun HomeSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                     StageAction(OwnTVIcon.MOVE, stringResource(R.string.settings_home_move_row), startMove),
                     liveMode?.let { mode -> StageAction(OwnTVIcon.GRID, mode.displayLabel(), { vm.setLiveRowMode(row, mode.toggled()) }) },
                 )
+                var showActions by remember { mutableStateOf(false) }
                 val isMoving = moving == row
                 val title = row.displayTitle()
                 val hiddenWord = stringResource(R.string.settings_hidden)
@@ -145,7 +159,11 @@ fun HomeSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                             maxLines = 1, overflow = TextOverflow.Ellipsis,
                         )
                     },
-                    onClick = { if (isMoving) moving = null else { acting = row; runCatching { actionsFocus.requestFocus() } } },
+                    onClick = {
+                        if (isMoving) moving = null
+                        else if (fullWidth) showActions = true
+                        else { acting = row; runCatching { actionsFocus.requestFocus() } }
+                    },
                     onLongClick = startMove,
                     marked = isMoving,
                     keepPanel = acting == row,
@@ -165,7 +183,11 @@ fun HomeSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                     ),
                     modifier = Modifier
                         .focusRequester(focus)
-                        .focusProperties { if (!isMoving) right = actionsFocus }
+                        .then(when {
+                            isMoving -> Modifier
+                            fullWidth -> Modifier.openSettingsActionsOnRight { showActions = true }
+                            else -> Modifier.focusProperties { right = actionsFocus }
+                        })
                         .onFocusChanged { if (it.isFocused) acting = null }
                         .onPreviewKeyEvent { e ->
                             if (!isMoving) return@onPreviewKeyEvent false
@@ -178,6 +200,7 @@ fun HomeSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                             true
                         },
                 )
+                if (showActions) SettingsActionPopup(title, actions) { showActions = false }
             }
         }
 

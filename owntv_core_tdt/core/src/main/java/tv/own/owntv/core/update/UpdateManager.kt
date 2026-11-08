@@ -202,12 +202,37 @@ class UpdateManager(
      * APK is otherwise only rejected by the installer itself, which reports nothing to us and shows
      * the user a bare "App not installed" — the failure this whole guard exists to explain.
      */
+    @Suppress("DEPRECATION")
     private fun verifyApk(apk: File) {
-        val info = context.packageManager.getPackageArchiveInfo(apk.absolutePath, 0)
+        val manager = context.packageManager
+        val modernSigning = android.os.Build.VERSION.SDK_INT >= 28
+        val flags = if (modernSigning) android.content.pm.PackageManager.GET_SIGNING_CERTIFICATES
+            else android.content.pm.PackageManager.GET_SIGNATURES
+        val info = manager.getPackageArchiveInfo(apk.absolutePath, flags)
             ?: throw DamagedDownloadException("unparseable APK (${apk.length()} bytes)")
         if (info.packageName != context.packageName) {
             throw DamagedDownloadException("wrong package ${info.packageName}")
         }
+        val installed = manager.getPackageInfo(context.packageName, flags)
+        val trusted = if (modernSigning) {
+            val current = installed.signingInfo
+            val incoming = info.signingInfo
+            if (current == null || incoming == null) false
+            else if (current.hasMultipleSigners() || incoming.hasMultipleSigners()) {
+                val expected = current.apkContentsSigners.orEmpty().toSet()
+                expected.isNotEmpty() && expected == incoming.apkContentsSigners.orEmpty().toSet()
+            } else {
+                val signer = current.signingCertificateHistory?.lastOrNull()
+                signer != null && incoming.signingCertificateHistory.orEmpty().contains(signer)
+            }
+        } else {
+            val expected = installed.signatures.orEmpty().toSet()
+            expected.isNotEmpty() && expected == info.signatures.orEmpty().toSet()
+        }
+        if (!trusted) throw DamagedDownloadException("APK signing certificate mismatch")
+        val incomingVersion = if (modernSigning) info.longVersionCode else info.versionCode.toLong()
+        val installedVersion = if (modernSigning) installed.longVersionCode else installed.versionCode.toLong()
+        if (incomingVersion <= installedVersion) throw DamagedDownloadException("APK version code is not newer")
     }
 
     /**

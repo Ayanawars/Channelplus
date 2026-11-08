@@ -144,7 +144,7 @@ fun BackupScreen(
     }
 
     // The counts the warning card names, from More's read-only view model.
-    val counts: tv.own.owntv.features.more.MoreCountsViewModel = koinViewModel()
+    val counts: BackupCountsViewModel = koinViewModel()
     val lastBackup by counts.lastBackup.collectAsStateWithLifecycle()
     val favorites by counts.favorites.collectAsStateWithLifecycle()
     val history by counts.history.collectAsStateWithLifecycle()

@@ -37,9 +37,10 @@ class TunerSourceSyncer(
         val ownerFilter = if (sourceUri.getQueryParameter("ownerFilter") == "1") provider else null
         val manager = context.getSystemService(TvInputManager::class.java)
         check(manager?.tvInputList?.any { it.id == input } == true) { context.getString(tv.own.owntv.core.R.string.tuner_missing) }
-        val stations = readStations(input, ownerFilter)
-        // A denied/filtered read must never erase the previous working list.
-        check(stations.isNotEmpty()) { context.getString(tv.own.owntv.core.R.string.tuner_empty) }
+        val (stations, confirmedRadioOnly) = readStations(input, ownerFilter, applyRadioChoices = provider != PLUTO_PACKAGE)
+        // An unreadable provider must never erase the previous working list. A confirmed
+        // classification that moves every visible service to radio may clear the TV list.
+        check(stations.isNotEmpty() || confirmedRadioOnly) { context.getString(tv.own.owntv.core.R.string.tuner_empty) }
         val categoryKey = if (provider == PLUTO_PACKAGE) "pluto:$input" else "antenna"
         val categoryName = if (provider == PLUTO_PACKAGE) PLUTO_LABEL else context.getString(tv.own.owntv.core.R.string.tuner_antenna_name)
         var category = categories.findByRemoteIds(source.id, MediaType.LIVE, listOf(categoryKey)).firstOrNull()
@@ -74,16 +75,27 @@ class TunerSourceSyncer(
         }
     }
 
-    private suspend fun readStations(input: String, ownerFilter: String? = null): List<Station> {
+    private suspend fun readStations(
+        input: String,
+        ownerFilter: String? = null,
+        applyRadioChoices: Boolean = true,
+    ): Pair<List<Station>, Boolean> {
         val columns = arrayOf(TvContract.Channels._ID, TvContract.Channels.COLUMN_DISPLAY_NAME,
             TvContract.Channels.COLUMN_DISPLAY_NUMBER, TvContract.Channels.COLUMN_SERVICE_TYPE,
             TvContract.Channels.COLUMN_PACKAGE_NAME, TvContract.Channels.COLUMN_VIDEO_FORMAT)
         val stations = ArrayList<Station>()
+        var matched = 0
+        var confirmedRadio = 0
+        val classification = if (applyRadioChoices) TunerRadioClassification.read(context, input) else emptyMap()
         context.contentResolver.query(TvContract.buildChannelsUriForInput(input), columns, null, null, null)?.use { c ->
             while (c.moveToNext()) {
                 currentCoroutineContext().ensureActive()
-                if (c.getString(3) == TvContract.Channels.SERVICE_TYPE_AUDIO) continue
                 if (ownerFilter != null && c.getString(4) != ownerFilter) continue
+                matched++
+                val choice = classification[c.getLong(0)]
+                if (choice == true) confirmedRadio++
+                val radio = choice ?: (c.getString(3) == TvContract.Channels.SERVICE_TYPE_AUDIO)
+                if (radio) continue
                 stations += Station(c.getLong(0), c.getString(1) ?: context.getString(tv.own.owntv.core.R.string.tuner_channel_name, c.getLong(0)), c.getString(2)?.toIntOrNull(),
                     when (c.getString(5)) {
                         "VIDEO_FORMAT_4320P" -> 4320
@@ -96,14 +108,14 @@ class TunerSourceSyncer(
                     })
             }
         }
-        return stations
+        return stations to (matched > 0 && matched == confirmedRadio)
     }
 
     suspend fun refreshGuide(source: SourceEntity, storeId: Long = source.id): Int {
         val sourceUri = Uri.parse(source.url)
         val input = sourceUri.getQueryParameter("input") ?: error(context.getString(tv.own.owntv.core.R.string.tuner_missing))
         val ownerFilter = if (sourceUri.getQueryParameter("ownerFilter") == "1") sourceProvider(sourceUri) else null
-        val stations = readStations(input, ownerFilter)
+        val (stations) = readStations(input, ownerFilter, applyRadioChoices = sourceProvider(sourceUri) != PLUTO_PACKAGE)
         check(stations.isNotEmpty()) { context.getString(tv.own.owntv.core.R.string.tuner_empty) }
         val now = System.currentTimeMillis()
         var count = 0

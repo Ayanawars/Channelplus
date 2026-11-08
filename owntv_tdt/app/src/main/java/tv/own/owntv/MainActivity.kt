@@ -202,7 +202,8 @@ open class MainActivity : ComponentActivity() {
             // configuration changes, profile switches, or external deep links.
             var introVisible by remember {
                 mutableStateOf(
-                    savedInstanceState == null &&
+                    this@MainActivity !is StayonHomeActivity &&
+                        savedInstanceState == null &&
                         pendingDeepLink == null &&
                         intent.action == Intent.ACTION_MAIN
                 )
@@ -244,16 +245,12 @@ open class MainActivity : ComponentActivity() {
             val bgImagePath by viewModel.bgImagePath.collectAsStateWithLifecycle()
             val glassConfig by viewModel.glassConfig.collectAsStateWithLifecycle()
             val background by viewModel.backgroundConfig.collectAsStateWithLifecycle()
-            val avatarId by viewModel.avatarId.collectAsStateWithLifecycle()
-            val avatarPath by viewModel.avatarPath.collectAsStateWithLifecycle()
-            val profileName by viewModel.profileName.collectAsStateWithLifecycle()
             val sourceSummary by viewModel.sourceSummary.collectAsStateWithLifecycle()
             val playlists by viewModel.playlists.collectAsStateWithLifecycle()
             val activePlaylistId by viewModel.activePlaylistId.collectAsStateWithLifecycle()
             val weather by viewModel.weather.collectAsStateWithLifecycle()
             val weatherFahrenheit by viewModel.weatherFahrenheit.collectAsStateWithLifecycle()
             val selectedSection by viewModel.selectedSection.collectAsStateWithLifecycle()
-            val visibleSections by viewModel.visibleSections.collectAsStateWithLifecycle()
             val activeProfileId by viewModel.activeProfileId.collectAsStateWithLifecycle()
             val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
 
@@ -396,6 +393,7 @@ open class MainActivity : ComponentActivity() {
                         Box(modifier = Modifier.fillMaxSize()) {
                         val profile = activeProfileId
                         when {
+                            introVisible -> Unit // The intro has exclusive use of the video decoder.
                             profile == null || !profilesLoaded -> Unit // active id / Room list loading
                             // Adding a profile from the gate → onboard the new profile.
                             addingProfile -> Onboarding(
@@ -416,19 +414,13 @@ open class MainActivity : ComponentActivity() {
                             )
                             shellReady -> OwnTVShell(
                                 selectedSection = selectedSection,
-                                visibleSections = visibleSections,
+                                launcherEntry = this@MainActivity is StayonHomeActivity,
                                 onSelectSection = viewModel::selectSection,
                                 themeMode = themeMode,
                                 uiZoomPercent = uiZoomPercent,
                                 onSetZoom = viewModel::setUiZoom,
                                 fontCustomization = fontCustomization,
                                 onSetFontCustomization = viewModel::setFontCustomization,
-                                avatarId = avatarId,
-                                onSetAvatar = viewModel::setAvatar,
-                                avatarPath = avatarPath,
-                                onSetCustomAvatar = { file -> viewModel.setCustomAvatar(file) },
-                                onClearCustomAvatar = viewModel::clearCustomAvatar,
-                                profileName = profileName,
                                 sourceSummary = sourceSummary,
                                 playlists = playlists,
                                 activePlaylistId = activePlaylistId,

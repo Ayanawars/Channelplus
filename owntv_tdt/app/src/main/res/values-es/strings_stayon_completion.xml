@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stayon_radio_epg">EPG Radios</string>
+    <string name="stayon_radio_epg_desc">Añade guías XMLTV o GZIP. Las guías de arriba tienen prioridad.</string>
+    <string name="stayon_radio_epg_url">URL de XMLTV</string>
+    <string name="stayon_radio_epg_error">No se pudo guardar la guía. Revisa la URL, el tamaño y las plazas disponibles.</string>
+    <string name="stayon_home_edit">Editar Inicio</string>
+    <string name="stayon_home_scale">Escala de Inicio</string>
+    <string name="stayon_home_start_tab">Pestaña de Inicio predeterminada</string>
+    <string name="stayon_home_tabs">Pestañas de Inicio</string>
+    <string name="stayon_home_widgets">Widgets de TV</string>
+    <string name="stayon_home_favorite">Canal favorito</string>
+    <string name="stayon_home_sports">Deportes</string>
+    <string name="stayon_home_broadcasters">Operadores de TV</string>
+    <string name="stayon_home_widget_controls">OK para mostrar u ocultar. Izquierda o derecha para mover. Mantén OK para cambiar el tamaño.</string>
+    <string name="stayon_music_app_unavailable">App no disponible en este televisor</string>
+    <string name="stayon_music_app_desc">Abre las apps de música instaladas desde Inicio. Cada servicio gestiona su reproducción.</string>
+    <string name="stayon_launcher_offer">Ofrecer STAYON+ como launcher</string>
+    <string name="stayon_launcher_offer_desc">Activa la opción y elige la app de Inicio predeterminada en los ajustes de Android.</string>
+    <string name="stayon_launcher_system">Ajustes de Inicio de Android</string>
+    <string name="stayon_launcher_unavailable">Este televisor no ofrece la selección de la app de Inicio.</string>
+    <string name="stayon_launcher_disable">¿Retirar STAYON+ de las opciones de launcher?</string>
+    <string name="stayon_launcher_disable_desc">Si STAYON+ era el launcher predeterminado, Android elegirá o te pedirá otra app de Inicio.</string>
+    <string name="stayon_apps_reset_order">Restaurar orden de las apps</string>
+    <string name="stayon_apps_reset_order_desc">Vuelve al orden alfabético, con las favoritas primero.</string>
+    <string name="stayon_home_broadcaster_logo_sizes">Tamaño de los logos de LOVEStv</string>
+    <string name="stayon_epg_assign_channel">Asignar EPG por canal</string>
+    <string name="stayon_epg_assign_channel_desc">Busca un canal de TV y elige su entrada en la guía.</string>
+    <string name="stayon_epg_assign_empty">No se encontraron canales de TV</string>
+</resources>

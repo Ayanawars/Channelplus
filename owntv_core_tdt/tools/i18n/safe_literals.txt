@@ -540,6 +540,7 @@
 1	sql	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	ALTER TABLE `epg_programmes` ADD COLUMN `categories` TEXT
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	ALTER TABLE `epg_programmes` ADD COLUMN `contentHash` INTEGER NOT NULL DEFAULT 0
 1	sql	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	ALTER TABLE `epg_programmes` ADD COLUMN `episode` TEXT
+1	sql	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	ALTER TABLE `epg_programmes` ADD COLUMN `imageUrl` TEXT
 1	sql	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	ALTER TABLE `epg_programmes` ADD COLUMN `lengthMin` INTEGER
 1	sql	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	ALTER TABLE `epg_programmes` ADD COLUMN `rating` TEXT
 1	sql	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	ALTER TABLE `epg_programmes` ADD COLUMN `year` INTEGER
@@ -852,13 +853,14 @@
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	directSource
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	drmConfig
 4	log	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	epg_channels
-2	room-schema	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	epg_programmes
+3	room-schema	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	epg_programmes
 3	room-schema	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	episodes
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	episodesSyncedAt
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	episodes_fts
 3	room-schema	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	httpHeaders
 1	sql	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	httpReferer
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	iconUrl
+1	room-schema	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	imageUrl
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	livePrerollSecs
 1	sql	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	liveTuneTimeoutSecs
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/OwnTVDatabase.kt	mac
@@ -2598,11 +2600,12 @@
 1	protocol	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	display-name
 2	protocol	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	duplicateChannelsSkipped=${metrics.duplicateChannelsSkipped}
 1	technical	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	episode-num
-1	protocol	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	http://
+2	protocol	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	http://
 1	protocol	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	http://xmlpull.org/v1/doc/features.html#relaxed
-1	protocol	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	https://
-1	protocol	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	icon
+2	protocol	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	https://
+2	protocol	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	icon
 1	protocol	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	id
+1	protocol	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	image
 1	technical	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	length
 1	protocol	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	parse end channels=$channels programmes=$programmes skipped=${metrics.skippedProgrammes}
 1	protocol	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	parse progress items=$items channels=$channels programmes=$programmes skipped=${metrics.skippedProgrammes}
@@ -2612,7 +2615,7 @@
 2	protocol	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	programme
 2	protocol	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	programmeFilterHit=${metrics.programmeFilterHit} programmeFilterMiss=${metrics.programmeFilterMiss}
 2	technical	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	rating
-1	protocol	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	src
+2	protocol	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	src
 1	protocol	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	start
 1	protocol	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	stop
 2	technical	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	system
@@ -2620,6 +2623,7 @@
 1	protocol	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	totalMs=${now - startedAt}
 1	protocol	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	totalParseOrReadMs=${metrics.parseOrReadMs} totalCallbackMs=${metrics.callbackMs}
 1	technical	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	units
+1	protocol	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	url
 1	technical	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	value
 1	technical	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	xmltv_ns
 1	protocol	core/src/main/java/tv/own/owntv/core/parser/XmltvParser.kt	—
@@ -3344,6 +3348,7 @@
 1	technical	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	startup_mode_
 1	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	startup_mode_$pid
 4	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	startup_mode_$profileId
+1	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	stayon_home_layout
 1	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sub_font
 1	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sub_scale
 1	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	sub_scale_exo
@@ -3376,6 +3381,8 @@
 1	preference-key	core/src/main/java/tv/own/owntv/core/settings/SettingsRepository.kt	weather_location
 2	technical	core/src/main/java/tv/own/owntv/core/settings/SourceOverrides.kt	Referer
 1	technical	core/src/main/java/tv/own/owntv/core/settings/SourceOverrides.kt	catchup
+5	technical	core/src/main/java/tv/own/owntv/core/settings/StayonHomeLayout.kt	,
+1	technical	core/src/main/java/tv/own/owntv/core/settings/StayonHomeLayout.kt	|
 1	empty	core/src/main/java/tv/own/owntv/core/setup/SetupText.kt	\0
 1	protocol	core/src/main/java/tv/own/owntv/core/setup/SetupText.kt	Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG250 stbapp ver: 2 rev: 250 Safari/533.3
 1	protocol	core/src/main/java/tv/own/owntv/core/setup/SetupText.kt	Mozilla/5.0 (QtEmbedded; U; Linux; C) AppleWebKit/533.3 (KHTML, like Gecko) MAG254 stbapp ver: 2 rev: 250 Safari/533.3
@@ -4870,6 +4877,11 @@
 1	log	core/src/main/java/tv/own/owntv/core/sync/SyncSupport.kt	refreshCategories upsert sourceId=${s.id} type=$type rows=${entities.size}
 1	log	core/src/main/java/tv/own/owntv/core/sync/SyncSupport.kt	skippedDuplicates=$skippedDuplicates elapsedMs=${SystemClock.elapsedRealtime() - chunkRunStart}
 1	log	core/src/main/java/tv/own/owntv/core/sync/SyncSupport.kt	totalSkipped=$skippedDuplicates totalUnique=${total[0]} filterMs=$filterMs elapsedMs=${SystemClock.elapsedRealtime() - chunkRunStart}
+1	empty	core/src/main/java/tv/own/owntv/core/sync/TunerRadioClassification.kt	\0
+1	regex	core/src/main/java/tv/own/owntv/core/sync/TunerRadioClassification.kt	\\btv\\b
+1	regex	core/src/main/java/tv/own/owntv/core/sync/TunerRadioClassification.kt	\\p{M}+
+1	regex	core/src/main/java/tv/own/owntv/core/sync/TunerRadioClassification.kt	^(?:radio(?:\\b|\\d)|rne\\b|r\\s?ne\\b|ser\\b|cadena (?:ser|100)\\b|cope\\b|onda cero\\b|los\\s?40\\b|rac\\s?[15]\\b|kiss fm\\b|europa fm\\b|rock fm\\b|melodia fm\\b|dial\\b|esradio\\b)
+1	preference-key	core/src/main/java/tv/own/owntv/core/sync/TunerRadioClassification.kt	stayon_tuner_classification
 1	sql	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	${TvContract.Channels.COLUMN_PACKAGE_NAME} = ?
 1	protocol	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	/HW
 3	protocol	core/src/main/java/tv/own/owntv/core/sync/TunerSourceSyncer.kt	1
@@ -5400,8 +5412,11 @@
 1	technical	core/src/main/java/tv/own/owntv/core/ui/stage/StageGlyph.kt	M9 18l6-6-6-6
 1	technical	core/src/main/java/tv/own/owntv/core/ui/stage/StageGlyph.kt	M9.5 2.5H14.5A2.5 2.5 0 0 1 17 5V19A2.5 2.5 0 0 1 14.5 21.5H9.5A2.5 2.5 0 0 1 7 19V5A2.5 2.5 0 0 1 9.5 2.5zM11 18.5h2
 1	technical	core/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	.apk
+1	technical	core/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	APK signing certificate mismatch
+1	technical	core/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	APK version code is not newer
 1	technical	core/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	Accept
 2	technical	core/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	Channelplus
+1	technical	core/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	DEPRECATION
 1	log	core/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	UpdateManager
 2	technical	core/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	User-Agent
 1	mime	core/src/main/java/tv/own/owntv/core/update/UpdateManager.kt	application/vnd.github+json

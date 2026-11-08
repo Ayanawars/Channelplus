@@ -14,6 +14,8 @@ data class EpgDetails(
     val rating: String? = null,
     val lengthMin: Int? = null,
     val episode: String? = null,
+    /** Artwork URL on the XMLTV programme (not the channel logo). */
+    val imageUrl: String? = null,
 ) {
     /** The categories as a list, in feed order. */
     val categoryList: List<String>

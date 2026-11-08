@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stayon_radio_epg">Radio EPG</string>
+    <string name="stayon_radio_epg_desc">Add XMLTV or GZIP feeds. Feeds at the top have priority.</string>
+    <string name="stayon_radio_epg_url">XMLTV URL</string>
+    <string name="stayon_radio_epg_error">The guide could not be saved. Check the URL, feed size and available slots.</string>
+    <string name="stayon_home_edit">Edit Home</string>
+    <string name="stayon_home_scale">Home scale</string>
+    <string name="stayon_home_start_tab">Default Home tab</string>
+    <string name="stayon_home_tabs">Home tabs</string>
+    <string name="stayon_home_widgets">TV widgets</string>
+    <string name="stayon_home_favorite">Favorite channel</string>
+    <string name="stayon_home_sports">Sports</string>
+    <string name="stayon_home_broadcasters">Broadcasters</string>
+    <string name="stayon_home_widget_controls">OK: show or hide. Left or right: move. Hold OK: resize.</string>
+    <string name="stayon_music_app_unavailable">App unavailable on this TV</string>
+    <string name="stayon_music_app_desc">Open installed music apps from Home. Playback is managed by each service.</string>
+    <string name="stayon_launcher_offer">Offer STAYON+ as a launcher</string>
+    <string name="stayon_launcher_offer_desc">Enable this option, then choose the default Home app in Android settings.</string>
+    <string name="stayon_launcher_system">Android Home settings</string>
+    <string name="stayon_launcher_unavailable">Home selection is unavailable on this TV.</string>
+    <string name="stayon_launcher_disable">Remove STAYON+ as a launcher option?</string>
+    <string name="stayon_launcher_disable_desc">Android will choose or ask for another Home app if STAYON+ was the default.</string>
+    <string name="stayon_apps_reset_order">Restore app order</string>
+    <string name="stayon_apps_reset_order_desc">Return to alphabetical order, with favorites first.</string>
+    <string name="stayon_home_broadcaster_logo_sizes">LOVEStv shortcut logo sizes</string>
+    <string name="stayon_epg_assign_channel">Assign EPG by channel</string>
+    <string name="stayon_epg_assign_channel_desc">Search for a TV channel and choose its entry in the guide.</string>
+    <string name="stayon_epg_assign_empty">No TV channels found</string>
+</resources>

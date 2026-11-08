@@ -376,7 +376,8 @@ private fun SettingPanelBody(help: SettingHelp) {
             }
         }
     }
-    if (help.hints.isNotEmpty()) StageKeyHints(help.hints, Modifier.padding(top = 20.mpx), textSize = 15)
+    if (help.hints.isNotEmpty() && LocalSettingsNavigation.current == null)
+        StageKeyHints(help.hints, Modifier.padding(top = 20.mpx), textSize = 15)
     help.footer?.invoke()
 }
 
@@ -722,7 +723,7 @@ fun StageSettingRow(
 @Composable
 private fun settingsRowAccent(): StageAccent =
     if (LocalSettingsNavigation.current != null && !LocalStagePalette.current.isLight)
-        StageAccent(Color(0xFFF4EBD8), Color(0xFF18202C), Color(0xFFF4EBD8)) else stageAccent
+        StageAccent(Color(0xFFF4F29A), Color.Black, Color(0xFFF4F29A)) else stageAccent
 
 private val FocusedDesc: Color @Composable get() = StageColors.FxLine
 
@@ -1016,7 +1017,7 @@ fun StageFieldRow(
                 Text(label, style = stageText(if (modern) 25 else 21, 700), color = if (modern && lit) accent.onAccent else StageColors.Text, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Box(Modifier.padding(top = 3.mpx)) {
                     if (value.isEmpty() && !editing) {
-                        Text(placeholder, style = stageText(15.5f, 500), color = if (modern && lit) accent.onAccent.copy(alpha = 0.65f) else StageColors.Dim, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(placeholder, style = stageText(if (modern) 18f else 15.5f, 500), color = if (modern && lit) accent.onAccent.copy(alpha = 0.65f) else StageColors.Dim, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                     androidx.compose.foundation.text.BasicTextField(
                         value = value,
@@ -1033,7 +1034,7 @@ fun StageFieldRow(
                                     true
                                 } else false
                             },
-                        textStyle = stageText(15.5f, 500).copy(color = if (modern && lit) accent.onAccent else if (focused || editing) FocusedDesc else StageColors.Text),
+                        textStyle = stageText(if (modern) 18f else 15.5f, 500).copy(color = if (modern && lit) accent.onAccent else if (focused || editing) FocusedDesc else StageColors.Text),
                         singleLine = true,
                         cursorBrush = androidx.compose.ui.graphics.SolidColor(a.accent),
                         // A password row gets the password keyboard: the text one auto-corrects and
@@ -1112,6 +1113,30 @@ fun StageActionColumn(actions: List<StageAction>, back: FocusRequester?, first: 
     }
 }
 
+/** Actions explicitly opened from a row in the full-width settings layout. */
+@Composable
+internal fun SettingsActionPopup(title: String, actions: List<StageAction>, onDismiss: () -> Unit) {
+    val first = remember { FocusRequester() }
+    tv.own.owntv.ui.stage.StagePopup(onDismiss = onDismiss, title = title) {
+        androidx.compose.runtime.LaunchedEffect(Unit) { runCatching { first.requestFocus() } }
+        StageActionColumn(actions.map { action ->
+            StageAction(
+                action.icon,
+                action.label,
+                { onDismiss(); action.onClick() },
+                action.onLongClick?.let { longClick -> { onDismiss(); longClick() } },
+                action.danger,
+            )
+        }, back = null, first = first)
+    }
+}
+
+internal fun Modifier.openSettingsActionsOnRight(onOpen: () -> Unit): Modifier = onPreviewKeyEvent { event ->
+    if (event.key != Key.DirectionRight) return@onPreviewKeyEvent false
+    if (event.type == KeyEventType.KeyUp) onOpen()
+    true
+}
+
 /** The panel's SPAN / MULTI-SELECT block: how a span is picked, and the CH keys that reach its end. */
 @Composable
 fun SpanHelpBlock() {
@@ -1154,11 +1179,8 @@ private fun SettingsListPage(
     val eyebrow = stringResource(R.string.settings_breadcrumb_eyebrow,
         parents.lastOrNull() ?: stringResource(R.string.common_nav_settings), group).uppercase(locale)
     CompositionLocalProvider(LocalSettingsPanel provides panel, tv.own.owntv.ui.stage.LocalPopupEyebrow provides eyebrow) {
-        Row(modifier.fillMaxSize().padding(start = 54.mpx, end = 56.mpx, top = 128.mpx, bottom = 36.mpx),
-            horizontalArrangement = Arrangement.spacedBy(36.mpx)) {
-            Box(Modifier.width(350.mpx).fillMaxHeight()) { navigation.sidebar() }
-            Box(Modifier.width(1.mpx).fillMaxHeight().background(StageColors.Muted.copy(alpha = 0.2f)))
-            Column(Modifier.weight(1f).fillMaxHeight()) {
+        Column(modifier.fillMaxSize().padding(start = 54.mpx, end = 56.mpx, top = 128.mpx, bottom = 36.mpx)) {
+            Column(Modifier.fillMaxSize()) {
                 Row(Modifier.fillMaxWidth().padding(bottom = 24.mpx), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(20.mpx)) {
                     Column(Modifier.weight(1f)) {
@@ -1166,15 +1188,12 @@ private fun SettingsListPage(
                             maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(bottom = 5.mpx))
                         Text(group, style = stageText(40, 800), color = StageColors.Text,
                             maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        Text(count, style = stageText(17, 500), color = StageColors.Muted,
-                            maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 5.mpx))
                     }
                     if (tools != null) Row(horizontalArrangement = Arrangement.spacedBy(8.mpx), content = tools)
                     if (showSearch) StageSearchField(
                         query = query, onQueryChange = onQueryChange,
                         placeholder = stringResource(R.string.more_settings_search),
-                        modifier = Modifier.width(330.mpx).focusRequester(searchFocus)
-                            .focusProperties { left = navigation.categoryFocus },
+                        modifier = Modifier.width(330.mpx).focusRequester(searchFocus),
                         height = 50.mpx, radius = 12.mpx, horizontalPadding = 16.mpx,
                         autoEdit = searchAutoEdit, onActivate = onSearchActivate,
                     )
@@ -1182,41 +1201,31 @@ private fun SettingsListPage(
                 if (toolbar != null) Row(Modifier.fillMaxWidth().padding(bottom = 14.mpx),
                     horizontalArrangement = Arrangement.spacedBy(8.mpx), verticalAlignment = Alignment.CenterVertically,
                     content = toolbar)
-                val help = panel.help
-                val editor = panel.editor
-                // Keep functional panels (source actions, previews and editors); plain help lives below the list.
-                val showPanel = editor != null || help?.extra != null || help?.footer != null || panelTop != null
-                Row(Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(26.mpx)) {
-                    Box(Modifier.weight(1f).fillMaxHeight()) {
-                        val listModifier = Modifier.fillMaxSize().focusRequester(navigation.contentFocus)
-                            .focusRequester(rowsFocus).focusProperties { left = navigation.categoryFocus }.focusGroup()
-                        if (list != null) list(listModifier)
-                        else CompositionLocalProvider(LocalBringIntoViewSpec provides edgeScrollSpec) {
-                            Column(listModifier.verticalScroll(scroll).padding(bottom = 24.mpx),
-                                verticalArrangement = Arrangement.spacedBy(2.mpx), content = rows)
-                        }
-                    }
-                    if (showPanel) Column(Modifier.width(490.mpx).fillMaxHeight()
-                        .verticalScroll(androidx.compose.foundation.rememberScrollState())
-                        .stageGlass(16.mpx).padding(22.mpx)) {
-                        if (editor != null) SettingPanelEditor(editor, help,
-                            onClosed = { panel.opener?.let { runCatching { it.requestFocus() } } })
-                        else {
-                            if (panelTop != null && help?.extra == null) panelTop()
-                            if (help != null) SettingPanelBody(help)
+                Box(Modifier.weight(1f).fillMaxWidth()) {
+                    val listModifier = Modifier.fillMaxSize().focusRequester(navigation.contentFocus)
+                        .focusRequester(rowsFocus).focusGroup()
+                    if (list != null) list(listModifier)
+                    else CompositionLocalProvider(LocalBringIntoViewSpec provides edgeScrollSpec) {
+                        Column(listModifier.verticalScroll(scroll).padding(bottom = 24.mpx),
+                            verticalArrangement = Arrangement.spacedBy(2.mpx)) {
+                            panelTop?.invoke(this)
+                            rows()
                         }
                     }
                 }
-                Box(Modifier.fillMaxWidth().height(1.mpx).background(StageColors.Muted.copy(alpha = 0.18f)))
-                Box(Modifier.fillMaxWidth().height(68.mpx).padding(top = 12.mpx)) {
-                    if (!showPanel && !help?.text.isNullOrBlank()) Text(help?.text.orEmpty(),
-                        style = stageText(17, 500), color = StageColors.Muted,
-                        maxLines = 2, overflow = TextOverflow.Ellipsis)
+                panel.editor?.let { editor ->
+                    val help = panel.help
+                    val opener = panel.opener
+                    val view = androidx.compose.ui.platform.LocalView.current
+                    androidx.compose.runtime.DisposableEffect(editor.owner) {
+                        onDispose { view.post { opener?.let { runCatching { it.requestFocus() } } } }
+                    }
+                    tv.own.owntv.ui.stage.StagePopup(
+                        onDismiss = editor.onDismiss,
+                        title = help?.title?.takeIf { it.isNotBlank() },
+                        scroll = false,
+                    ) { editor.content(this, help) }
                 }
-                StageKeyHints(listOf(
-                    stringResource(R.string.common_ok) to stringResource(R.string.settings_menu_select),
-                    stringResource(R.string.common_back) to stringResource(R.string.settings_menu_return),
-                ), Modifier.padding(top = 16.mpx), textSize = 16)
             }
         }
     }

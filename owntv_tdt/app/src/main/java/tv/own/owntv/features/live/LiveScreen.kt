@@ -609,7 +609,12 @@ fun LiveScreen(
         val listWidth = if (cinematic) fx(550) else if (previewShown) listW else row - (listX - margin)
 
         if (cinematic) {
-            LiveDrawerBackdrop(vm.previewEngine, previewChannel, effectivePreview, previewBlockedSingleSession)
+            val artworkContext = androidx.compose.ui.platform.LocalContext.current
+            val showEpgArtwork by remember(artworkContext) {
+                tv.own.owntv.features.settings.EpgArtworkPreferences.observe(artworkContext)
+            }.collectAsStateWithLifecycle()
+            LiveDrawerBackdrop(vm.previewEngine, previewChannel, effectivePreview, previewBlockedSingleSession,
+                nowNext?.nowDetails?.imageUrl.takeIf { showEpgArtwork })
             Box(Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Brush.horizontalGradient(
                 0f to androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.96f),
                 0.29f to androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.90f),

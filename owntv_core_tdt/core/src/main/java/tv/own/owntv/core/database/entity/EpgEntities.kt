@@ -82,8 +82,10 @@ data class EpgProgrammeEntity(
     val rating: String? = null,
     val lengthMin: Int? = null,
     val episode: String? = null,
+    /** XMLTV programme artwork; null when unavailable. Channel Picons live in epg_channels. */
+    val imageUrl: String? = null,
 ) {
-    val details: EpgDetails get() = EpgDetails(categories, year, rating, lengthMin, episode)
+    val details: EpgDetails get() = EpgDetails(categories, year, rating, lengthMin, episode, imageUrl)
 }
 
 /** A programme row carrying the feed's [details]. */
@@ -93,6 +95,7 @@ fun EpgProgrammeEntity.withDetails(details: EpgDetails): EpgProgrammeEntity = if
     rating = details.rating,
     lengthMin = details.lengthMin,
     episode = details.episode,
+    imageUrl = details.imageUrl,
 )
 
 /** Projection for the "Use this guide's channel logos" override: one EPG channel id → its feed icon. */
@@ -139,4 +142,4 @@ data class EpgHashProjection(
 // The details are part of the hash, so a feed that starts sending them (or the first sync after v47)
 // rewrites the rows instead of skipping them as unchanged.
 fun EpgProgrammeEntity.computeContentHash(): Int =
-    Objects.hash(title, description, stopMs, categories, year, rating, lengthMin, episode)
+    Objects.hash(title, description, stopMs, categories, year, rating, lengthMin, episode, imageUrl)

@@ -489,7 +489,7 @@ internal fun videoQuickBinding(key: String, vm: SettingsViewModel): VideoQuickBi
  */
 internal class QuickPinScope(
     val pinned: List<String>,
-    val onHold: (String) -> Unit,
+    val onHold: ((String) -> Unit)?,
     val focusKey: String?,
     val focusRequester: FocusRequester,
 )
@@ -733,10 +733,11 @@ internal fun VideoPlayerGroupRows(
     val zoomMode = runCatching { ZoomMode.valueOf(zoom) }.getOrDefault(ZoomMode.FIT)
 
     val counts = videoSectionCounts(vm)
+    val quickEnabled = LocalSettingsNavigation.current == null
     androidx.compose.runtime.CompositionLocalProvider(
         LocalQuickPin provides QuickPinScope(
-            pinned = quickPinned,
-            onHold = { menuKey = it },
+            pinned = if (quickEnabled) quickPinned else emptyList(),
+            onHold = if (quickEnabled) { key -> menuKey = key } else null,
             focusKey = menuReturnKey ?: focusRowKey,
             focusRequester = rowReturnFocus,
         ),
@@ -2082,9 +2083,9 @@ internal fun KeyedSettingRow(
         desc = words.line,
         value = value,
         onClick = onClick,
-        onLongClick = pin?.let { p -> { p.onHold(quickKey!!) } },
+        onLongClick = pin?.onHold?.let { onHold -> { onHold(quickKey!!) } },
         onStep = onStep,
-        help = settingHelp(key, words.title, desc, value, choices, chosen, recommended, pinnable = pin != null),
+        help = settingHelp(key, words.title, desc, value, choices, chosen, recommended, pinnable = pin?.onHold != null),
         pinned = pin != null && quickKey in pin.pinned,
         modifier = modifier.then(if (pin != null && pin.focusKey == quickKey) Modifier.focusRequester(pin.focusRequester) else Modifier),
     )

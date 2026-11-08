@@ -63,7 +63,7 @@ private class IntroTextureView(context: Context, private val onFinished: () -> U
 
     override fun onSurfaceTextureAvailable(texture: SurfaceTexture, width: Int, height: Int) {
         if (closed) return
-        postDelayed(timeout, 12_000L)
+        postDelayed(timeout, 8_000L)
         try {
             output = Surface(texture)
             val media = MediaPlayer()
@@ -85,6 +85,13 @@ private class IntroTextureView(context: Context, private val onFinished: () -> U
                         it.setVolume(1f, 1f)
                         it.start()
                     }
+                }
+                media.setOnInfoListener { _, what, _ ->
+                    if (what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
+                        removeCallbacks(timeout)
+                        postDelayed(timeout, media.duration.coerceAtLeast(0) + 2_000L)
+                    }
+                    false
                 }
                 media.setOnCompletionListener { finish() }
                 media.setOnErrorListener { _, _, _ -> finish(); true }

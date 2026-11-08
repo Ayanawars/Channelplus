@@ -23,3 +23,5 @@ internal fun stillLaunchTheme(icon: tv.own.owntv.core.brand.AppIcon): Int = when
     tv.own.owntv.core.brand.AppIcon.OLIVE_CREAM -> R.style.Theme_OwnTV_Starting_OliveCream_Still
     tv.own.owntv.core.brand.AppIcon.PIXEL -> R.style.Theme_OwnTV_Starting_Pixel_Still
 }
+
+class StayonHomeActivity : MainActivity()

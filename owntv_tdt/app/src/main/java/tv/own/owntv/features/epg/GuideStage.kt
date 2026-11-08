@@ -56,6 +56,11 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.em
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import coil3.compose.AsyncImage
+import tv.own.owntv.features.settings.EpgArtworkPreferences
+import tv.own.owntv.ui.metadata.rememberExternalMetadata
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Text
 import tv.own.owntv.R
@@ -172,9 +177,56 @@ internal fun programmeDetailsLine(p: EpgProgrammeEntity): String? {
         .takeIf { it.isNotEmpty() }?.joinToString(" · ")
 }
 
+/** The focused programme, separate from the channel video and its logo. */
+@Composable
+internal fun GuideProgrammeCard(
+    programme: EpgProgrammeEntity?,
+    channelName: String,
+    now: Long,
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalContext.current
+    val artworkEnabled by remember(context) { EpgArtworkPreferences.observe(context) }
+        .collectAsStateWithLifecycle()
+    Row(modifier, horizontalArrangement = Arrangement.spacedBy(24.mpx)) {
+        GuideProgrammeBlock(
+            eyebrow = programme?.let { programmeEyebrow(it, channelName, now) },
+            title = programme?.title ?: channelName,
+            details = programme?.let { programmeDetailsLine(it) }
+                ?: if (programme == null) stringResource(R.string.content_epg_no_programme) else null,
+            synopsis = programme?.description,
+            modifier = Modifier.weight(1f),
+        )
+        if (artworkEnabled && programme != null) GuideProgrammeArtwork(programme)
+    }
+}
+
+@Composable
+private fun GuideProgrammeArtwork(programme: EpgProgrammeEntity) {
+    val xmltvImage = programme.imageUrl?.takeIf { it.isNotBlank() }
+    var xmltvFailed by remember(programme.sourceId, programme.epgChannelId, programme.startMs, xmltvImage) {
+        mutableStateOf(false)
+    }
+    val image = if (xmltvImage != null && !xmltvFailed) {
+        xmltvImage
+    } else {
+        val metadata = rememberExternalMetadata(programme.title, programme.details)
+        metadata?.tvdbArtwork ?: metadata?.posterUrl
+    }
+    if (image != null) {
+        AsyncImage(
+            model = image,
+            contentDescription = null,
+            modifier = Modifier.width(256.mpx).height(192.mpx).clip(RoundedCornerShape(12.mpx)),
+            contentScale = ContentScale.Fit,
+            onError = { if (image == xmltvImage) xmltvFailed = true },
+        )
+    }
+}
+
 /** The programme block beside the video: eyebrow (accent, clock), title 60/800, details, 2-line synopsis. */
 @Composable
-internal fun GuideProgrammeBlock(
+private fun GuideProgrammeBlock(
     eyebrow: String?,
     title: String?,
     details: String?,
