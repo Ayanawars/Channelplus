@@ -293,4 +293,6 @@
     <string name="common_weather_degrees_city"><xliff:g id="temperature">%1$d</xliff:g>° <xliff:g id="city">%2$s</xliff:g></string>
     <!-- Translators: Button that closes a prompt without acting on it, e.g. a programme reminder. -->
     <string name="common_dismiss">Dismiss</string>
+
+    <string name="content_match_epg_batch">Edit EPG for several channels</string>
 </resources>
