@@ -77,7 +77,7 @@ internal fun EpgChannelAssignment(
         when (filter) {
             EpgBatchFilter.ALL -> true
             EpgBatchFilter.UNASSIGNED -> manual == null && channel.epgChannelId.isNullOrBlank()
-            EpgBatchFilter.MANUAL -> manual != null
+            EpgBatchFilter.MAPPED -> manual != null || !channel.epgChannelId.isNullOrBlank()
             EpgBatchFilter.PENDING -> staged.containsKey(channel.id)
         }
     }
@@ -160,7 +160,7 @@ internal fun EpgChannelAssignment(
             listOf(
                 EpgBatchFilter.ALL to R.string.stayon_epg_filter_all,
                 EpgBatchFilter.UNASSIGNED to R.string.stayon_epg_filter_unassigned,
-                EpgBatchFilter.MANUAL to R.string.stayon_epg_filter_manual,
+                EpgBatchFilter.MAPPED to R.string.stayon_epg_filter_manual,
                 EpgBatchFilter.PENDING to R.string.stayon_epg_filter_pending,
             ).forEach { (mode, label) ->
                 StageButton(
@@ -239,4 +239,4 @@ internal fun EpgChannelAssignment(
     ) {}
 }
 
-private enum class EpgBatchFilter { ALL, UNASSIGNED, MANUAL, PENDING }
+private enum class EpgBatchFilter { ALL, UNASSIGNED, MAPPED, PENDING }
