@@ -77,6 +77,13 @@ class EpgSyncWorker(
             }
             progress.flush()
             store.setSynced(source.id, System.currentTimeMillis(), null)
+            // Match after the download is committed, off the UI thread. Direct tvg-id matches work
+            // already; only confident gaps are filled, preserving every manual channel override.
+            runCatching { autoAssignment.assign() }
+                .onSuccess { outcome ->
+                    Log.i(TAG, "EPG automatic assignment: applied=${outcome.applied} review=${outcome.suggested}")
+                }
+                .onFailure { Log.w(TAG, "EPG automatic assignment skipped: ${it.message}") }
             // A series rule is a standing instruction about programmes that do not exist in the
             // database until the guide mentioning them is fetched — so this is the moment "record
             // every showing" becomes actual timers. Best-effort: a rule that could not be
