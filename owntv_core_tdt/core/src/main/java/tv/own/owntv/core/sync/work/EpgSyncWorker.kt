@@ -25,6 +25,7 @@ class EpgSyncWorker(
     private val recordings: tv.own.owntv.core.recording.RecordingManager,
     private val localeStore: LocaleStore,
     private val watchSession: tv.own.owntv.core.live.WatchSession,
+    private val autoAssignment: tv.own.owntv.core.epg.EpgAutoAssignmentService,
 ) : CoroutineWorker(context, params) {
 
     /**
