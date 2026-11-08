@@ -32,6 +32,7 @@ private val LIVE_ACTIONS = listOf(
     MenuActionRef("favourite", R.string.content_add_favourite),
     MenuActionRef("rename", R.string.content_rename),
     MenuActionRef("match_epg", R.string.content_match_epg),
+    MenuActionRef("match_epg_batch", R.string.content_match_epg_batch),
     MenuActionRef("epg_offset", R.string.content_epg_time_offset),
     MenuActionRef("catchup", R.string.content_catchup),
     // Record this channel from now. It belongs in the list rather than being added by an app,
