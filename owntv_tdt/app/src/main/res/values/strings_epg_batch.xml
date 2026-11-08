@@ -9,4 +9,11 @@
     <string name="stayon_epg_batch_discard">Discard</string>
     <string name="stayon_epg_batch_error_title">Could not save EPG assignments</string>
     <string name="stayon_epg_batch_error_body">The changes were not confirmed. Review them and try saving again.</string>
+
+    <string name="stayon_epg_filter_all">All</string>
+    <string name="stayon_epg_filter_unassigned">No EPG</string>
+    <string name="stayon_epg_filter_manual">Manual</string>
+    <string name="stayon_epg_filter_pending">Pending</string>
+    <string name="stayon_epg_batch_no_guide">No guide assigned</string>
+    <string name="stayon_epg_batch_auto_id">Auto: %1$s</string>
 </resources>
