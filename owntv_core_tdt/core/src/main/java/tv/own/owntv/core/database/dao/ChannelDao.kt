@@ -149,6 +149,16 @@ interface ChannelDao {
     )
     suspend fun channelsForGuide(sourceIds: List<Long>, query: String, limit: Int): List<ChannelEntity>
 
+    /** Continue EPG edits at the channel invoked by long-press, in this source's native order.
+     * Offset paging would be slow for large IPTV playlists; sortOrder/id uses a stable anchor.
+     */
+    @Query(
+        "SELECT * FROM channels WHERE sourceId = :sourceId " +
+            "AND (sortOrder > :sortOrder OR (sortOrder = :sortOrder AND id >= :channelId)) " +
+            "ORDER BY sortOrder ASC, id ASC LIMIT :limit",
+    )
+    suspend fun channelsForEpgFrom(sourceId: Long, sortOrder: Int, channelId: Long, limit: Int): List<ChannelEntity>
+
     /** Channels matching these remoteIds (Xtream stream ids) — to resolve smart-matched channels in bulk
      *  without loading the whole channel table. */
     @Query("SELECT * FROM channels WHERE sourceId IN (:sourceIds) AND remoteId IN (:remoteIds)")

@@ -2091,6 +2091,7 @@
 3	preference-key	core/src/main/java/tv/own/owntv/core/menu/ContentMenus.kt	hide
 2	preference-key	core/src/main/java/tv/own/owntv/core/menu/ContentMenus.kt	mark_watched
 1	preference-key	core/src/main/java/tv/own/owntv/core/menu/ContentMenus.kt	match_epg
+1	preference-key	core/src/main/java/tv/own/owntv/core/menu/ContentMenus.kt	match_epg_batch
 3	preference-key	core/src/main/java/tv/own/owntv/core/menu/ContentMenus.kt	move
 3	preference-key	core/src/main/java/tv/own/owntv/core/menu/ContentMenus.kt	move_to_category
 3	preference-key	core/src/main/java/tv/own/owntv/core/menu/ContentMenus.kt	play_external
@@ -6772,3 +6773,6 @@
 1	log	player-core/src/main/java/tv/own/owntv/player/ZapTiming.kt	(zap key press to first frame ${it}ms)
 1	log	core/src/main/java/tv/own/owntv/core/sync/work/EpgSyncWorker.kt	EPG automatic assignment skipped: ${e.message}
 1	log	core/src/main/java/tv/own/owntv/core/sync/work/EpgSyncWorker.kt	EPG automatic assignment: applied=${outcome.applied} review=${outcome.suggested}
+1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	SELECT * FROM channels WHERE sourceId = :sourceId
+1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	AND (sortOrder > :sortOrder OR (sortOrder = :sortOrder AND id >= :channelId))
+1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	ORDER BY sortOrder ASC, id ASC LIMIT :limit

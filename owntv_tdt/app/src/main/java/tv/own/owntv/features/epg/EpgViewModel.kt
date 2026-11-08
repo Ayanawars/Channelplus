@@ -1103,7 +1103,7 @@ class EpgViewModel(
     }
 
     /** Include TV channels with no guide so they can be assigned from Sources. */
-    internal suspend fun channelsForAssignment(query: String): List<Pair<ChannelEntity, String>> {
+    internal suspend fun channelsForAssignment(query: String, fromChannel: ChannelEntity? = null): List<Pair<ChannelEntity, String>> {
         val pid = currentProfileId() ?: return emptyList()
         val sources = sourceDao.observeForProfile(pid).first().filter { it.syncLive }.associateBy { it.id }
         val ids = sources.keys.toList()
@@ -1116,7 +1116,15 @@ class EpgViewModel(
         // Editing only the first 200 channels made most IPTV lineups appear unassignable.
         // Search still queries the full database, while LazyColumn only renders visible rows.
         val limit = if (query.isBlank()) 2_000 else 5_000
-        return channelDao.channelsForGuide(ids, query.trim(), limit).mapNotNull { channel ->
+        // Long-press starts from the selected channel and continues through its actual playlist
+        // order, rather than trapping the user in name-search results for that one station.
+        // Search deliberately spans all TDT/IPTV sources, including other playlists.
+        val rows = if (fromChannel != null && query.isBlank() && fromChannel.sourceId in sources) {
+            channelDao.channelsForEpgFrom(fromChannel.sourceId, fromChannel.sortOrder, fromChannel.id, limit)
+        } else {
+            channelDao.channelsForGuide(ids, query.trim(), limit)
+        }
+        return rows.mapNotNull { channel ->
             if (channel.categoryId in hiddenCategories || CustomizeKeys.channel(channel) in cust.hiddenItems) {
                 return@mapNotNull null
             }

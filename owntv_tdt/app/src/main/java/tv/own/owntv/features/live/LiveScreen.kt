@@ -68,6 +68,7 @@ import tv.own.owntv.core.customize.CustomizeKeys
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.ContentOrderEntity
 import tv.own.owntv.features.customize.MoveToCategoryDialog
+import tv.own.owntv.features.settings.EpgChannelAssignment
 import tv.own.owntv.features.settings.SettingsViewModel
 import tv.own.owntv.core.settings.PanelSection
 import tv.own.owntv.features.settings.data.computePanelWidths
@@ -214,6 +215,7 @@ fun LiveScreen(
     var railPaneFocused by remember { mutableStateOf(false) }
     var renaming by remember { mutableStateOf<ChannelEntity?>(null) }
     var matchingEpg by remember { mutableStateOf<ChannelEntity?>(null) }
+    var batchEpgChannel by remember { mutableStateOf<ChannelEntity?>(null) }
     var offsettingEpg by remember { mutableStateOf<ChannelEntity?>(null) }
     var catchupChannel by remember { mutableStateOf<ChannelEntity?>(null) }
     // The channel the "Schedule recording…" dialog is open for (#2).
@@ -320,7 +322,7 @@ fun LiveScreen(
         contextMenuOpen = false
         // A follow-up dialog (rename / match EPG / catch-up / move) grabs focus itself — only restore
         // for plain closes (Cancel, Favourite, Hide, Close). Those dialogs restore on their own close.
-        if (renaming != null || matchingEpg != null || offsettingEpg != null || catchupChannel != null || schedulingChannel != null || enteringMoveMode ||
+        if (renaming != null || matchingEpg != null || batchEpgChannel != null || offsettingEpg != null || catchupChannel != null || schedulingChannel != null || enteringMoveMode ||
             moveItem != null || creatingCategory
         ) return@LaunchedEffect
         restoreToContextRow()
@@ -375,6 +377,13 @@ fun LiveScreen(
     }
     // The Match EPG dialog grabbed focus while open — when it closes (pick/clear/dismiss), put focus
     // back on the channel it was opened for instead of letting it fall to the nav panel.
+    var batchEpgWasOpen by remember { mutableStateOf(false) }
+    LaunchedEffect(batchEpgChannel) {
+        if (batchEpgChannel != null) { batchEpgWasOpen = true; return@LaunchedEffect }
+        if (!batchEpgWasOpen) return@LaunchedEffect
+        batchEpgWasOpen = false
+        restoreToContextRow()
+    }
     var matchEpgWasOpen by remember { mutableStateOf(false) }
     LaunchedEffect(matchingEpg) {
         if (matchingEpg != null) { matchEpgWasOpen = true; return@LaunchedEffect }
@@ -966,6 +975,7 @@ fun LiveScreen(
                 onWatch = { vm.watchFullscreen(ch, emptyList()); if (!externalPlayerOn) onFullscreen() },
                 onPlayFromStart = { vm.playCatchupProgramme(ch, p); if (!externalPlayerOn) onFullscreen() },
                 onPickEpg = { contextChannelId = ch.id; matchingEpg = ch },
+                onPickEpgBatch = { contextChannelId = ch.id; batchEpgChannel = ch },
                 onEpgOffset = { contextChannelId = ch.id; offsettingEpg = ch },
                 autoMatch = false,
             ),
@@ -1030,6 +1040,14 @@ fun LiveScreen(
         )
     }
 
+    // Keep sequential guide edits in one batch; the source/stream itself never changes.
+    batchEpgChannel?.let { ch ->
+        EpgChannelAssignment(
+            initialChannel = ch,
+            onDismiss = { batchEpgChannel = null },
+        )
+    }
+
     offsettingEpg?.let { ch ->
         EpgOffsetDialog(
             channelName = ch.name,
@@ -1055,6 +1073,7 @@ fun LiveScreen(
             onRename = { renaming = ch; contextChannel = null },
             onHide = { vm.hideChannel(ch); contextChannel = null },
             onMatchEpg = { matchingEpg = ch; contextChannel = null },
+            onMatchEpgBatch = { batchEpgChannel = ch; contextChannel = null },
             onEpgOffset = { offsettingEpg = ch; contextChannel = null },
             onCatchup = { catchupChannel = ch; contextChannel = null },
             isRecording = ch.id in recordingChannelIds,
@@ -1208,6 +1227,7 @@ private fun ChannelContextMenu(
     onRename: () -> Unit,
     onHide: () -> Unit,
     onMatchEpg: () -> Unit,
+    onMatchEpgBatch: () -> Unit,
     onEpgOffset: () -> Unit,
     onCatchup: () -> Unit,
     // A recording of this channel is running: Record becomes Stop recording.
@@ -1251,6 +1271,7 @@ private fun ChannelContextMenu(
         add(MenuAction("hide", stringResource(R.string.content_hide_channel), OwnTVIcon.EYE_OFF, group = chan, onClick = onHide))
         if (isHistory) add(MenuAction("remove_history", stringResource(R.string.content_remove_history), OwnTVIcon.HISTORY, group = chan, onClick = onRemoveFromHistory))
         add(MenuAction("match_epg", stringResource(R.string.content_match_epg), OwnTVIcon.EPG, group = guide, onClick = onMatchEpg))
+        add(MenuAction("match_epg_batch", stringResource(R.string.content_match_epg_batch), OwnTVIcon.LIST, group = guide, onClick = onMatchEpgBatch))
         add(MenuAction("epg_offset", stringResource(R.string.content_epg_time_offset), OwnTVIcon.CLOCK, group = guide, onClick = onEpgOffset))
         if (canMove) {
             add(MenuAction("move", stringResource(R.string.content_move), OwnTVIcon.MOVE, group = organise, onClick = onMove))

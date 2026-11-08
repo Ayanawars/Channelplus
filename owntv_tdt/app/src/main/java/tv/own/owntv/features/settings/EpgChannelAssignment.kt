@@ -1,5 +1,7 @@
 package tv.own.owntv.features.settings
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
@@ -39,9 +41,15 @@ import tv.own.owntv.ui.theme.mpx
  * edit in one DataStore update. Search changes never discard edits to channels outside the query.
  */
 @Composable
-internal fun EpgChannelAssignment(onDismiss: () -> Unit) {
+internal fun EpgChannelAssignment(
+    initialChannel: ChannelEntity? = null,
+    onDismiss: () -> Unit,
+) {
     val vm: EpgViewModel = koinViewModel()
-    var query by remember { mutableStateOf("") }
+    // Long-press starts at this channel and continues in source order. Search spans ALL sources.
+    var query by remember(initialChannel?.id) { mutableStateOf("") }
+    var filter by remember { mutableStateOf(EpgBatchFilter.ALL) }
+    var initialFocusPending by remember(initialChannel?.id) { mutableStateOf(initialChannel != null) }
     var selected by remember { mutableStateOf<ChannelEntity?>(null) }
     var nextFocusId by remember { mutableStateOf<Long?>(null) }
     var saving by remember { mutableStateOf(false) }
@@ -54,12 +62,23 @@ internal fun EpgChannelAssignment(onDismiss: () -> Unit) {
     val rowFocus = remember { mutableMapOf<Long, FocusRequester>() }
     val listState = rememberLazyListState()
     val restoreFocus = rememberDialogFocusRestore(selected != null)
-    val channels = key(query) {
+    val fetchedChannels = key(query) {
         val result by produceState<List<Pair<ChannelEntity, String>>?>(null) {
             if (query.isNotBlank()) delay(250)
-            value = vm.channelsForAssignment(query)
+            value = vm.channelsForAssignment(query, initialChannel)
         }
         result
+    }
+    // These filters affect the viewport only; every staged assignment survives search/filter changes.
+    val channels = fetchedChannels?.filter { (channel, _) ->
+        val queued = staged[channel.id]
+        val manual = if (staged.containsKey(channel.id)) queued?.second else vm.currentEpgMatch(channel)
+        when (filter) {
+            EpgBatchFilter.ALL -> true
+            EpgBatchFilter.UNASSIGNED -> manual == null && channel.epgChannelId.isNullOrBlank()
+            EpgBatchFilter.MAPPED -> manual != null || !channel.epgChannelId.isNullOrBlank()
+            EpgBatchFilter.PENDING -> staged.containsKey(channel.id)
+        }
     }
 
     fun close() {
@@ -116,7 +135,41 @@ internal fun EpgChannelAssignment(onDismiss: () -> Unit) {
     ) {
         LaunchedEffect(Unit) {
             withFrameNanos { }
-            runCatching { searchFocus.requestFocus() }
+            // No channel requested: focus search. With a requested channel, focus its row below.
+            if (initialChannel == null) runCatching { searchFocus.requestFocus() }
+        }
+        LaunchedEffect(channels, initialChannel?.id) {
+            if (!initialFocusPending || channels == null || selected != null) return@LaunchedEffect
+            val id = initialChannel?.id ?: return@LaunchedEffect
+            val index = channels.indexOfFirst { it.first.id == id }
+            if (index >= 0) {
+                listState.scrollToItem(index)
+                withFrameNanos { }
+                withFrameNanos { }
+                if (rowFocus[id] != null) runCatching { rowFocus[id]?.requestFocus() }
+                else runCatching { searchFocus.requestFocus() }
+            } else {
+                runCatching { searchFocus.requestFocus() }
+            }
+            // Otherwise the first row would steal focus again after every staged change,
+            // making it impossible to edit the next channel with the remote.
+            initialFocusPending = false
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.mpx)) {
+            listOf(
+                EpgBatchFilter.ALL to R.string.stayon_epg_filter_all,
+                EpgBatchFilter.UNASSIGNED to R.string.stayon_epg_filter_unassigned,
+                EpgBatchFilter.MAPPED to R.string.stayon_epg_filter_manual,
+                EpgBatchFilter.PENDING to R.string.stayon_epg_filter_pending,
+            ).forEach { (mode, label) ->
+                StageButton(
+                    text = stringResource(label),
+                    tinted = filter == mode,
+                    onClick = { filter = mode },
+                    height = 44.mpx,
+                    textSize = 15,
+                )
+            }
         }
         StageSearchField(
             query = query,
@@ -139,11 +192,12 @@ internal fun EpgChannelAssignment(onDismiss: () -> Unit) {
                             manual ?: stringResource(R.string.stayon_epg_batch_auto),
                         )
                         manual != null -> stringResource(R.string.stayon_epg_batch_manual, manual)
-                        else -> sourceName
+                        channel.epgChannelId.isNullOrBlank() -> stringResource(R.string.stayon_epg_batch_no_guide)
+                        else -> stringResource(R.string.stayon_epg_batch_auto_id, channel.epgChannelId.orEmpty())
                     }
                     StageMenuItem(
                         text = channel.name,
-                        value = label,
+                        value = if (sourceName.isBlank()) label else stringResource(R.string.stayon_epg_batch_source_status, sourceName, label),
                         icon = OwnTVIcon.LIVE_TV,
                         modifier = Modifier.focusRequester(row),
                         onClick = { if (!saving) { restoreFocus.value = row; selected = channel } },
@@ -183,3 +237,5 @@ internal fun EpgChannelAssignment(onDismiss: () -> Unit) {
         },
     ) {}
 }
+
+private enum class EpgBatchFilter { ALL, UNASSIGNED, MAPPED, PENDING }
