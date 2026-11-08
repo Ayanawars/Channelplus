@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="stayon_epg_batch_hint">Assign guide entries one channel at a time. %1$d pending changes; Save applies them together.</string>
+    <string name="stayon_epg_batch_hint">Assign guide entries one channel at a time. Pending changes: %1$d. Save applies them together.</string>
     <string name="stayon_epg_batch_pending">Pending: %1$s</string>
     <string name="stayon_epg_batch_auto">Automatic</string>
     <string name="stayon_epg_batch_manual">EPG: %1$s</string>
     <string name="stayon_epg_batch_discard_title">Discard EPG assignments?</string>
-    <string name="stayon_epg_batch_discard_body">Discard %1$d unsaved EPG changes?</string>
+    <string name="stayon_epg_batch_discard_body">Discard pending EPG changes (%1$d)?</string>
     <string name="stayon_epg_batch_discard">Discard</string>
     <string name="stayon_epg_batch_error_title">Could not save EPG assignments</string>
     <string name="stayon_epg_batch_error_body">The changes were not confirmed. Review them and try saving again.</string>
