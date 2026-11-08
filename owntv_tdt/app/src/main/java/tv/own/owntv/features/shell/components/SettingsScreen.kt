@@ -150,17 +150,9 @@ internal fun SettingsContent(
     onSetFontCustomization: (FontCustomization) -> Unit,
     onOpenPlaylist: () -> Unit,
     modifier: Modifier = Modifier,
-    /**
-     * Where Back from the **root** of this screen goes. Settings sits behind More, so leaving
-     * it should land on More rather than throw focus all the way out to the rail. Null keeps the old
-     * behaviour, which is the shell's own handler.
-     */
     onBack: (() -> Unit)? = null,
     openEpgAdd: Boolean = false,
     onEpgAddConsumed: () -> Unit = {},
-    /** More › Settings: open at a root group, or with search open. */
-    start: SettingsStart? = null,
-    onStartConsumed: () -> Unit = {},
     selectedGroup: Int,
     onSelectGroup: (Int) -> Unit,
     navigationVersion: Int,
@@ -208,10 +200,9 @@ internal fun SettingsContent(
     // Settings search + quick toggles. Empty query = normal grouped list; a non-blank
     // query swaps the list for flat results that carry their group context ("Playback › HDR").
     var searchQuery by remember { mutableStateOf("") }
-    // Search opened (from More, or a full page's search): the plain search page, even while the query
+    // The search page stays open even while the query
     // is still empty — not the group that happens to be selected behind it.
     var searchMode by remember { mutableStateOf(false) }
-    var searchFromMore by remember { mutableStateOf(false) }
     val searchFieldFocus = remember { FocusRequester() }
     // While searching, Back clears the query (and returns focus to the field) instead of leaving Settings.
     BackHandler(enabled = tab == SettingsTab.ROOT && searchQuery.isNotBlank()) {
@@ -244,27 +235,14 @@ internal fun SettingsContent(
     val pageScroll = rememberScrollState()
     // These belong to the two-pane Settings root, but stay remembered while a detail screen replaces
     // it. Otherwise Back briefly rebuilds Quick at row zero before restoring the real group/row.
-    // Start on the card More opened, not Quick: waiting for the start effect drew Quick for a few frames first.
-    var displayedGroup by rememberSaveable { mutableIntStateOf(start?.group ?: 0) }
+    var displayedGroup by rememberSaveable { mutableIntStateOf(selectedGroup) }
     var savedScrollPx by remember { mutableIntStateOf(0) }
     val saveScroll = { savedScrollPx = pageScroll.value }
     // The rows column: fresh entry and a lost focus land here, on the page's first row.
     val rowsFocus = remember { FocusRequester() }
-    // Opens the search field's keyboard as it appears, so one OK reaches typing (More's search box too).
+    // Opens the search field's keyboard as it appears, so one OK reaches typing.
     var searchAutoEdit by remember { mutableStateOf(false) }
     LaunchedEffect(searchAutoEdit) { if (searchAutoEdit) { kotlinx.coroutines.delay(1000); searchAutoEdit = false } }
-    LaunchedEffect(start) {
-        if (start == null) return@LaunchedEffect
-        tab = SettingsTab.ROOT
-        start.group?.let { onSelectGroup(it); displayedGroup = it }
-        if (start.search) {
-            searchMode = true
-            searchFromMore = true
-            searchAutoEdit = true
-            for (attempt in 0 until 10) { kotlinx.coroutines.delay(50); if (runCatching { searchFieldFocus.requestFocus() }.getOrDefault(false)) break }
-        }
-        onStartConsumed()
-    }
     val anyDialogOpen = showPicons || showDownloadableThemes || showZoom || showPopupSize || showTheme || showAccent || showUpdate || showCatchupTime || showCatchupSources || showCatchupSourceValue || showEpgOffset || showGuideDays || showAnimations || showStartup || showStartupChannelPicker || showAfrWarning || showLivePreviewPanelWarning || showBgImageChooser || showBgPicker || showAmbientGlow || showFocusHighlight || showBgRemote || showLiveLayout || stageSettings.open != null
     // When a dialog closes, restore focus to the row that opened it. NOTE: this restore crosses
     // INTO the root focus group from outside (the dialog), but onEnter does NOT fire for programmatic
@@ -409,7 +387,7 @@ internal fun SettingsContent(
     // Sub-screens sit below the status cluster (StageContentTop), 6 dp in from the edges.
     val sub = modifier.padding(start = 6.dp, end = 6.dp, bottom = 6.dp, top = StageContentTop)
     // A full page's search hands over to Settings search, keyboard up.
-    val openSearch: () -> Unit = { lastTab = null; searchQuery = ""; searchMode = true; searchFromMore = false; searchAutoEdit = true; tab = SettingsTab.ROOT }
+    val openSearch: () -> Unit = { lastTab = null; searchQuery = ""; searchMode = true; searchAutoEdit = true; tab = SettingsTab.ROOT }
     if (tab != SettingsTab.ROOT) {
     CompositionLocalProvider(tv.own.owntv.features.settings.LocalSettingsSearch provides openSearch) {
     when (tab) {
@@ -928,10 +906,10 @@ internal fun SettingsContent(
         }
     }
 
-    // A fresh entry from More: the page's first row (a search start focuses the field instead).
+    // Focus the first row when entering a settings category.
     if (onBack != null) {
         LaunchedEffect(Unit) {
-            if (returningRowFocus != null || start?.search == true) return@LaunchedEffect
+            if (returningRowFocus != null) return@LaunchedEffect
             repeat(10) {
                 withFrameNanos { }
                 if (runCatching { rowsFocus.requestFocus() }.getOrDefault(false)) return@LaunchedEffect
@@ -1148,10 +1126,9 @@ internal fun SettingsContent(
             .distinctBy { it.group + it.title }
     }
     val searching = searchQuery.isNotBlank() || searchMode
-    // Back from an empty search: to More when it was opened there, else to the group page.
+    // Back from an empty search returns to the group page.
     BackHandler(enabled = tab == SettingsTab.ROOT && searchMode && searchQuery.isBlank()) {
         searchMode = false
-        if (searchFromMore) { searchFromMore = false; onBack?.invoke() }
     }
     val group = SettingsGroup.entries[selectedGroup.coerceIn(0, SettingsGroup.entries.size - 1)]
     val pageCount = when {
@@ -1923,9 +1900,6 @@ private fun CatchupSourcesHost(
         onDismiss = onDismiss,
     )
 }
-
-/** More's way into this screen: a root group to open at, or the search field. */
-data class SettingsStart(val group: Int?, val search: Boolean)
 
 /** One playlist's catch-up time zone, moved out of [SettingsScreen] unchanged (its body is at the JVM method limit). */
 @Composable

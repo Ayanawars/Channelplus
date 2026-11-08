@@ -6,7 +6,7 @@ import tv.own.owntv.features.sports.SportsViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
-import tv.own.owntv.features.more.MoreCountsViewModel
+import tv.own.owntv.features.settings.BackupCountsViewModel
 import tv.own.owntv.features.shell.RailCountsViewModel
 import org.koin.dsl.module
 import tv.own.owntv.features.customize.CustomizeItemsViewModel
@@ -166,7 +166,7 @@ val appModule = module {
     viewModelOf(::BackupViewModel)
     viewModelOf(::EpgSourcesViewModel)
     // The counts the More rows and the Favourites / History tabs carry.
-    viewModelOf(::MoreCountsViewModel)
+    viewModelOf(::BackupCountsViewModel)
     // The counts beside the sections in the open Stage rail.
     viewModelOf(::RailCountsViewModel)
 }

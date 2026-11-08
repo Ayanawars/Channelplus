@@ -245,9 +245,6 @@ open class MainActivity : ComponentActivity() {
             val bgImagePath by viewModel.bgImagePath.collectAsStateWithLifecycle()
             val glassConfig by viewModel.glassConfig.collectAsStateWithLifecycle()
             val background by viewModel.backgroundConfig.collectAsStateWithLifecycle()
-            val avatarId by viewModel.avatarId.collectAsStateWithLifecycle()
-            val avatarPath by viewModel.avatarPath.collectAsStateWithLifecycle()
-            val profileName by viewModel.profileName.collectAsStateWithLifecycle()
             val sourceSummary by viewModel.sourceSummary.collectAsStateWithLifecycle()
             val playlists by viewModel.playlists.collectAsStateWithLifecycle()
             val activePlaylistId by viewModel.activePlaylistId.collectAsStateWithLifecycle()
@@ -424,12 +421,6 @@ open class MainActivity : ComponentActivity() {
                                 onSetZoom = viewModel::setUiZoom,
                                 fontCustomization = fontCustomization,
                                 onSetFontCustomization = viewModel::setFontCustomization,
-                                avatarId = avatarId,
-                                onSetAvatar = viewModel::setAvatar,
-                                avatarPath = avatarPath,
-                                onSetCustomAvatar = { file -> viewModel.setCustomAvatar(file) },
-                                onClearCustomAvatar = viewModel::clearCustomAvatar,
-                                profileName = profileName,
                                 sourceSummary = sourceSummary,
                                 playlists = playlists,
                                 activePlaylistId = activePlaylistId,

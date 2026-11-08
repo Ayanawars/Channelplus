@@ -23,4 +23,5 @@
     <string name="stayon_launcher_disable_desc">Si STAYON+ era el launcher predeterminado, Android elegirá o te pedirá otra app de Inicio.</string>
     <string name="stayon_apps_reset_order">Restaurar orden de las apps</string>
     <string name="stayon_apps_reset_order_desc">Vuelve al orden alfabético, con las favoritas primero.</string>
+    <string name="stayon_home_broadcaster_logo_sizes">Tamaño de los logos de LOVEStv</string>
 </resources>

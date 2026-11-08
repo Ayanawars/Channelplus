@@ -75,7 +75,6 @@ import tv.own.owntv.player.MiniPlayer
 import tv.own.owntv.player.MpvVideoSurface
 import tv.own.owntv.player.OwnTVPlayer
 import tv.own.owntv.player.PlayerHud
-import tv.own.owntv.features.shell.components.AvatarPickerDialog
 import tv.own.owntv.features.shell.components.ExitDialog
 import tv.own.owntv.features.shell.components.IncompleteRestoreDialog
 import tv.own.owntv.features.shell.components.SettingsScreen
@@ -113,13 +112,7 @@ fun OwnTVShell(
     onSetZoom: (Int) -> Unit,
     fontCustomization: tv.own.owntv.core.theme.FontCustomization,
     onSetFontCustomization: (tv.own.owntv.core.theme.FontCustomization) -> Unit,
-    avatarId: Int,
-    onSetAvatar: (Int) -> Unit,
     // The active profile's own picture, and the two things that can be done to it. Blank = none.
-    avatarPath: String = "",
-    onSetCustomAvatar: (java.io.File) -> Unit = {},
-    onClearCustomAvatar: () -> Unit = {},
-    profileName: String,
     sourceSummary: String?,
     playlists: List<tv.own.owntv.core.database.entity.SourceEntity> = emptyList(),
     activePlaylistId: Long = -1L,
@@ -139,8 +132,6 @@ fun OwnTVShell(
 
     val scope = rememberCoroutineScope()
     var showExit by remember { mutableStateOf(false) }
-    var showAvatarPicker by remember { mutableStateOf(false) }
-    var showAvatarChooser by remember { mutableStateOf(false) }
     var showPlaylistPicker by remember { mutableStateOf(false) }
     // Held by the Activity-scoped ShellViewModel, so a recreation (a script-family language switch)
     // does not close a film that is playing.
@@ -187,12 +178,10 @@ fun OwnTVShell(
     val contentAreaFocus = remember { FocusRequester() }
     var guideEntry by remember { mutableStateOf<(() -> Boolean)?>(null) }
     var downloadsEntry by remember { mutableStateOf<(() -> Boolean)?>(null) }
-    var moreEntry by remember { mutableStateOf<(() -> Boolean)?>(null) }
     var sportsEntry by remember { mutableStateOf<(() -> Boolean)?>(null) }
     fun focusContent() {
         val enter = when (selectedSection) {
             MainSection.LIVE_TV, MainSection.EPG -> guideEntry
-            MainSection.MORE -> moreEntry
             MainSection.DOWNLOADS -> downloadsEntry
             MainSection.SPORTS -> sportsEntry
             else -> null
@@ -201,9 +190,6 @@ fun OwnTVShell(
     }
     // Home's Live sports row opens a match page through the same request the player's Match button uses.
     val sportsMatchRequests = koinInject<tv.own.owntv.features.sports.SportsPlayback>()
-    // More › Settings opens Settings at a group, or with its search open.
-    var settingsStart by remember { mutableStateOf<tv.own.owntv.features.shell.components.SettingsStart?>(null) }
-    var staySettingsOpened by remember { mutableStateOf(false) }
     // The playlist pill's place on screen, where the playlist menu redraws it above its scrim.
     var playlistPillBounds by remember { mutableStateOf<androidx.compose.ui.geometry.Rect?>(null) }
     var miniHasFocus by remember { mutableStateOf(false) }
@@ -781,14 +767,11 @@ fun OwnTVShell(
     BackHandler {
         when {
             playerMode == PlayerMode.FULLSCREEN -> exitPlayer()
-            showAvatarPicker -> showAvatarPicker = false
             showPlaylistPicker -> showPlaylistPicker = false
             showExit -> showExit = false
             searchReturn == selectedSection -> returnToSearch()
-            selectedSection == MainSection.SETTINGS && !staySettingsOpened -> onSelectSection(MainSection.MORE)
             selectedSection != MainSection.HOME -> {
                 restoreFocus = true
-                staySettingsOpened = false
                 onSelectSection(MainSection.HOME)
             }
             else -> showExit = true
@@ -809,7 +792,7 @@ fun OwnTVShell(
     var shortcutKeyCode by remember { mutableStateOf(android.view.KeyEvent.KEYCODE_UNKNOWN) }
     var shortcutLongFired by remember { mutableStateOf(false) }
     var shortcutHoldJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
-    val longPressBackArmed = playerMode == PlayerMode.MINI && !showExit && !showAvatarPicker && !showPlaylistPicker
+    val longPressBackArmed = playerMode == PlayerMode.MINI && !showExit && !showPlaylistPicker
     // Media keys (the third way in) act on the docked window wherever focus is — but only if nothing nearer
     // claimed them first, which is why this is a bubbling handler: a focused browse list still gets its
     // CH+/CH− paging, and the full-screen HUD still owns zapping.
@@ -996,32 +979,6 @@ fun OwnTVShell(
                         .focusGroup(),
                 ) {
                     when {
-                        // More — the hub the rail's last item opens. Settings is a row in it.
-                        selectedSection == MainSection.MORE -> tv.own.owntv.features.more.MoreScreen(
-                            profileName = profileName.ifBlank { stringResource(R.string.common_own_tv_user) },
-                            playlistLabel = playlistLabel,
-                            avatarId = avatarId,
-                            avatarPath = avatarPath,
-                            onSwitchProfile = onSwitchProfile,
-                            onPickAvatar = { showAvatarPicker = true },
-                            onOpenSettings = { group, search ->
-                                settingsStart = tv.own.owntv.features.shell.components.SettingsStart(group, search)
-                                onSelectSection(MainSection.SETTINGS)
-                            },
-                            // The same paths Home uses, so the engine ladder, resume and Continue all apply.
-                            onPlayChannel = { id -> scope.launch { if (liveVm.ensurePlayingByIdAsync(id)) openFullscreen(MainSection.LIVE_TV) } },
-                            onPlayMovie = { id, pos -> scope.launch { if (movieVm.playByIdAsync(id, pos) && !movieVm.externalPlayerOn.value) openFullscreen(MainSection.MOVIES) } },
-                            onPlayEpisode = { seriesId, epId, pos -> scope.launch { if (seriesVm.playFromHomeAsync(seriesId, epId, pos) && !seriesVm.externalPlayerOn.value) openFullscreen(MainSection.SERIES) } },
-                            onOpenSeries = { id -> seriesVm.openSeriesById(id); restoreFocus = true; onSelectSection(MainSection.SERIES) },
-                            onChildFocused = {},
-                            onEntryHook = { moreEntry = it },
-                            restoreFocus = restoreFocus,
-                            onRestored = { restoreFocus = false },
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .focusGroup(),
-                        )
-
                         selectedSection == MainSection.SETTINGS -> SettingsScreen(
                             themeMode = themeMode,
                             uiZoomPercent = uiZoomPercent,
@@ -1029,17 +986,12 @@ fun OwnTVShell(
                             fontCustomization = fontCustomization,
                             onSetFontCustomization = onSetFontCustomization,
                             onOpenPlaylist = {},
-                            // Settings is reached through More now, so Back out of its root goes
-                            // back there rather than to the rail — one level out, not two.
                             onBack = {
                                 restoreFocus = true
-                                onSelectSection(if (staySettingsOpened) MainSection.HOME else MainSection.MORE)
-                                staySettingsOpened = false
+                                onSelectSection(MainSection.HOME)
                             },
                             openEpgAdd = openEpgAdd,
                             onEpgAddConsumed = { openEpgAdd = false },
-                            start = settingsStart,
-                            onStartConsumed = { settingsStart = null },
                             modifier = Modifier
                                 .fillMaxSize()
                                 .focusGroup(),
@@ -1054,13 +1006,8 @@ fun OwnTVShell(
                             },
                             onOpenTv = { onSelectSection(MainSection.LIVE_TV) },
                             onOpenGuide = { onSelectSection(MainSection.EPG) },
-                            onOpenSettings = {
-                                staySettingsOpened = true
-                                onSelectSection(MainSection.SETTINGS)
-                            },
+                            onOpenSettings = { onSelectSection(MainSection.SETTINGS) },
                             onOpenSearch = { onSelectSection(MainSection.SEARCH) },
-                            onOpenMore = { onSelectSection(MainSection.MORE) },
-                            onOpenDownloads = { onSelectSection(MainSection.DOWNLOADS) },
                             onOpenMatch = { match ->
                                 sportsMatchRequests.pendingMatch.value = match to null
                                 onSelectSection(MainSection.SPORTS)
@@ -1676,24 +1623,6 @@ fun OwnTVShell(
 
     if (showExit) {
         ExitDialog(onConfirm = onExitApp, onDismiss = { showExit = false })
-    }
-    if (showAvatarPicker) {
-        AvatarPickerDialog(
-                selectedId = avatarId,
-                onSelect = onSetAvatar,
-                customPath = avatarPath,
-                onPickCustom = { showAvatarPicker = false; showAvatarChooser = true },
-                onClearCustom = { onClearCustomAvatar(); showAvatarPicker = false },
-                onDismiss = { showAvatarPicker = false },
-        )
-    }
-    if (showAvatarChooser) {
-        tv.own.owntv.features.profiles.ProfilePictureChooser(
-                hasImage = avatarPath.isNotBlank(),
-                onPicked = { file -> onSetCustomAvatar(file); showAvatarChooser = false },
-                onClear = { onClearCustomAvatar(); showAvatarChooser = false },
-                onDismiss = { showAvatarChooser = false },
-            )
     }
     if (showPlaylistPicker) {
         tv.own.owntv.ui.components.OwnTVPopup(onDismissRequest = { showPlaylistPicker = false }, stageLayout = true) {

@@ -11,6 +11,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import tv.own.owntv.R
+import tv.own.owntv.core.settings.StayonBroadcaster
 import tv.own.owntv.core.settings.StayonHomeLayout
 import tv.own.owntv.core.settings.StayonHomeTab
 import tv.own.owntv.core.settings.StayonHomeWidget
@@ -27,6 +28,13 @@ internal fun homeTabLabel(tab: StayonHomeTab): String = stringResource(when (tab
     StayonHomeTab.RADIO -> R.string.stayon_nav_radio
     StayonHomeTab.MUSIC -> R.string.stayon_music
     StayonHomeTab.APPS -> R.string.stayon_nav_apps
+})
+
+@Composable
+internal fun broadcasterLabel(broadcaster: StayonBroadcaster): String = stringResource(when (broadcaster) {
+    StayonBroadcaster.MEDIASET -> R.string.stayon_mediaset
+    StayonBroadcaster.RTVE -> R.string.stayon_rtve
+    StayonBroadcaster.ATRESMEDIA -> R.string.stayon_atresmedia
 })
 
 @Composable
@@ -84,6 +92,19 @@ internal fun StayonHomeEditor(
                     }
                 },
                 onLongClick = { update(draft.copy(large = if (widget in draft.large) draft.large - widget else draft.large + widget)) })
+        }
+        StageSettingsHeading(stringResource(R.string.stayon_home_broadcaster_logo_sizes), null)
+        StayonBroadcaster.entries.forEach { broadcaster ->
+            val size = draft.logoSize(broadcaster)
+            fun setSize(value: Int) {
+                val next = value.coerceIn(StayonHomeLayout.MIN_LOGO_SIZE, StayonHomeLayout.MAX_LOGO_SIZE)
+                val sizes = if (next == 100) draft.logoSizes - broadcaster else draft.logoSizes + (broadcaster to next)
+                update(draft.copy(logoSizes = sizes))
+            }
+            StageSettingRow(OwnTVIcon.ZOOM, broadcasterLabel(broadcaster), null,
+                SettingValue.Stepper(stringResource(R.string.common_percent, size)),
+                onStep = { setSize(size + 5 * it) },
+                onClick = { setSize(if (size >= StayonHomeLayout.MAX_LOGO_SIZE) StayonHomeLayout.MIN_LOGO_SIZE else size + 5) })
         }
         StageSettingRow(OwnTVIcon.REFRESH, stringResource(R.string.common_reset), null, null,
             onClick = { update(StayonHomeLayout()) })

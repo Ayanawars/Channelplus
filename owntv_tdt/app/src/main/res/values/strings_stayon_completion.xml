@@ -23,4 +23,5 @@
     <string name="stayon_launcher_disable_desc">Android will choose or ask for another Home app if STAYON+ was the default.</string>
     <string name="stayon_apps_reset_order">Restore app order</string>
     <string name="stayon_apps_reset_order_desc">Return to alphabetical order, with favorites first.</string>
+    <string name="stayon_home_broadcaster_logo_sizes">LOVEStv shortcut logo sizes</string>
 </resources>

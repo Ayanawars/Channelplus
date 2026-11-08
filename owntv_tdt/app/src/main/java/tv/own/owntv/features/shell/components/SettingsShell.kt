@@ -56,14 +56,10 @@ fun SettingsScreen(
     onBack: (() -> Unit)? = null,
     openEpgAdd: Boolean = false,
     onEpgAddConsumed: () -> Unit = {},
-    start: SettingsStart? = null,
-    onStartConsumed: () -> Unit = {},
 ) {
     // A full-width category hub instead of the old permanent left navigation rail.
     // Deep links may still open a category directly.
-    val initialGroup = start?.group?.takeUnless { it == SettingsGroup.PROFILE.ordinal }
-        ?.let { if (it == SettingsGroup.QUICK.ordinal) SettingsGroup.APP.ordinal else it }
-        ?: if (openEpgAdd) SettingsGroup.SOURCES.ordinal else -1
+    val initialGroup = if (openEpgAdd) SettingsGroup.SOURCES.ordinal else -1
     var selected by rememberSaveable { mutableIntStateOf(initialGroup) }
     var navigationVersion by remember { mutableIntStateOf(0) }
     val contentFocus = remember { FocusRequester() }
@@ -97,7 +93,6 @@ fun SettingsScreen(
                     onOpenPlaylist, Modifier.fillMaxSize(),
                     onBack = { selected = -1 },
                     openEpgAdd = openEpgAdd, onEpgAddConsumed = onEpgAddConsumed,
-                    start = start, onStartConsumed = onStartConsumed,
                     selectedGroup = selected,
                     onSelectGroup = { selected = it },
                     navigationVersion = navigationVersion,

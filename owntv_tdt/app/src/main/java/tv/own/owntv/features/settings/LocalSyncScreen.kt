@@ -163,7 +163,7 @@ fun LocalSyncScreen(
                     val sep = stringResource(R.string.content_epg_bits_separator)
                     paired.forEach { device ->
                         val rowFocus = remember(device.id) { FocusRequester() }
-                        tv.own.owntv.features.more.StageActionRow(
+                        StageActionRow(
                             height = 104.mpx,
                             focus = rowFocus,
                             onClick = { stepFocus.value = rowFocus; vm.chooseDevice(device) },
@@ -175,8 +175,8 @@ fun LocalSyncScreen(
                             title = codes[device.id]?.let { stringResource(R.string.local_sync_device_with_code, device.name, it) } ?: device.name,
                             line = listOfNotNull(device.address.takeIf { it.isNotBlank() }, lastSyncedText(device.lastSyncAt)).joinToString(sep),
                             actions = listOf(
-                                tv.own.owntv.features.more.RowAction(stringResource(R.string.settings_sync_now), OwnTVIcon.REFRESH) { stepFocus.value = rowFocus; vm.chooseDevice(device) },
-                                tv.own.owntv.features.more.RowAction(stringResource(R.string.more_sync_unpair), OwnTVIcon.CLOSE) { vm.unpair(device) },
+                                RowAction(stringResource(R.string.settings_sync_now), OwnTVIcon.REFRESH) { stepFocus.value = rowFocus; vm.chooseDevice(device) },
+                                RowAction(stringResource(R.string.more_sync_unpair), OwnTVIcon.CLOSE) { vm.unpair(device) },
                             ),
                         )
                     }
