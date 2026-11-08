@@ -16,4 +16,5 @@
     <string name="stayon_epg_filter_pending">Pending</string>
     <string name="stayon_epg_batch_no_guide">No guide assigned</string>
     <string name="stayon_epg_batch_auto_id">Auto: %1$s</string>
+    <string name="stayon_epg_batch_source_status">%1$s · %2$s</string>
 </resources>
