@@ -368,6 +368,7 @@ fun EpgScreen(
         onWatch = { watch(ch) },
         onPlayFromStart = { playFromStart(ch, p) },
         onPickEpg = { matchingChannel = ch },
+        onPickEpgBatch = { batchEpgChannel = ch },
         onEpgOffset = { offsetChannel = ch },
     )
 
