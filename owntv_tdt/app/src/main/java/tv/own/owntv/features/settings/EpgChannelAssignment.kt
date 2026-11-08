@@ -46,9 +46,8 @@ internal fun EpgChannelAssignment(
     initialChannel: ChannelEntity? = null,
 ) {
     val vm: EpgViewModel = koinViewModel()
-    // Opening from a channel long-press starts with that channel, even in very large playlists.
-    // Clear Search to continue editing the whole TV lineup in a single batch.
-    var query by remember(initialChannel?.id) { mutableStateOf(initialChannel?.name.orEmpty()) }
+    // Long-press starts at this channel and continues in source order. Search spans ALL sources.
+    var query by remember(initialChannel?.id) { mutableStateOf("") }
     var filter by remember { mutableStateOf(EpgBatchFilter.ALL) }
     var initialFocusPending by remember(initialChannel?.id) { mutableStateOf(initialChannel != null) }
     var selected by remember { mutableStateOf<ChannelEntity?>(null) }
@@ -66,7 +65,7 @@ internal fun EpgChannelAssignment(
     val fetchedChannels = key(query) {
         val result by produceState<List<Pair<ChannelEntity, String>>?>(null) {
             if (query.isNotBlank()) delay(250)
-            value = vm.channelsForAssignment(query)
+            value = vm.channelsForAssignment(query, initialChannel)
         }
         result
     }
