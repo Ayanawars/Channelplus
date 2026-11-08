@@ -1113,7 +1113,10 @@ class EpgViewModel(
         val hiddenCategories = tv.own.owntv.core.content.AdultCategoryClassifier.hiddenCategoryIds(
             categoryDao.observe(ids, MediaType.LIVE).first(), cust.hiddenCategories, isKids,
         )
-        return channelDao.channelsForGuide(ids, query.trim(), 200).mapNotNull { channel ->
+        // Editing only the first 200 channels made most IPTV lineups appear unassignable.
+        // Search still queries the full database, while LazyColumn only renders visible rows.
+        val limit = if (query.isBlank()) 2_000 else 5_000
+        return channelDao.channelsForGuide(ids, query.trim(), limit).mapNotNull { channel ->
             if (channel.categoryId in hiddenCategories || CustomizeKeys.channel(channel) in cust.hiddenItems) {
                 return@mapNotNull null
             }
