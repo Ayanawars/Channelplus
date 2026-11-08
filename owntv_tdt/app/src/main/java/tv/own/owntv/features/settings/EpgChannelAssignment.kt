@@ -50,6 +50,7 @@ internal fun EpgChannelAssignment(
     // Clear Search to continue editing the whole TV lineup in a single batch.
     var query by remember(initialChannel?.id) { mutableStateOf(initialChannel?.name.orEmpty()) }
     var filter by remember { mutableStateOf(EpgBatchFilter.ALL) }
+    var initialFocusPending by remember(initialChannel?.id) { mutableStateOf(initialChannel != null) }
     var selected by remember { mutableStateOf<ChannelEntity?>(null) }
     var nextFocusId by remember { mutableStateOf<Long?>(null) }
     var saving by remember { mutableStateOf(false) }
@@ -139,12 +140,21 @@ internal fun EpgChannelAssignment(
             if (initialChannel == null) runCatching { searchFocus.requestFocus() }
         }
         LaunchedEffect(channels, initialChannel?.id) {
+            if (!initialFocusPending || channels == null || selected != null) return@LaunchedEffect
             val id = initialChannel?.id ?: return@LaunchedEffect
-            val index = channels?.indexOfFirst { it.first.id == id } ?: -1
-            if (index < 0 || selected != null) return@LaunchedEffect
-            listState.scrollToItem(index)
-            withFrameNanos { }
-            runCatching { rowFocus[id]?.requestFocus() }.onFailure { runCatching { searchFocus.requestFocus() } }
+            val index = channels.indexOfFirst { it.first.id == id }
+            if (index >= 0) {
+                listState.scrollToItem(index)
+                withFrameNanos { }
+                withFrameNanos { }
+                if (rowFocus[id] != null) runCatching { rowFocus[id]?.requestFocus() }
+                else runCatching { searchFocus.requestFocus() }
+            } else {
+                runCatching { searchFocus.requestFocus() }
+            }
+            // Otherwise the first row would steal focus again after every staged change,
+            // making it impossible to edit the next channel with the remote.
+            initialFocusPending = false
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.mpx)) {
             listOf(
