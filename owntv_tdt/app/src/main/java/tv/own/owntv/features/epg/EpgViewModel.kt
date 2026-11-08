@@ -625,6 +625,44 @@ class EpgViewModel(
         customize.update(profileId, MediaType.LIVE) { it.copy(epgMatches = it.epgMatches + clean) }
     }
 
+    /**
+     * Commit the sequential EPG editor's draft in one persistent update.
+     * Null values remove an override and restore automatic matching.
+     * Existing unrelated preferences and guide mappings remain untouched.
+     */
+    fun saveManualEpgAssignments(
+        assignments: Map<ChannelEntity, String?>,
+        onComplete: (Boolean) -> Unit,
+    ) {
+        if (assignments.isEmpty()) { onComplete(true); return }
+        viewModelScope.launch {
+            try {
+                val pid = settings.activeProfileId.first()
+                val updates = assignments.map { (channel, id) ->
+                    CustomizeKeys.channel(channel) to id?.trim()?.lowercase()?.takeIf { it.isNotEmpty() }
+                }.toMap()
+                customize.update(pid, MediaType.LIVE) { current ->
+                    val mapped = current.epgMatches.toMutableMap()
+                    updates.forEach { (key, id) ->
+                        if (id == null) mapped.remove(key) else mapped[key] = id
+                    }
+                    current.copy(epgMatches = mapped)
+                }
+                // Wait for the in-memory profile to observe this write before refreshing guide rows.
+                kotlinx.coroutines.withTimeoutOrNull(1_500) {
+                    custom.first { current -> updates.all { (key, id) -> current.epgMatches[key] == id } }
+                }
+                val ids = updates.values.filterNotNull().distinct()
+                if (ids.isNotEmpty()) fillMatchedInBackground(ids) else load()
+                onComplete(true)
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                onComplete(false)
+            }
+        }
+    }
+
     /** Set/clear a channel's manual EPG match (null clears → auto-match), then reload the guide. */
     fun setEpgMatch(channel: ChannelEntity, epgChannelId: String?) {
         viewModelScope.launch {
