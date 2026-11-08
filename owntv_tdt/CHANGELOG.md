@@ -1,5 +1,19 @@
 # OwnTV — Changelog
 
+## v5.4.9 — 2026-11-08
+
+### ✨ New features
+- **📺 Automatic EPG assignment for TDT and IPTV channels**
+- **📝 Sequential EPG editor with Save after multiple channels**
+- **🔍 Direct guide matching and unmatched-channel visibility in Settings**
+
+### 🐛 Fixes
+- **Playlist EPG feeds register and sync without a separate prompt**
+- **Daily EPG refresh defaults for sources without saved preferences**
+- **EPG channel assignments survive guide refreshes**
+- **Guide reports available native programming without a separate XMLTV source**
+
+
 > Release notes: two parts per version — New features (by name) and Fixes. This file feeds the GitHub release body and the in-app update dialog.
 >
 > **Rule: bullet points only — no descriptions.** Each line is a short bolded feature/fix title and
