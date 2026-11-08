@@ -198,7 +198,7 @@ internal fun EpgChannelAssignment(
                     }
                     StageMenuItem(
                         text = channel.name,
-                        value = if (sourceName.isBlank()) label else "$sourceName · $label",
+                        value = if (sourceName.isBlank()) label else stringResource(R.string.stayon_epg_batch_source_status, sourceName, label),
                         icon = OwnTVIcon.LIVE_TV,
                         modifier = Modifier.focusRequester(row),
                         onClick = { if (!saving) { restoreFocus.value = row; selected = channel } },
