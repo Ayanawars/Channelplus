@@ -26,6 +26,7 @@ class KoinWorkerFactory : WorkerFactory() {
                 koin.get(),
                 koin.get(),
                 koin.get(),
+                koin.get(), // shared automatic EPG assignment service
             )
             TrendingRefreshWorker::class.java.name -> TrendingRefreshWorker(
                 appContext,

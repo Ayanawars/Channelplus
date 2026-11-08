@@ -1571,7 +1571,9 @@ class SettingsRepository(private val context: Context, private val localeStore: 
     }
 
     /** The TV Guide also lists channels with no guide data (Order ▾ › Show), so they can be matched from there. */
-    val guideShowEmpty: Flow<Boolean> = prefsFlow { it[Keys.GUIDE_SHOW_EMPTY] ?: false }
+    // New installs show unmatched channels so users can find and correct their EPG mapping.
+    // An explicit existing preference (true or false) is always respected.
+    val guideShowEmpty: Flow<Boolean> = prefsFlow { it[Keys.GUIDE_SHOW_EMPTY] ?: true }
     suspend fun setGuideShowEmpty(show: Boolean) {
         context.dataStore.edit { it[Keys.GUIDE_SHOW_EMPTY] = show }
     }

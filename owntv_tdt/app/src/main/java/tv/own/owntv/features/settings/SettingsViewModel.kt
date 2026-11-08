@@ -71,6 +71,7 @@ class SettingsViewModel(
     private val userDataWriter: tv.own.owntv.core.backup.UserDataWriter,
     private val epgRepository: tv.own.owntv.core.repository.EpgRepository,
     private val epgSourceStore: tv.own.owntv.core.epg.EpgSourceStore,
+    private val epgSyncScheduler: tv.own.owntv.core.sync.work.EpgSyncScheduler,
     private val launcherIntegrationRepository: LauncherIntegrationRepository,
     private val catalogSyncScheduler: CatalogSyncScheduler,
     private val okHttpClient: okhttp3.OkHttpClient,
@@ -1347,9 +1348,22 @@ class SettingsViewModel(
             val done = importer.state.value as? SourceImporter.ImportState.Success ?: return@launch
             Log.d(TAG, "runImport sync success sourceId=${done.source?.id} profile=$pid")
             done.source?.let { synced ->
-                if (epgRepository.guideUrl(synced) != null) {
-                    pendingEpgSource = synced
-                    _epgSync.value = EpgSyncUi.Ask(synced.name)
+                // A playlist advertising XMLTV does not require a second configuration wizard.
+                // Register its feed(s), share them with TDT and all IPTV sources, and let the
+                // background worker download + automatically match unmatched channels.
+                // Keep the user's refresh preference on an existing EPG source unchanged.
+                epgRepository.guideUrls(synced).forEach { url ->
+                    val current = epgSourceStore.getAll().firstOrNull { it.url == url }
+                    val feed = current ?: epgSourceStore.add(synced.name, url, synced.userAgent)
+                    if (current == null) settings.setEpgAutoRefresh(
+                        feed.id,
+                        tv.own.owntv.core.settings.EpgRefresh(
+                            tv.own.owntv.core.settings.EpgAutoRefresh.HOURS_24,
+                        ),
+                    )
+                    // Do not force a resync of a previously configured shared feed.
+                    if (current == null || current.lastSyncAt == null)
+                        epgSyncScheduler.enqueueSync(feed.id, "playlist_import")
                 }
             }
             runCatching { refreshActiveTvHome(allowBrowsableRequest = true) }

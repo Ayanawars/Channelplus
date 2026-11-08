@@ -31,10 +31,70 @@ class EpgSourcesViewModel(
     private val epgDao: tv.own.owntv.core.database.dao.EpgDao,
     private val channelDao: tv.own.owntv.core.database.dao.ChannelDao,
     private val epgSyncScheduler: EpgSyncScheduler,
+    private val automaticAssignment: tv.own.owntv.core.epg.EpgAutoAssignmentService,
 ) : ViewModel() {
+
+    init {
+        // An older install may already contain guide URLs but no refresh preference, which
+        // previously meant OFF. Enable 24h refresh only where the user never chose a value;
+        // an explicitly disabled feed stays disabled.
+        viewModelScope.launch {
+            val configured = settings.epgAutoRefresh.first()
+            store.getAll().filter { it.id !in configured }.forEach {
+                settings.setEpgAutoRefresh(it.id, EpgRefresh(EpgAutoRefresh.HOURS_24))
+            }
+        }
+    }
 
     /** An existing playlist's EPG feed, offered as a one-tap "fill from playlist" option. */
     data class PlaylistEpg(val name: String, val url: String)
+
+    sealed interface AutoAssignStatus {
+        data object Idle : AutoAssignStatus
+        data object Running : AutoAssignStatus
+        data object NoSources : AutoAssignStatus
+        data object UpdatingGuide : AutoAssignStatus
+        data class Done(val applied: Int, val review: Int) : AutoAssignStatus
+        data object Failed : AutoAssignStatus
+    }
+
+    private val _autoAssignStatus = MutableStateFlow<AutoAssignStatus>(AutoAssignStatus.Idle)
+    val autoAssignStatus: StateFlow<AutoAssignStatus> = _autoAssignStatus.asStateFlow()
+
+    /** Show all TV channels even when their programme ID is still unresolved. */
+    val showUnmatchedChannels: StateFlow<Boolean> = settings.guideShowEmpty
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
+
+    fun setShowUnmatchedChannels(enabled: Boolean) {
+        viewModelScope.launch { settings.setGuideShowEmpty(enabled) }
+    }
+
+    /** Re-match on demand; a missing/empty guide is downloaded first by the background workers. */
+    fun assignAutomatically() {
+        if (_autoAssignStatus.value is AutoAssignStatus.Running) return
+        viewModelScope.launch {
+            _autoAssignStatus.value = AutoAssignStatus.Running
+            try {
+                val feeds = store.getAll()
+                if (feeds.isEmpty()) {
+                    _autoAssignStatus.value = AutoAssignStatus.NoSources
+                    return@launch
+                }
+                val stored = epgDao.countForSources(feeds.map { it.id })
+                if (stored == 0) {
+                    feeds.forEach { epgSyncScheduler.enqueueSync(it.id, "assign_guide") }
+                    _autoAssignStatus.value = AutoAssignStatus.UpdatingGuide
+                    return@launch
+                }
+                val result = automaticAssignment.assign()
+                _autoAssignStatus.value = AutoAssignStatus.Done(result.applied, result.suggested)
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                _autoAssignStatus.value = AutoAssignStatus.Failed
+            }
+        }
+    }
 
     val sources: StateFlow<List<EpgSource>> =
         store.sources.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -55,7 +115,7 @@ class EpgSourcesViewModel(
         viewModelScope.launch { settings.setEpgUseLogos(source.id, enabled) }
     }
 
-    fun add(name: String, url: String, userAgent: String? = null, autoRefresh: EpgRefresh = EpgRefresh.OFF, useLogos: Boolean = false) {
+    fun add(name: String, url: String, userAgent: String? = null, autoRefresh: EpgRefresh = EpgRefresh(EpgAutoRefresh.HOURS_24), useLogos: Boolean = false) {
         viewModelScope.launch {
             val source = store.add(name, url, userAgent)
             settings.setEpgAutoRefresh(source.id, autoRefresh)

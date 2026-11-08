@@ -79,19 +79,20 @@ class AutoRefresh(
         }
         // --- EPG sources ---
         val epgModes = settings.epgAutoRefresh.first()
-        if (epgModes.isNotEmpty()) {
-            epgSourceStore.getAll().forEach { src ->
-                val mode = epgModes[src.id] ?: EpgRefresh.OFF
-                if (shouldRefreshEpg(mode, src.lastSyncAt, nowMs, includeStartup)) {
-                    val base = epgDao.countForSources(listOf(src.id))
-                    Log.d(TAG, "checkAutoRefresh epg sourceId=${src.id} mode=$mode — enqueuing")
-                    epgSyncScheduler.enqueueSync(
-                        src.id,
-                        reason = REASON,
-                        baseProgrammes = base,
-                        policy = ExistingWorkPolicy.KEEP,
-                    )
-                }
+        // A guide source with no saved refresh preference defaults to every 24h. The old
+        // "if (epgModes.isNotEmpty())" prevented ALL refreshes for upgraded installations
+        // that had valid EPG URLs but had never opened the auto-refresh selector.
+        epgSourceStore.getAll().forEach { src ->
+            val mode = epgModes[src.id] ?: EpgRefresh(EpgAutoRefresh.HOURS_24)
+            if (shouldRefreshEpg(mode, src.lastSyncAt, nowMs, includeStartup)) {
+                val base = epgDao.countForSources(listOf(src.id))
+                Log.d(TAG, "checkAutoRefresh epg sourceId=${src.id} mode=$mode — enqueuing")
+                epgSyncScheduler.enqueueSync(
+                    src.id,
+                    reason = REASON,
+                    baseProgrammes = base,
+                    policy = ExistingWorkPolicy.KEEP,
+                )
             }
         }
         if (includeStartup) refillGuideEmptiedByMigration()

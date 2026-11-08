@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stayon_epg_auto_section">Guía automática de canales</string>
+    <string name="stayon_epg_shared_explanation">Las guías XMLTV están disponibles tanto para canales TDT como IPTV. STAYON+ busca coincidencias automáticamente: primero por identificador y luego por nombre fiable. No necesitas vincular una URL EPG a cada lista.</string>
+    <string name="stayon_epg_auto_assign">Buscar EPG automáticamente</string>
+    <string name="stayon_epg_auto_assign_desc">Asigna la guía a los canales pendientes de todas las fuentes de TV. Respeta las correcciones manuales.</string>
+    <string name="stayon_epg_auto_running">Comprobando canales y programación…</string>
+    <string name="stayon_epg_auto_add_source">Primero añade una fuente EPG XMLTV para poder encontrar coincidencias.</string>
+    <string name="stayon_epg_auto_syncing">La guía todavía no tiene programas descargados. Se descargará y se asignará automáticamente al terminar.</string>
+    <string name="stayon_epg_auto_done">Asignaciones automáticas: %1$d. Para revisar manualmente: %2$d. Se conservan los identificadores y asignaciones existentes.</string>
+    <string name="stayon_epg_auto_failed">No se pudo completar la asignación. Comprueba que la guía EPG está descargada y vuelve a intentarlo.</string>
+    <string name="stayon_epg_show_unmatched">Mostrar canales sin EPG</string>
+    <string name="stayon_epg_show_unmatched_desc">Mantener visibles en la guía los canales cuya programación aún no se ha encontrado.</string>
+</resources>

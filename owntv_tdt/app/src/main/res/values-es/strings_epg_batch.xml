@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stayon_epg_batch_hint">Asigna la guía canal a canal. Cambios pendientes: %1$d. Guardar los aplica juntos.</string>
+    <string name="stayon_epg_batch_pending">Pendiente: %1$s</string>
+    <string name="stayon_epg_batch_auto">Automático</string>
+    <string name="stayon_epg_batch_manual">EPG: %1$s</string>
+    <string name="stayon_epg_batch_discard_title">¿Descartar asignaciones EPG?</string>
+    <string name="stayon_epg_batch_discard_body">¿Descartar los cambios EPG pendientes (%1$d)?</string>
+    <string name="stayon_epg_batch_discard">Descartar</string>
+    <string name="stayon_epg_batch_error_title">No se pudieron guardar las asignaciones EPG</string>
+    <string name="stayon_epg_batch_error_body">No se han confirmado los cambios. Revísalos e intenta guardarlos de nuevo.</string>
+</resources>

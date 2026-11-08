@@ -2430,6 +2430,8 @@ private fun stayonRelatedRows(group: SettingsGroup, goTo: (SettingsGroup) -> Uni
 /** The settings that live inside a sub-screen, findable by their own names; each opens its screen. */
 @Composable
 private fun subScreenSearchEntries(open: (SettingsTab) -> Unit): List<SettingsSearchEntry> = listOf(
+        SettingsSearchEntry(stringResource(R.string.stayon_settings_sources), stringResource(R.string.stayon_epg_auto_assign), stringResource(R.string.stayon_epg_auto_assign_desc), OwnTVIcon.EPG, TileTone.SECONDARY) { open(SettingsTab.EPG) },
+        SettingsSearchEntry(stringResource(R.string.stayon_settings_sources), stringResource(R.string.stayon_epg_show_unmatched), stringResource(R.string.stayon_epg_show_unmatched_desc), OwnTVIcon.EPG, TileTone.SECONDARY) { open(SettingsTab.EPG) },
         SettingsSearchEntry(stringResource(R.string.stayon_settings_sources), stringResource(R.string.stayon_epg_assign_channel), stringResource(R.string.stayon_epg_assign_channel_desc), OwnTVIcon.EPG, TileTone.SECONDARY) { open(SettingsTab.EPG) },
         SettingsSearchEntry(stringResource(R.string.stayon_settings_sources), stringResource(R.string.stayon_epg_artwork_enabled), stringResource(R.string.stayon_epg_artwork_enabled_desc), OwnTVIcon.IMAGE, TileTone.SECONDARY) { open(SettingsTab.EPG) },
         SettingsSearchEntry(stringResource(R.string.stayon_radio_section), stringResource(R.string.stayon_radio_iptv_title), stringResource(R.string.stayon_radio_iptv_desc), OwnTVIcon.AUDIO, TileTone.SECONDARY) { open(SettingsTab.RADIO_IPTV) },
