@@ -1,4 +1,4 @@
-name: Channelplus checks
+name: STAYON+ 5.4.7 production build
 on:
   push:
     branches: [main, codex/complete-import-channel-review]
@@ -44,8 +44,9 @@ jobs:
           VERSION_CODE: '101007'
           VERSION_NAME: '5.4.7'
           CHANNELPLUS_TEST_KEYSTORE: ${{ runner.temp }}/stayon-preview.jks
-        run: ./gradlew :app:testStandardDebugUnitTest :owntv_core_tdt:core:testDebugUnitTest :owntv_core_tdt:player-core:testDebugUnitTest :app:assembleStandardDebug --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g -Dfile.encoding=UTF-8" -Pkotlin.daemon.jvmargs=-Xmx3g
+        run: ./gradlew :app:testStandardDebugUnitTest :owntv_core_tdt:core:testDebugUnitTest :owntv_core_tdt:player-core:testDebugUnitTest :app:assembleStandardRelease --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g -Dfile.encoding=UTF-8" -Pkotlin.daemon.jvmargs=-Xmx3g
       - uses: actions/upload-artifact@v4
         with:
-          name: Channelplus-CI-test-only
-          path: owntv_tdt/app/build/outputs/apk/standard/debug/*.apk
+          name: StayON-5.4.7-unsigned-release
+          path: owntv_tdt/app/build/outputs/apk/standard/release/*-unsigned.apk
+          if-no-files-found: error
