@@ -318,6 +318,7 @@ fun EpgScreen(
     var recordMenuFor by remember { mutableStateOf<Pair<ChannelEntity, EpgProgrammeEntity>?>(null) }
     var askPlayerFor by remember { mutableStateOf<Pair<ChannelEntity, EpgProgrammeEntity>?>(null) }
     var matchingChannel by remember { mutableStateOf<ChannelEntity?>(null) }
+    var batchEpgChannel by remember { mutableStateOf<ChannelEntity?>(null) }
     var offsetChannel by remember { mutableStateOf<ChannelEntity?>(null) }
     var orderOpen by remember { mutableStateOf(false) }
     var dayOpen by remember { mutableStateOf(false) }
@@ -328,7 +329,7 @@ fun EpgScreen(
     var searchHadFocus by remember { mutableStateOf(false) }
     // Where focus goes back to when an overlay closes: the control or button that opened it.
     var returnTo by remember { mutableStateOf<(() -> Unit)?>(null) }
-    val anyOverlay = menuFor != null || channelMenuFor != null || recordMenuFor != null || askPlayerFor != null || matchingChannel != null ||
+    val anyOverlay = menuFor != null || channelMenuFor != null || recordMenuFor != null || askPlayerFor != null || matchingChannel != null || batchEpgChannel != null ||
         offsetChannel != null || orderOpen || dayOpen || review.isNotEmpty()
     var hadOverlay by remember { mutableStateOf(false) }
     LaunchedEffect(anyOverlay) {
@@ -695,6 +696,7 @@ fun EpgScreen(
             onFavorite = { vm.toggleFavoriteChannel(ch) },
             onAutoMatch = { vm.autoMatchOne(ch) },
             onPickEpg = { matchingChannel = ch },
+            onPickEpgBatch = { batchEpgChannel = ch },
             onEpgOffset = { offsetChannel = ch },
             onDismiss = { channelMenuFor = null },
         )
@@ -730,6 +732,12 @@ fun EpgScreen(
             onPick = { vm.setEpgMatch(channel, it); matchingChannel = null },
             onClear = { vm.setEpgMatch(channel, null); matchingChannel = null },
             onDismiss = { matchingChannel = null },
+        )
+    }
+    batchEpgChannel?.let { ch ->
+        tv.own.owntv.features.settings.EpgChannelAssignment(
+            initialChannel = ch,
+            onDismiss = { batchEpgChannel = null },
         )
     }
     if (review.isNotEmpty()) {
