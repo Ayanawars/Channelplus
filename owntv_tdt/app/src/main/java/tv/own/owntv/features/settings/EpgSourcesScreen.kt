@@ -194,7 +194,7 @@ fun EpgSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier, startOnA
             title = stringResource(R.string.stayon_epg_priority),
             desc = stringResource(R.string.stayon_epg_priority_desc),
             value = SettingValue.Opens(null),
-            enabled = sources.isNotEmpty() && playlists.isNotEmpty(),
+            enabled = playlists.isNotEmpty(),
             onClick = { choosingPlaylist = true },
         )
         StageSettingRow(
@@ -246,7 +246,7 @@ fun EpgSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier, startOnA
                 StageMenuItem(
                     text = playlist.name,
                     value = priorities[playlist.id].orEmpty().firstOrNull()
-                        ?.let { id -> sources.firstOrNull { it.id == id }?.name }
+                        ?.let { id -> if (id == playlist.id) stringResource(R.string.stayon_epg_native_source, playlist.name) else sources.firstOrNull { it.id == id }?.name }
                         ?: stringResource(R.string.stayon_epg_batch_auto),
                     icon = OwnTVIcon.PLAYLIST,
                     onClick = { editingPlaylist = playlist.id },
@@ -255,36 +255,8 @@ fun EpgSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier, startOnA
         }
     }
 
-    val playlist = playlists.firstOrNull { it.id == editingPlaylist }
-    if (playlist != null) {
-        key(playlist.id) {
-            var order by remember { mutableStateOf(priorities[playlist.id].orEmpty()) }
-            StagePopup(
-                onDismiss = { editingPlaylist = null },
-                title = playlist.name,
-                body = stringResource(R.string.stayon_epg_priority_hint),
-                buttons = {
-                    StageButton(stringResource(R.string.content_close), onClick = { editingPlaylist = null })
-                    StageButton(stringResource(R.string.common_save), tinted = true, onClick = {
-                        vm.savePlaylistPriority(playlist.id, order)
-                        editingPlaylist = null
-                    })
-                },
-            ) {
-                (order.mapNotNull { id -> sources.firstOrNull { it.id == id } } + sources.filter { it.id !in order })
-                    .forEach { source ->
-                        key(source.id) {
-                            val position = order.indexOf(source.id)
-                            StageMenuItem(
-                                text = source.name,
-                                value = if (position >= 0) stringResource(R.string.stayon_epg_priority_position, position + 1) else null,
-                                icon = if (position >= 0) OwnTVIcon.CHECK else OwnTVIcon.ADD,
-                                onClick = { order = if (position >= 0) order - source.id else order + source.id },
-                            )
-                        }
-                    }
-            }
-        }
+    playlists.firstOrNull { it.id == editingPlaylist }?.let { playlist ->
+        PlaylistEpgPriority(playlist, vm, onDismiss = { editingPlaylist = null })
     }
 
     confirmDelete?.let { s ->
@@ -608,4 +580,58 @@ private fun PlaylistEpgPicker(
     }
     if (panelEditor(onDismiss) { list() }) return
     tv.own.owntv.ui.stage.StagePopup(onDismiss = onDismiss, title = stringResource(R.string.settings_epg_sources_fill_playlist)) { list() }
+}
+
+@Composable
+internal fun PlaylistEpgPriority(
+    playlist: tv.own.owntv.core.database.entity.SourceEntity,
+    vm: EpgSourcesViewModel = koinViewModel(),
+    onDismiss: () -> Unit,
+) {
+    val sources by vm.sources.collectAsStateWithLifecycle()
+    val priorities by vm.playlistPriorities.collectAsStateWithLifecycle()
+    val feeds = sources.map { it.id to it.name } + (playlist.id to stringResource(R.string.stayon_epg_native_source, playlist.name))
+    GuidePriorityPopup(playlist.name, feeds, priorities[playlist.id].orEmpty(), onDismiss) { order ->
+        vm.savePlaylistPriority(playlist.id, order)
+    }
+}
+
+@Composable
+internal fun <T : Any> GuidePriorityPopup(
+    name: String, sources: List<Pair<T, String>>, initialOrder: List<T>, onDismiss: () -> Unit,
+    onSave: (List<T>) -> Unit,
+) {
+    var draft by remember { mutableStateOf<List<T>?>(null) }
+    val order = draft ?: initialOrder
+    val names = sources.toMap()
+    val heading = stringResource(R.string.stayon_epg_priority_title, name)
+    StagePopup(
+        onDismiss = onDismiss,
+        title = heading,
+        body = stringResource(R.string.stayon_epg_priority_hint),
+        buttons = {
+            StageButton(stringResource(R.string.content_close), onClick = onDismiss)
+            StageButton(stringResource(R.string.common_save), tinted = true, onClick = {
+                onSave(order)
+                onDismiss()
+            })
+        },
+    ) {
+        (order.filter { it in names } + sources.map { it.first }.filter { it !in order }).forEach { id ->
+            key(id) {
+                val position = order.indexOf(id)
+                StageMenuItem(
+                    text = names.getValue(id),
+                    value = when (position) {
+                        -1 -> null
+                        0 -> stringResource(R.string.stayon_epg_preferred)
+                        else -> stringResource(R.string.stayon_epg_priority_position, position + 1)
+                    },
+                    icon = if (position >= 0) OwnTVIcon.CHECK else OwnTVIcon.ADD,
+                    onClick = { draft = if (position >= 0) order - id else order + id },
+                )
+            }
+        }
+        if (sources.isEmpty()) StageSettingsNote(stringResource(R.string.settings_epg_sources_empty), null)
+    }
 }

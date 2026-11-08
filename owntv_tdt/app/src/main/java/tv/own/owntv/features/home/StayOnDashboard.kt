@@ -438,6 +438,7 @@ private fun StayOnRadioDashboard(onManage: () -> Unit, modifier: Modifier = Modi
     val stations by library.stations.collectAsStateWithLifecycle()
     val guideStore = remember(context) { tv.own.owntv.features.settings.RadioGuideStore.shared(context) }
     val guideFeeds by guideStore.feeds.collectAsStateWithLifecycle()
+    val guidePriorities by guideStore.priorities.collectAsStateWithLifecycle()
     LaunchedEffect(guideStore) { guideStore.load() }
     val now by produceState(System.currentTimeMillis()) {
         while (true) { delay(30_000L); value = System.currentTimeMillis() }
@@ -461,8 +462,10 @@ private fun StayOnRadioDashboard(onManage: () -> Unit, modifier: Modifier = Modi
         ) {
             items(stations, key = { it.id }) { station ->
                 val active = playing == station.id
-                val (programme, guideLogo) = remember(guideFeeds, station, now) {
-                    tv.own.owntv.features.settings.radioGuideMatch(guideFeeds, station, now)
+                val (programme, guideLogo) = remember(guideFeeds, guidePriorities, station, now) {
+                    val source = station.playlistId ?: station.tunerChannel?.inputId
+                    val selected = guidePriorities[source].orEmpty().mapNotNull { id -> guideFeeds.firstOrNull { it.id == id } }
+                    tv.own.owntv.features.settings.radioGuideMatch(selected.ifEmpty { guideFeeds }, station, now)
                 }
                 val logo = station.logo ?: guideLogo
                 var focused by remember { mutableStateOf(false) }

@@ -1033,8 +1033,10 @@ fun LiveScreen(
         EpgMatchDialog(
             channelName = ch.name,
             currentMatch = vm.currentEpgMatch(ch),
+            currentFeed = vm.currentEpgFeed(ch),
+            loadCurrentSource = { vm.currentEpgSource(ch) },
             loadChannels = { q -> vm.availableEpgChannels(ch.name, q) },
-            onPick = { epgId -> vm.setEpgMatch(ch, epgId); matchingEpg = null },
+            onPick = { epgId, feed -> vm.setEpgMatch(ch, epgId, feed); matchingEpg = null },
             onClear = { vm.setEpgMatch(ch, null); matchingEpg = null },
             onDismiss = { matchingEpg = null },
         )
@@ -1416,12 +1418,15 @@ private fun CatchupDialog(
 internal fun EpgMatchDialog(
     channelName: String,
     currentMatch: String?,
+    currentFeed: Long?,
+    loadCurrentSource: suspend () -> Pair<Long, String>?,
     loadChannels: suspend (String) -> List<tv.own.owntv.core.epg.GuideCandidate>,
-    onPick: (String) -> Unit,
+    onPick: (String, Long?) -> Unit,
     onClear: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     var query by remember { mutableStateOf("") }
+    val currentSource by produceState<Pair<Long, String>?>(null) { value = loadCurrentSource() }
     val results by androidx.compose.runtime.produceState<List<tv.own.owntv.core.epg.GuideCandidate>?>(initialValue = null, query) {
         kotlinx.coroutines.delay(250)
         value = runCatching { loadChannels(query) }.getOrDefault(emptyList())
@@ -1456,6 +1461,9 @@ internal fun EpgMatchDialog(
                         stringResource(R.string.content_epg_match_prompt, channelName)
                     },
                 )
+                currentSource?.let { source ->
+                    Text(stringResource(R.string.stayon_epg_source_label, source.second), modifier = Modifier.padding(horizontal = 12.mpx))
+                }
                 tv.own.owntv.ui.stage.StageSearchField(
                     query = query, onQueryChange = { query = it },
                     placeholder = stringResource(R.string.content_search_guide_channels).trimEnd('…'),
@@ -1471,12 +1479,13 @@ internal fun EpgMatchDialog(
                         modifier = Modifier.padding(horizontal = 14.mpx, vertical = 12.mpx),
                     )
                     else -> LazyColumn(Modifier.fillMaxWidth().height(400.mpx)) {
-                        items(list, key = { it.epgChannelId }) { epg ->
+                        items(list, key = { "${it.sourceId}:${it.epgChannelId}" }) { epg ->
                             tv.own.owntv.ui.stage.StageMenuItem(
                                 text = epg.displayName ?: epg.epgChannelId,
-                                value = epg.epgChannelId.takeIf { epg.displayName != null },
-                                checked = epg.epgChannelId == currentMatch,
-                                onClick = { onPick(epg.epgChannelId) },
+                                value = epg.sourceName ?: epg.epgChannelId.takeIf { epg.displayName != null },
+                                checked = epg.epgChannelId == currentMatch &&
+                                    (if (currentFeed != null) epg.sourceId == currentFeed else epg.sourceId == currentSource?.first),
+                                onClick = { onPick(epg.epgChannelId, epg.sourceId) },
                                 modifier = if (epg == list.first()) Modifier.focusRequester(firstItemFocus) else Modifier,
                             )
                         }

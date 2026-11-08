@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import tv.own.owntv.core.customize.SectionCustomizations
+import tv.own.owntv.core.database.entity.ContentOrderEntity
 import tv.own.owntv.core.database.dao.ChannelDao
 import tv.own.owntv.core.database.dao.EpgDao
 import tv.own.owntv.core.database.dao.ProfileDao
@@ -51,7 +52,6 @@ import tv.own.owntv.core.database.entity.EpgProgrammeEntity
 import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.network.ConnectivityObserver
 import tv.own.owntv.core.repository.EpgRepository
-import tv.own.owntv.core.repository.SourceRepository
 import tv.own.owntv.core.repository.activeSourceIds
 import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.owntv.core.settings.GuideWidthShares
@@ -93,7 +93,6 @@ data class EpgUiState(
  */
 class EpgViewModel(
     private val settings: SettingsRepository,
-    private val sourceRepository: SourceRepository,
     private val channelDao: ChannelDao,
     private val epgDao: EpgDao,
     private val profileDao: ProfileDao,
@@ -117,8 +116,83 @@ class EpgViewModel(
     private val epgActivity: tv.own.owntv.core.sync.EpgActivityTracker,
     /** "Recently watched" in the category list reads the same history Live TV does. */
     private val historyDao: tv.own.owntv.core.database.dao.HistoryDao,
+    private val contentOrderDao: tv.own.owntv.core.database.dao.ContentOrderDao,
     private val reminderManager: tv.own.owntv.core.reminder.ReminderManager,
 ) : ViewModel() {
+
+    internal data class GuideMove(
+        val items: List<ChannelEntity>, val index: Int, val context: String, val profileId: Long,
+    )
+    private val _guideMove = MutableStateFlow<GuideMove?>(null)
+    internal val guideMove = _guideMove.asStateFlow()
+
+    private suspend fun moveContext(filter: tv.own.owntv.core.live.LiveKey?): String? =
+        when (filter) {
+            is tv.own.owntv.core.live.LiveKey.Folder -> categoryDao.getById(filter.id)?.let(CustomizeKeys::category)
+            is tv.own.owntv.core.live.LiveKey.Custom -> filter.id
+            tv.own.owntv.core.live.LiveKey.Favorites -> ContentOrderEntity.FAV_CONTEXT
+            else -> ContentOrderEntity.ALL_CHANNELS_CONTEXT
+        }
+
+    private suspend fun orderedChannels(
+        profileId: Long, filter: tv.own.owntv.core.live.LiveKey?, context: String, sources: List<Long>,
+    ): List<ChannelEntity> = when (filter) {
+        is tv.own.owntv.core.live.LiveKey.Folder -> channelDao.snapshotByCategoryManual(filter.id, profileId, context, Int.MAX_VALUE)
+        is tv.own.owntv.core.live.LiveKey.Custom -> customCategoryDao.snapshotChannels(profileId, filter.id, sources, Int.MAX_VALUE)
+        tv.own.owntv.core.live.LiveKey.Favorites -> channelDao.snapshotFavoritesManual(profileId, context, sources, Int.MAX_VALUE)
+        else -> channelDao.snapshotAllManual(sources, profileId, context, Int.MAX_VALUE)
+    }
+
+    internal fun startGuideMove(channel: ChannelEntity) {
+        viewModelScope.launch {
+            val pid = currentProfileId() ?: return@launch
+            val filter = _categoryFilter.value
+            val context = moveContext(filter) ?: return@launch
+            val sources = sourceDao.observeForProfile(pid).first().filter { it.syncLive }.map { it.id }
+            if (sources.isEmpty()) return@launch
+            val ordered = orderedChannels(pid, filter, context, sources)
+            val visible = _state.value.channels.mapTo(HashSet()) { it.id }
+            val items = ordered.filter { it.id in visible }
+            val index = items.indexOfFirst { it.id == channel.id }
+            if (index >= 0) {
+                moveSnapshot = ordered
+                _guideMove.value = GuideMove(items, index, context, pid)
+            }
+        }
+    }
+
+    private var moveSnapshot = emptyList<ChannelEntity>()
+
+    internal fun moveGuideChannel(from: Int, to: Int) {
+        val state = _guideMove.value ?: return
+        if (from !in state.items.indices || to !in state.items.indices || from == to) return
+        val items = state.items.toMutableList().apply { add(to, removeAt(from)) }
+        _guideMove.value = state.copy(items = items, index = to)
+    }
+
+    internal fun cancelGuideMove() {
+        _guideMove.value = null
+        moveSnapshot = emptyList()
+    }
+
+    internal fun commitGuideMove() {
+        val state = _guideMove.value ?: return
+        val visible = state.items.mapTo(HashSet()) { it.id }
+        val replacements = state.items.iterator()
+        val ordered = moveSnapshot.map { if (it.id in visible) replacements.next() else it }
+        cancelGuideMove()
+        viewModelScope.launch {
+            if (currentProfileId() != state.profileId) return@launch
+            contentOrderDao.replaceContext(
+                state.profileId, MediaType.LIVE, state.context,
+                ordered.mapIndexed { index, channel ->
+                    ContentOrderEntity(profileId = state.profileId, mediaType = MediaType.LIVE, contextKey = state.context, itemId = channel.id, position = index)
+                },
+            )
+            settings.setSortGuide(SettingsRepository.GuideSort.LIVE_TV)
+            load()
+        }
+    }
 
     /** The categories' search text, held here so it survives the player (see LiveViewModel). */
     private val _categoryQuery = kotlinx.coroutines.flow.MutableStateFlow("")
@@ -377,6 +451,14 @@ class EpgViewModel(
         runCatching { epgDao.programmeById(programmeId) }.getOrNull()
 
     init {
+        combine(epgSourceStore.priorities, custom) { order, choices ->
+            Triple(order, choices.epgMatches, choices.epgMatchFeeds)
+        }.distinctUntilChanged().drop(1).onEach {
+            prefetchJob?.cancel()
+            clearRows()
+            _cacheRevision.value++
+            load()
+        }.launchIn(viewModelScope)
         // Re-filter the grid as the user types (DB-level, so it searches ALL guide channels, not
         // just the visible rows). drop(1): the screen triggers the initial load itself.
         _query
@@ -588,6 +670,13 @@ class EpgViewModel(
     /** The channel's current manual EPG match (or null if auto-matched). */
     fun currentEpgMatch(channel: ChannelEntity): String? = custom.value.epgMatchResolver.epgIdFor(channel)
 
+    internal fun currentEpgFeed(channel: ChannelEntity): Long? = custom.value.epgMatchFeed(channel)
+
+    internal suspend fun currentEpgSource(channel: ChannelEntity): Pair<Long, String>? {
+        val pid = currentProfileId() ?: return null
+        return liveEpgReader.currentGuideSource(pid, channel, custom.value, epgOffset.value)
+    }
+
     /** The channel's own guide shift in minutes, or null when it follows the global offset. */
     fun currentEpgShift(channel: ChannelEntity): Int? =
         tv.own.owntv.core.epg.EpgShift.overrideFor(custom.value, channel)
@@ -631,28 +720,29 @@ class EpgViewModel(
      * Existing unrelated preferences and guide mappings remain untouched.
      */
     fun saveManualEpgAssignments(
-        assignments: Map<ChannelEntity, String?>,
+        assignments: Map<ChannelEntity, tv.own.owntv.core.epg.GuideSelection?>,
         onComplete: (Boolean) -> Unit,
     ) {
         if (assignments.isEmpty()) { onComplete(true); return }
         viewModelScope.launch {
             try {
-                val pid = settings.activeProfileId.first()
-                val updates = assignments.map { (channel, id) ->
-                    CustomizeKeys.channel(channel) to id?.trim()?.lowercase()?.takeIf { it.isNotEmpty() }
-                }.toMap()
+                val pid = currentProfileId() ?: run { onComplete(false); return@launch }
+                val updates = assignments.mapKeys { (channel, _) -> CustomizeKeys.channel(channel) }
                 customize.update(pid, MediaType.LIVE) { current ->
                     val mapped = current.epgMatches.toMutableMap()
-                    updates.forEach { (key, id) ->
-                        if (id == null) mapped.remove(key) else mapped[key] = id
+                    val feeds = current.epgMatchFeeds.toMutableMap()
+                    updates.forEach { (key, selection) ->
+                        if (selection == null) mapped.remove(key) else mapped[key] = selection.channelId
+                        val feed = selection?.sourceId
+                        if (feed == null) feeds.remove(key) else feeds[key] = feed.toString()
                     }
-                    current.copy(epgMatches = mapped)
+                    current.copy(epgMatches = mapped, epgMatchFeeds = feeds)
                 }
                 // Wait for the in-memory profile to observe this write before refreshing guide rows.
                 kotlinx.coroutines.withTimeoutOrNull(1_500) {
-                    custom.first { current -> updates.all { (key, id) -> current.epgMatches[key] == id } }
+                    custom.first { current -> updates.all { (key, selection) -> current.epgMatches[key] == selection?.channelId && current.epgMatchFeeds[key] == selection?.sourceId?.toString() } }
                 }
-                val ids = updates.values.filterNotNull().distinct()
+                val ids = updates.values.mapNotNull { it?.channelId }.distinct()
                 if (ids.isNotEmpty()) fillMatchedInBackground(ids) else load()
                 onComplete(true)
             } catch (cancelled: kotlinx.coroutines.CancellationException) {
@@ -664,10 +754,10 @@ class EpgViewModel(
     }
 
     /** Set/clear a channel's manual EPG match (null clears → auto-match), then reload the guide. */
-    fun setEpgMatch(channel: ChannelEntity, epgChannelId: String?) {
+    fun setEpgMatch(channel: ChannelEntity, epgChannelId: String?, sourceId: Long? = null) {
         viewModelScope.launch {
             val pid = settings.activeProfileId.first()
-            customize.setEpgMatch(pid, MediaType.LIVE, CustomizeKeys.channel(channel), epgChannelId)
+            customize.setEpgMatch(pid, MediaType.LIVE, CustomizeKeys.channel(channel), epgChannelId, sourceId)
             if (epgChannelId != null) fillMatchedInBackground(listOf(epgChannelId)) else load()
         }
     }
@@ -699,7 +789,7 @@ class EpgViewModel(
 
     private suspend fun refreshAllEpgFromNetwork() {
         val pid = settings.activeProfileId.first()
-        if (pid >= 0) sourceRepository.observeSources(pid).first().forEach { runCatching { epgRepository.refresh(it) } }
+        if (pid >= 0) sourceDao.observeForProfile(pid).first().forEach { runCatching { epgRepository.refresh(it) } }
         epgSourceStore.getAll().forEach { runCatching { epgRepository.refreshUrl(it.id, it.url, it.userAgent) } }
     }
 
@@ -967,6 +1057,11 @@ class EpgViewModel(
                 historyDao.getForProfileType(pid, MediaType.LIVE).mapTo(HashSet()) { it.itemId }
             else -> null
         }
+        val manualContext = moveContext(filter)
+        val manualOrder = if (sortGuideMode == SettingsRepository.GuideSort.LIVE_TV && manualContext != null &&
+            manualContext in contentOrderDao.observeContextKeys(pid, MediaType.LIVE).first()
+        ) orderedChannels(pid, filter, manualContext, playlistIds).mapIndexed { index, ch -> ch.id to index }.toMap()
+        else emptyMap()
         // Heavy work — filter hidden, apply renames + manual EPG matches, sort, category-filter — runs off
         // the main thread (#3/#5) so a 50k-channel playlist never freezes the UI building the guide list.
         val channels = withContext(Dispatchers.Default) {
@@ -987,7 +1082,7 @@ class EpgViewModel(
                 SettingsRepository.GuideSort.CATCHUP -> matched.sortedWith(compareByDescending<ChannelEntity> { it.catchup }.then(byProvider))
                 SettingsRepository.GuideSort.FAVORITES -> matched.sortedWith(compareByDescending<ChannelEntity> { it.id in favoriteIds }.then(byProvider))
                 // LIVE_TV, the old default, is the provider's order too (Channel number was the same thing).
-                SettingsRepository.GuideSort.LIVE_TV -> matched.sortedWith(byProvider)
+                SettingsRepository.GuideSort.LIVE_TV -> matched.sortedWith(compareBy<ChannelEntity> { manualOrder[it.id] ?: Int.MAX_VALUE }.then(byProvider))
             }.let { sorted ->
                 when (filter) {
                     null, tv.own.owntv.core.live.LiveKey.All -> sorted
@@ -1135,18 +1230,23 @@ class EpgViewModel(
 
     internal suspend fun assignmentCoverage(
         channels: List<ChannelEntity>,
-        changes: Map<Long, Pair<ChannelEntity, String?>>,
+        changes: Map<Long, Pair<ChannelEntity, tv.own.owntv.core.epg.GuideSelection?>>,
     ): Set<Long> {
         val now = System.currentTimeMillis()
+        val priorities = epgSourceStore.priorities.first()
         val keyed = channels.mapNotNull { channel ->
-            val assignment = if (channel.id in changes) changes[channel.id]?.second else currentEpgMatch(channel)
+            val assignment = if (channel.id in changes) changes[channel.id]?.second?.channelId else currentEpgMatch(channel)
             val guideId = (assignment ?: channel.epgChannelId)?.trim()?.lowercase()?.takeIf { it.isNotEmpty() }
-            guideId?.let { Triple(channel.id, it, currentEpgShift(channel) ?: globalEpgShift()) }
+            val feed = if (channel.id in changes) changes[channel.id]?.second?.sourceId else currentEpgFeed(channel)
+            val scope = feed?.let(::listOf) ?: priorities[channel.sourceId].orEmpty()
+            val shift = currentEpgShift(channel) ?: globalEpgShift()
+            guideId?.let { Triple(channel.id, it, shift to scope) }
         }
         return buildSet {
-            for ((shift, group) in keyed.groupBy { it.third }) {
+            for ((schedule, group) in keyed.groupBy { it.third }) {
+                val (shift, scope) = schedule
                 val keysWithGuide = group.map { it.second }.distinct().chunked(400)
-                    .flatMap { epgDao.keysWithUpcomingProgrammes(it, now - shift * 60_000L) }.toSet()
+                    .flatMap { epgDao.keysWithUpcomingProgrammes(it, now - shift * 60_000L, scope, scope.isEmpty()) }.toSet()
                 group.filter { it.second in keysWithGuide }.forEach { add(it.first) }
             }
         }
@@ -1155,8 +1255,8 @@ class EpgViewModel(
     /** Guide channels for the manual "Match EPG" picker, ranked so ones resembling [channelName]
      *  come first. The candidate set is core's and is filtered by no source — see [GuideCandidates]. */
     suspend fun availableEpgChannels(channelName: String, query: String): List<GuideCandidate> {
-        currentProfileId() ?: return emptyList()
-        return guideCandidates.forPicker(channelName, query)
+        val pid = currentProfileId() ?: return emptyList()
+        return liveEpgReader.guidePicker(pid, channelName, query)
     }
 
     private suspend fun currentProfileId(): Long? {

@@ -485,6 +485,7 @@
 2	technical	core/src/main/java/tv/own/owntv/core/customize/CustomizationStore.kt	cust_
 1	preference-key	core/src/main/java/tv/own/owntv/core/customize/CustomizationStore.kt	cust_${profileId}_${type.name}
 2	json	core/src/main/java/tv/own/owntv/core/customize/CustomizationStore.kt	epgMatch
+2	json	core/src/main/java/tv/own/owntv/core/customize/CustomizationStore.kt	epgMatchFeeds
 2	preference-key	core/src/main/java/tv/own/owntv/core/customize/CustomizationStore.kt	epgShift
 2	json	core/src/main/java/tv/own/owntv/core/customize/CustomizationStore.kt	hiddenCats
 2	json	core/src/main/java/tv/own/owntv/core/customize/CustomizationStore.kt	hiddenItems
@@ -6773,7 +6774,7 @@
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	AND (sortOrder > :sortOrder OR (sortOrder = :sortOrder AND id >= :channelId))
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/ChannelDao.kt	ORDER BY sortOrder ASC, id ASC LIMIT :limit
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/EpgDao.kt	SELECT DISTINCT sourceId FROM epg_programmes WHERE epgChannelId = :epgKey AND stopMs > :from AND startMs < :to AND sourceId IN (:sourceIds)
-1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/EpgDao.kt	SELECT DISTINCT epgChannelId FROM epg_programmes WHERE epgChannelId IN (:keys) AND stopMs > :now
+1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/EpgDao.kt	SELECT DISTINCT epgChannelId FROM epg_programmes WHERE epgChannelId IN (:keys) AND stopMs > :now AND (:allSources OR sourceId IN (:sourceIds))
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/EpgDao.kt	SELECT * FROM epg_programmes WHERE epgChannelId = :epgChannelId AND (:sourceId IS NULL OR sourceId = :sourceId) AND startMs <= :now AND stopMs > :now ORDER BY startMs DESC LIMIT 1
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/EpgDao.kt	SELECT * FROM epg_programmes WHERE epgChannelId = :epgChannelId AND (:sourceId IS NULL OR sourceId = :sourceId) AND stopMs <= :now ORDER BY stopMs DESC LIMIT 1
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/EpgDao.kt	SELECT * FROM epg_programmes WHERE epgChannelId = :epgChannelId AND (:sourceId IS NULL OR sourceId = :sourceId) AND stopMs > :now ORDER BY startMs ASC LIMIT :limit

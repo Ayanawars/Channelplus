@@ -68,6 +68,25 @@ private fun radioGuideName(value: String): String =
 
 /** XMLTV snapshots are independent of the TV guide. A failed fetch keeps the previous feed. */
 internal class RadioGuideStore private constructor(context: Context) {
+    private val priorityPrefs = context.getSharedPreferences("stayon_radio_epg_priority", Context.MODE_PRIVATE)
+    private val _priorities = MutableStateFlow(priorityPrefs.all.mapNotNull { (key, value) ->
+        val raw = value as? String ?: return@mapNotNull null
+        val array = runCatching { JSONArray(raw) }.getOrNull() ?: return@mapNotNull null
+        key to (0 until array.length()).mapNotNull { array.optString(it).takeIf(String::isNotEmpty) }
+    }.toMap())
+    val priorities = _priorities.asStateFlow()
+
+    fun setPriority(sourceId: String, feeds: List<String>) {
+        val ids = feeds.distinct().filter { id -> state.value.any { it.id == id } }
+        if (ids.isEmpty()) {
+            priorityPrefs.edit().remove(sourceId).apply()
+            _priorities.value = _priorities.value - sourceId
+        } else {
+            priorityPrefs.edit().putString(sourceId, JSONArray(ids).toString()).apply()
+            _priorities.value = _priorities.value + (sourceId to ids)
+        }
+    }
+
     private val file = AtomicFile(File(context.filesDir, "stayon-radio-epg.json"))
     private val lock = Mutex()
     private val state = MutableStateFlow<List<RadioGuideFeed>>(emptyList())

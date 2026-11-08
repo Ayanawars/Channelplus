@@ -88,6 +88,7 @@ fun ManageSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier, tuner
     // Within "Add source": null = the Remote|Manual chooser, else the chosen path.
     var addMode by remember { mutableStateOf<AddMode?>(null) }
     var customizingSource by remember { mutableStateOf<SourceEntity?>(null) }
+    var epgPlaylist by remember { mutableStateOf<SourceEntity?>(null) }
     var editingSource by remember { mutableStateOf<SourceEntity?>(null) }
     var confirmDelete by remember { mutableStateOf<SourceEntity?>(null) }
     var resyncChoice by remember { mutableStateOf<SourceEntity?>(null) }
@@ -337,6 +338,7 @@ fun ManageSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier, tuner
                         isDeleting = source.id in deletingIds,
                         rowFocus = rowFocus,
                         onFocused = { contextId = source.id; contextIndex = index },
+                        onChooseEpg = { epgPlaylist = source },
                         onCustomize = { contextId = source.id; contextIndex = index; customizingSource = source },
                         onEdit = { contextId = source.id; contextIndex = index; editingSource = source },
                         onTest = { contextId = source.id; contextIndex = index; vm.testSource(source) },
@@ -349,6 +351,8 @@ fun ManageSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier, tuner
                 }
             }
         }
+
+        epgPlaylist?.let { PlaylistEpgPriority(it, onDismiss = { epgPlaylist = null }) }
 
         resyncChoice?.let { src ->
             ResyncChoiceDialog(
@@ -406,6 +410,7 @@ private fun SourceRow(
     rowFocus: FocusRequester?,
     onFocused: () -> Unit,
     onCustomize: () -> Unit,
+    onChooseEpg: () -> Unit,
     onEdit: () -> Unit,
     onTest: () -> Unit,
     onResync: () -> Unit,
@@ -443,6 +448,7 @@ private fun SourceRow(
     val back = rowFocus ?: remember { FocusRequester() }
     val actions = if (isDeleting) emptyList() else listOfNotNull(
         StageAction(OwnTVIcon.LIST, stringResource(R.string.tdt_edit_channels), onCustomize),
+        if (source.syncLive) StageAction(OwnTVIcon.EPG, stringResource(R.string.stayon_epg_preferred), onChooseEpg) else null,
         if (tuner) null else StageAction(OwnTVIcon.PENCIL, stringResource(R.string.settings_sources_edit), onEdit),
         // "Info", not "Test": the expensive measurement lives behind Re-test inside the popup.
         if (tuner) null else StageAction(OwnTVIcon.INFO, stringResource(R.string.settings_sources_info), onTest),

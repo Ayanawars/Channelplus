@@ -24,4 +24,8 @@
     <string name="stayon_epg_coverage">Canales sin programación</string>
     <string name="stayon_epg_coverage_desc">Revisa los canales que no tienen próximos programas en la guía descargada.</string>
     <string name="stayon_epg_batch_no_programmes">%1$s · Sin programas descargados</string>
+    <string name="stayon_epg_preferred">EPG predeterminado</string>
+    <string name="stayon_epg_priority_title">Guías EPG de %1$s</string>
+    <string name="stayon_epg_native_source">%1$s (guía integrada)</string>
+    <string name="stayon_epg_source_label">Fuente EPG: %1$s</string>
 </resources>

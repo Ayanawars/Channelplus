@@ -59,8 +59,8 @@ interface EpgDao {
     @Query("SELECT DISTINCT sourceId FROM epg_programmes WHERE epgChannelId = :epgKey AND stopMs > :from AND startMs < :to AND sourceId IN (:sourceIds)")
     suspend fun sourcesWithProgrammes(epgKey: String, from: Long, to: Long, sourceIds: List<Long>): List<Long>
 
-    @Query("SELECT DISTINCT epgChannelId FROM epg_programmes WHERE epgChannelId IN (:keys) AND stopMs > :now")
-    suspend fun keysWithUpcomingProgrammes(keys: List<String>, now: Long): List<String>
+    @Query("SELECT DISTINCT epgChannelId FROM epg_programmes WHERE epgChannelId IN (:keys) AND stopMs > :now AND (:allSources OR sourceId IN (:sourceIds))")
+    suspend fun keysWithUpcomingProgrammes(keys: List<String>, now: Long, sourceIds: List<Long>, allSources: Boolean): List<String>
 
     /** The programme airing at [now] on a given EPG channel. */
     @Query("SELECT * FROM epg_programmes WHERE epgChannelId = :epgChannelId AND (:sourceId IS NULL OR sourceId = :sourceId) AND startMs <= :now AND stopMs > :now ORDER BY startMs DESC LIMIT 1")

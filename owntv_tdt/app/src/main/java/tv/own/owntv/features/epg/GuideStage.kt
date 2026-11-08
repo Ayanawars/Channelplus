@@ -456,7 +456,7 @@ internal fun guideProgrammeActions(
  * favourite, Pick EPG manually, EPG time offset (Global). Also Live TV's ▶ Schedule → OK menu.
  */
 @Composable
-internal fun GuideProgrammeMenu(title: String, subtitle: String, actions: GuideProgrammeActions, leadMinutes: Int, onDismiss: () -> Unit) {
+internal fun GuideProgrammeMenu(title: String, subtitle: String, actions: GuideProgrammeActions, leadMinutes: Int, onDismiss: () -> Unit, onReorder: (() -> Unit)? = null) {
     val focus = remember { FocusRequester() }
     LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
     val formatTime = rememberSystemTimeFormatter()
@@ -527,6 +527,9 @@ internal fun GuideProgrammeMenu(title: String, subtitle: String, actions: GuideP
             icon = OwnTVIcon.FAVORITE,
             onClick = { actions.onFavorite(); onDismiss() },
         )
+        if (onReorder != null) {
+            StageMenuItem(text = stringResource(R.string.content_reorder_channel), icon = OwnTVIcon.SORT, onClick = { onDismiss(); onReorder() })
+        }
         if (actions.onAutoMatch != null) {
             StageMenuItem(text = stringResource(R.string.content_epg_match_button), icon = OwnTVIcon.SPARKLE, onClick = { onDismiss(); actions.onAutoMatch.invoke() })
         }
@@ -618,6 +621,7 @@ internal fun GuideChannelMenu(
     onAutoMatch: () -> Unit,
     onPickEpg: () -> Unit,
     onPickEpgBatch: () -> Unit,
+    onReorder: () -> Unit,
     onEpgOffset: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -636,6 +640,7 @@ internal fun GuideChannelMenu(
             text = stringResource(if (isFavorite) R.string.content_epg_remove_favourite else R.string.content_epg_add_favourite),
             icon = OwnTVIcon.FAVORITE, onClick = { onFavorite(); onDismiss() },
         )
+        StageMenuItem(text = stringResource(R.string.content_reorder_channel), icon = OwnTVIcon.SORT, onClick = { onDismiss(); onReorder() })
         StageMenuItem(text = stringResource(R.string.content_epg_match_button), icon = OwnTVIcon.SPARKLE, onClick = { onDismiss(); onAutoMatch() })
         StageMenuItem(text = stringResource(R.string.content_epg_pick_manually), icon = OwnTVIcon.EPG, onClick = { onDismiss(); onPickEpg() })
         StageMenuItem(text = stringResource(R.string.content_match_epg_batch), icon = OwnTVIcon.LIST, onClick = { onDismiss(); onPickEpgBatch() })

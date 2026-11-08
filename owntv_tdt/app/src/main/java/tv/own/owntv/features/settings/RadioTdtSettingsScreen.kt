@@ -43,6 +43,7 @@ internal fun RadioTdtSettingsScreen(onBack: () -> Unit, modifier: Modifier = Mod
     val sources by settings.sources.collectAsStateWithLifecycle()
     var scan by remember { mutableStateOf<Pair<String, List<ScannedService>>?>(null) }
     val firstFocus = remember { FocusRequester() }
+    var epgInput by remember { mutableStateOf<Pair<String, String>?>(null) }
     var selected by remember { mutableStateOf<StayonRadioStation?>(null) }
     var removing by remember { mutableStateOf<StayonRadioStation?>(null) }
     var playing by remember { mutableStateOf<StayonRadioStation?>(null) }
@@ -79,6 +80,16 @@ internal fun RadioTdtSettingsScreen(onBack: () -> Unit, modifier: Modifier = Mod
         }
         if (loading) StageSettingsNote(stringResource(R.string.settings_sources_importing), null)
         else if (status != 0) StageSettingsNote(stringResource(status), null)
+        stations.mapNotNull { it.tunerChannel?.inputId }.distinct().forEach { inputId ->
+            val label = sources.firstOrNull {
+                Uri.parse(it.url).getQueryParameter("input") == inputId
+            }?.name ?: stringResource(R.string.stayon_radio_tdt)
+            StageSettingRow(
+                icon = OwnTVIcon.EPG, title = stringResource(R.string.stayon_epg_preferred),
+                desc = label, value = SettingValue.Opens(null),
+                onClick = { epgInput = inputId to label },
+            )
+        }
         stations.forEach { station ->
             StageSettingRow(
                 icon = OwnTVIcon.AUDIO,
@@ -89,6 +100,8 @@ internal fun RadioTdtSettingsScreen(onBack: () -> Unit, modifier: Modifier = Mod
             )
         }
     }
+
+    epgInput?.let { (inputId, label) -> RadioPlaylistEpgPriority(inputId, label) { epgInput = null } }
 
     scan?.let { (inputId, rows) ->
         ClassifyTunerServices(rows, onDismiss = { scan = null }, onSave = { radioIds ->

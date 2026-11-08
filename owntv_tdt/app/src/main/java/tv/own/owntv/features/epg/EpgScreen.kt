@@ -669,6 +669,7 @@ fun EpgScreen(
             actions = actionsFor(ch, p),
             leadMinutes = leadMinutes,
             onDismiss = { menuFor = null },
+            onReorder = { vm.startGuideMove(ch) },
         )
     }
     recordMenuFor?.let { (ch, p) -> GuideRecordMenu(title = p.title, actions = actionsFor(ch, p), onDismiss = { recordMenuFor = null }) }
@@ -700,6 +701,18 @@ fun EpgScreen(
             onPickEpgBatch = { batchEpgChannel = ch },
             onEpgOffset = { offsetChannel = ch },
             onDismiss = { channelMenuFor = null },
+            onReorder = { vm.startGuideMove(ch) },
+        )
+    }
+    val guideMove by vm.guideMove.collectAsStateWithLifecycle()
+    guideMove?.let { move ->
+        tv.own.owntv.ui.components.MoveOrderOverlay(
+            title = stringResource(R.string.content_reorder_channel),
+            itemNames = move.items.map { it.name },
+            activeIndex = move.index,
+            onMove = vm::moveGuideChannel,
+            onCommit = vm::commitGuideMove,
+            onCancel = vm::cancelGuideMove,
         )
     }
     if (dayOpen) {
@@ -729,8 +742,10 @@ fun EpgScreen(
         tv.own.owntv.features.live.EpgMatchDialog(
             channelName = channel.name,
             currentMatch = vm.currentEpgMatch(channel),
+            currentFeed = vm.currentEpgFeed(channel),
+            loadCurrentSource = { vm.currentEpgSource(channel) },
             loadChannels = { vm.availableEpgChannels(channel.name, it) },
-            onPick = { vm.setEpgMatch(channel, it); matchingChannel = null },
+            onPick = { id, feed -> vm.setEpgMatch(channel, id, feed); matchingChannel = null },
             onClear = { vm.setEpgMatch(channel, null); matchingChannel = null },
             onDismiss = { matchingChannel = null },
         )

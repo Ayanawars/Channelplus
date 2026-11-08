@@ -25,6 +25,7 @@ import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 import tv.own.owntv.R
 import tv.own.owntv.core.database.entity.ChannelEntity
+import tv.own.owntv.core.epg.GuideSelection
 import tv.own.owntv.features.epg.EpgViewModel
 import tv.own.owntv.features.live.EpgMatchDialog
 import tv.own.owntv.ui.components.OwnTVIcon
@@ -58,7 +59,7 @@ internal fun EpgChannelAssignment(
     var saveFailed by remember { mutableStateOf(false) }
     // Keep the channel entity: filtered-out channels must still be saved.
     // A null guide ID is an explicit staged "use automatic EPG" action.
-    val staged = remember { mutableStateMapOf<Long, Pair<ChannelEntity, String?>>() }
+    val staged = remember { mutableStateMapOf<Long, Pair<ChannelEntity, GuideSelection?>>() }
     val searchFocus = remember { FocusRequester() }
     val rowFocus = remember { mutableMapOf<Long, FocusRequester>() }
     val listState = rememberLazyListState()
@@ -91,11 +92,10 @@ internal fun EpgChannelAssignment(
         if (staged.isEmpty()) onDismiss() else showDiscard = true
     }
 
-    fun stage(channel: ChannelEntity, guideId: String?) {
-        val normalized = guideId?.trim()?.lowercase()?.takeIf { it.isNotEmpty() }
-        val original = vm.currentEpgMatch(channel)
-        if (original == normalized) staged.remove(channel.id)
-        else staged[channel.id] = channel to normalized
+    fun stage(channel: ChannelEntity, selection: GuideSelection?) {
+        val original = vm.currentEpgMatch(channel)?.let { GuideSelection(it, vm.currentEpgFeed(channel)) }
+        if (original == selection) staged.remove(channel.id)
+        else staged[channel.id] = channel to selection
         val index = channels.orEmpty().indexOfFirst { it.first.id == channel.id }
         nextFocusId = channels?.getOrNull(index + 1)?.first?.id ?: channel.id
         selected = null
@@ -190,7 +190,7 @@ internal fun EpgChannelAssignment(
                     val row = remember(channel.id) { FocusRequester() }
                     rowFocus[channel.id] = row
                     val change = staged[channel.id]
-                    val manual = if (change != null) change.second else vm.currentEpgMatch(channel)
+                    val manual = if (change != null) change.second?.channelId else vm.currentEpgMatch(channel)
                     val label = when {
                         change != null -> stringResource(
                             R.string.stayon_epg_batch_pending,
@@ -218,9 +218,11 @@ internal fun EpgChannelAssignment(
     selected?.let { channel ->
         EpgMatchDialog(
             channelName = channel.name,
-            currentMatch = if (staged.containsKey(channel.id)) staged[channel.id]?.second else vm.currentEpgMatch(channel),
+            currentMatch = if (channel.id in staged) staged[channel.id]?.second?.channelId else vm.currentEpgMatch(channel),
+            currentFeed = if (channel.id in staged) staged[channel.id]?.second?.sourceId else vm.currentEpgFeed(channel),
+            loadCurrentSource = { vm.currentEpgSource(channel) },
             loadChannels = { vm.availableEpgChannels(channel.name, it) },
-            onPick = { stage(channel, it) },
+            onPick = { id, feed -> stage(channel, GuideSelection(id, feed)) },
             onClear = { stage(channel, null) },
             onDismiss = { selected = null },
         )

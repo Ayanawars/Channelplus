@@ -27,7 +27,12 @@ data class GuideCandidate(
      */
     val normName: String = "",
     val normId: String = "",
+    val sourceId: Long? = null,
+    val sourceName: String? = null,
 )
+
+data class GuideSelection(val channelId: String, val sourceId: Long?)
+
 
 /**
  * The single way anything gets guide candidates.
@@ -102,14 +107,23 @@ class GuideCandidates(private val epgDao: EpgDao) {
         query: String,
         limit: Int = MAX_CANDIDATES,
         resultLimit: Int = PICKER_RESULTS,
+        sourceNames: Map<Long, String> = emptyMap(),
     ): List<GuideCandidate> {
-        val all = all(limit)
+        val all = if (sourceNames.isEmpty()) all(limit) else {
+            val now = System.currentTimeMillis()
+            sourceNames.flatMap { (sourceId, sourceName) ->
+                merge(
+                    named = epgDao.guideChannelNamesForSource(sourceId, limit),
+                    withProgrammes = epgDao.upcomingGuideIdsForSource(sourceId, now, limit),
+                ).map { it.copy(sourceId = sourceId, sourceName = sourceName) }
+            }
+        }
         // Filtered through the matcher's own normalizer rather than a raw substring — see
         // [EpgMatcher.matchesSearch] for the two things a raw substring could not do.
         val filtered = if (query.isBlank()) {
             all
         } else {
-            all.filter { EpgMatcher.matchesNormalizedSearch(query, it.normName, it.normId) }
+            all.filter { EpgMatcher.matchesNormalizedSearch(query, it.normName, it.normId) || it.sourceName?.contains(query, ignoreCase = true) == true }
         }
         if (filtered.isEmpty()) return emptyList()
         val startedAt = SystemClock.elapsedRealtime()

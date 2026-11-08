@@ -99,3 +99,15 @@ internal fun RadioGuideSettingsScreen(onBack: () -> Unit, modifier: Modifier = M
         )) { selected = null }
     }
 }
+
+@Composable
+internal fun RadioPlaylistEpgPriority(sourceId: String, sourceName: String, onDismiss: () -> Unit) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val store = remember(context) { RadioGuideStore.shared(context) }
+    val feeds by store.feeds.collectAsStateWithLifecycle()
+    val priorities by store.priorities.collectAsStateWithLifecycle()
+    androidx.compose.runtime.LaunchedEffect(store) { store.load() }
+    GuidePriorityPopup(sourceName, feeds.map { it.id to it.name }, priorities[sourceId].orEmpty(), onDismiss) {
+        store.setPriority(sourceId, it)
+    }
+}

@@ -105,7 +105,7 @@ class EpgAutoMatcher(
                     remaining.removeAll { it.id in priorityMatches }
                 }
             }
-            val unmatched = channels.filter { it.id !in priorityMatches && needsMatch(it, cust, idsWithProgrammes) }
+            val unmatched = channels.filter { it.sourceId !in priorities && needsMatch(it, cust, idsWithProgrammes) }
             val best = EpgMatcher.bestEpgMatchBulk(unmatched.map { it.name }, prepared)
 
             val applied = channels.mapNotNullTo(mutableListOf<Pair<String, String>>()) { channel ->

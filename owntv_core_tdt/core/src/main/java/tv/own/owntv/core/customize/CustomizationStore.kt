@@ -127,6 +127,7 @@ data class SectionCustomizations(
     val categoryOrder: List<String> = emptyList(),
     /** Manual EPG match: item key → the EPG channel id to use (overrides the channel's own epg id). */
     val epgMatches: Map<String, String> = emptyMap(),
+    val epgMatchFeeds: Map<String, String> = emptyMap(),
     /** Per-channel EPG time shift: item key → minutes to move the guide by (as a string, so it
      *  shares the JSON map helpers). Overrides the global offset; needed when East/West feeds of the
      *  same network share one guide and only one of them is on the guide's clock. */
@@ -148,10 +149,13 @@ data class SectionCustomizations(
      */
     val epgMatchResolver: EpgMatchResolver by lazy { EpgMatchResolver(epgMatches) }
 
+    fun epgMatchFeed(channel: ChannelEntity): Long? =
+        epgMatchFeeds[CustomizeKeys.channel(channel)]?.toLongOrNull()
+
     val isEmpty: Boolean
         get() = hiddenCategories.isEmpty() && hiddenItems.isEmpty() && categoryNames.isEmpty() &&
             itemNames.isEmpty() && categoryOrder.isEmpty() && epgMatches.isEmpty() &&
-            epgShifts.isEmpty() && customCategories.isEmpty() && movedFromOrigin.isEmpty()
+            epgMatchFeeds.isEmpty() && epgShifts.isEmpty() && customCategories.isEmpty() && movedFromOrigin.isEmpty()
 }
 
 /**
@@ -218,10 +222,14 @@ class CustomizationStore(private val context: Context) {
         update(profileId, type) { it.copy(categoryOrder = mergeCategoryOrder(it.categoryOrder, orderedKeys)) }
 
     /** Manually map an item to an EPG channel id (null/blank clears the override → auto-match). */
-    suspend fun setEpgMatch(profileId: Long, type: MediaType, itemKey: String, epgChannelId: String?) =
+    suspend fun setEpgMatch(profileId: Long, type: MediaType, itemKey: String, epgChannelId: String?, sourceId: Long? = null) =
         update(profileId, type) {
             val key = epgChannelId?.trim()?.lowercase()?.takeIf { it.isNotEmpty() }
-            it.copy(epgMatches = if (key == null) it.epgMatches - itemKey else it.epgMatches + (itemKey to key))
+            it.copy(
+                epgMatches = if (key == null) it.epgMatches - itemKey else it.epgMatches + (itemKey to key),
+                epgMatchFeeds = if (key == null || sourceId == null) it.epgMatchFeeds - itemKey
+                    else it.epgMatchFeeds + (itemKey to sourceId.toString()),
+            )
         }
 
     /** Shift this channel's guide by [minutes]; null clears the override → the global EPG offset.
@@ -328,6 +336,7 @@ class CustomizationStore(private val context: Context) {
                 itemNames = o.optJSONObject("itemNames").toStringMap(),
                 categoryOrder = o.optJSONArray("catOrder").toStringList(),
                 epgMatches = o.optJSONObject("epgMatch").toStringMap(),
+                epgMatchFeeds = o.optJSONObject("epgMatchFeeds").toStringMap(),
                 epgShifts = o.optJSONObject("epgShift").toStringMap(),
                 customCategories = o.optJSONArray("customCats").toCustomCategories(),
                 movedFromOrigin = o.optJSONObject("movedFrom").toStringMap(),
@@ -342,6 +351,7 @@ class CustomizationStore(private val context: Context) {
         put("itemNames", JSONObject(c.itemNames as Map<*, *>))
         put("catOrder", JSONArray(c.categoryOrder))
         put("epgMatch", JSONObject(c.epgMatches as Map<*, *>))
+        put("epgMatchFeeds", JSONObject(c.epgMatchFeeds as Map<*, *>))
         put("epgShift", JSONObject(c.epgShifts as Map<*, *>))
         put("movedFrom", JSONObject(c.movedFromOrigin as Map<*, *>))
         put(

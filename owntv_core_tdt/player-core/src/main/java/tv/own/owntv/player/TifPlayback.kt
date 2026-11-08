@@ -6,6 +6,7 @@ import android.media.tv.TvInputManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import android.os.Bundle
+import android.os.Build
 import tv.own.owntv.core.model.TifChannelUri
 
 /** Owns a TV Input session, not a decoder or an HTTP connection. All calls run on Main. */
@@ -16,13 +17,19 @@ internal class TifPlayback(private val context: android.content.Context, private
     private var view: TvView? = null
     private var channel: TifChannelUri? = null
     private var volume = 1f
+    private var modeRequested = false
+    private var shiftStatus = TvInputManager.TIME_SHIFT_STATUS_UNKNOWN
     private val _timeshift = MutableStateFlow(TunerTimeshiftState())
     val timeshift = _timeshift.asStateFlow()
     private fun updateTimeshift(value: TunerTimeshiftState) {
         _timeshift.value = value
         onTimeshift(value)
     }
-    private fun resetTimeshift() = updateTimeshift(TunerTimeshiftState())
+    private fun resetTimeshift() {
+        modeRequested = false
+        shiftStatus = TvInputManager.TIME_SHIFT_STATUS_UNKNOWN
+        updateTimeshift(TunerTimeshiftState())
+    }
     fun attach(next: TvView) {
         if (view === next) return
         view?.setCallback(null)
@@ -34,11 +41,17 @@ internal class TifPlayback(private val context: android.content.Context, private
         next.setCallback(object : TvView.TvInputCallback() {
             override fun onTimeShiftStatusChanged(inputId: String, status: Int) {
                 if (view !== next || channel?.inputId != inputId) return
+                shiftStatus = status
                 updateTimeshift(if (status == TvInputManager.TIME_SHIFT_STATUS_AVAILABLE)
                     _timeshift.value.copy(available = true) else TunerTimeshiftState())
             }
             override fun onVideoAvailable(inputId: String) {
-                if (view === next && channel?.inputId == inputId) state(true, null)
+                if (view !== next || channel?.inputId != inputId) return
+                if (!modeRequested && Build.VERSION.SDK_INT >= 34) {
+                    modeRequested = true
+                    runCatching { next.timeShiftSetMode(TvInputManager.TIME_SHIFT_MODE_AUTO) }
+                }
+                state(true, null)
             }
             override fun onVideoUnavailable(inputId: String, reason: Int) {
                 if (view === next && channel?.inputId == inputId) {
@@ -57,8 +70,13 @@ internal class TifPlayback(private val context: android.content.Context, private
         })
         next.setTimeShiftPositionCallback(object : TvView.TimeShiftPositionCallback() {
             override fun onTimeShiftStartPositionChanged(inputId: String, timeMs: Long) {
-                if (view === next && channel?.inputId == inputId)
-                    updateTimeshift(_timeshift.value.copy(startMs = timeMs.takeIf { it >= 0 }))
+                if (view !== next || channel?.inputId != inputId) return
+                val start = timeMs.takeIf { it > 0 && it <= System.currentTimeMillis() }
+                val state = _timeshift.value
+                updateTimeshift(state.copy(
+                    startMs = start,
+                    available = state.available || (start != null && shiftStatus == TvInputManager.TIME_SHIFT_STATUS_UNKNOWN),
+                ))
             }
             override fun onTimeShiftCurrentPositionChanged(inputId: String, timeMs: Long) {
                 if (view === next && channel?.inputId == inputId)

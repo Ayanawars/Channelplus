@@ -1,6 +1,5 @@
 package tv.own.owntv.core.epg
 
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 import tv.own.owntv.core.customize.CustomizationStore
 import tv.own.owntv.core.database.dao.ChannelDao

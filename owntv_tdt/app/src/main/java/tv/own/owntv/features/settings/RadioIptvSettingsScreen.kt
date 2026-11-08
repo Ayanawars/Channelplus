@@ -37,6 +37,7 @@ fun RadioIptvSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     var pendingRemoveStation by remember { mutableStateOf<StayonRadioStation?>(null) }
     var pendingRemovePlaylist by remember { mutableStateOf<StayonRadioPlaylist?>(null) }
     var editPlaylist by remember { mutableStateOf<StayonRadioPlaylist?>(null) }
+    var epgPlaylist by remember { mutableStateOf<StayonRadioPlaylist?>(null) }
     var playlistActions by remember { mutableStateOf<StayonRadioPlaylist?>(null) }
 
     fun openForm(newForm: RadioForm) {
@@ -152,6 +153,7 @@ fun RadioIptvSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
 
     playlistActions?.let { list ->
         SettingsActionPopup(list.name, listOf(
+            StageAction(OwnTVIcon.EPG, stringResource(R.string.stayon_epg_preferred), { epgPlaylist = list }),
             StageAction(OwnTVIcon.PENCIL, stringResource(R.string.common_edit), {
                 openForm(RadioForm.PLAYLIST)
                 editPlaylist = list
@@ -170,6 +172,7 @@ fun RadioIptvSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
             StageAction(OwnTVIcon.TRASH, stringResource(R.string.common_delete), { pendingRemovePlaylist = list }, danger = true),
         )) { playlistActions = null }
     }
+    epgPlaylist?.let { RadioPlaylistEpgPriority(it.id, it.name) { epgPlaylist = null } }
     pendingRemoveStation?.let { station ->
         ConfirmDialog(
             title = stringResource(R.string.stayon_radio_delete_station, station.name),

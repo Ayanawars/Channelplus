@@ -53,7 +53,7 @@ class EpgSourceStore(private val context: Context) {
         json.keys().asSequence().mapNotNull { key ->
             val playlistId = key.toLongOrNull() ?: return@mapNotNull null
             val feeds = json.optJSONArray(key) ?: return@mapNotNull null
-            val ids = (0 until feeds.length()).map { feeds.optLong(it) }.filter { it in available }
+            val ids = (0 until feeds.length()).map { feeds.optLong(it) }.filter { it in available || it == playlistId }
             playlistId.takeIf { ids.isNotEmpty() }?.let { it to ids }
         }.toMap()
     }
@@ -62,7 +62,7 @@ class EpgSourceStore(private val context: Context) {
         context.epgStore.edit { prefs ->
             val json = JSONObject(prefs[Keys.PRIORITIES] ?: "{}")
             val available = parse(prefs[Keys.LIST]).mapTo(HashSet()) { it.id }
-            val ids = sourceIds.distinct().filter { it in available }
+            val ids = sourceIds.distinct().filter { it in available || it == playlistId }
             if (ids.isEmpty()) json.remove(playlistId.toString())
             else json.put(playlistId.toString(), JSONArray(ids))
             prefs[Keys.PRIORITIES] = json.toString()

@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -376,7 +377,6 @@ class LiveViewModel(
      *  single place that knows a customization changed. */
 
     /** The same candidate set the Guide's picker uses — filtered by no source. */
-    private val guideCandidates = tv.own.owntv.core.epg.GuideCandidates(epgDao)
 
     /** Catch-up and live-rewind archive URL construction — see [LiveArchiveUrls]. */
     private val archiveUrls = LiveArchiveUrls(sourceDao, xtreamClient, streamUrlResolver, settings)
@@ -795,10 +795,10 @@ class LiveViewModel(
     }
 
     /** Manually map a channel to an EPG channel id (null clears the override → auto-match). */
-    fun setEpgMatch(channel: ChannelEntity, epgChannelId: String?) {
+    fun setEpgMatch(channel: ChannelEntity, epgChannelId: String?, sourceId: Long? = null) {
         viewModelScope.launch {
             val pid = currentProfileId() ?: return@launch
-            customize.setEpgMatch(pid, MediaType.LIVE, CustomizeKeys.channel(channel), epgChannelId)
+            customize.setEpgMatch(pid, MediaType.LIVE, CustomizeKeys.channel(channel), epgChannelId, sourceId)
             // The matched id may have no stored programmes yet (bulk sync only keeps ids in use) —
             // top it up from the cached XMLTV, then drop the channel's stale now/next and re-fetch,
             // so the details pane reflects the new match immediately instead of after a restart.
@@ -882,6 +882,13 @@ class LiveViewModel(
     /** The current manual EPG id for a channel, or null if auto-matched. */
     fun currentEpgMatch(channel: ChannelEntity): String? = custom.value.epgMatchResolver.epgIdFor(channel)
 
+    internal fun currentEpgFeed(channel: ChannelEntity): Long? = custom.value.epgMatchFeed(channel)
+
+    internal suspend fun currentEpgSource(channel: ChannelEntity): Pair<Long, String>? {
+        val pid = currentProfileId() ?: return null
+        return epgReader.currentGuideSource(pid, channel, custom.value, epgOffset.value)
+    }
+
     /** Shift this channel's guide by [minutes] (null → follow the global EPG offset). */
     fun setEpgShift(channel: ChannelEntity, minutes: Int?) {
         viewModelScope.launch {
@@ -908,8 +915,8 @@ class LiveViewModel(
     /** Distinct EPG channels for the "Match EPG" picker (across the profile's playlists + EPG feeds),
      *  ranked so guide channels resembling [channelName] come first instead of a plain A-Z list. */
     suspend fun availableEpgChannels(channelName: String, query: String): List<tv.own.owntv.core.epg.GuideCandidate> {
-        if (currentProfileId() == null) return emptyList()
-        return guideCandidates.forPicker(channelName, query)
+        val pid = currentProfileId() ?: return emptyList()
+        return epgReader.guidePicker(pid, channelName, query)
     }
 
     /** List view or Guide view: what Live TV shows, and so what it opens in next time. */
@@ -2118,6 +2125,16 @@ class LiveViewModel(
     private fun cachedNowPlaying(): Map<Long, tv.own.owntv.core.parser.XtEpgEntry?> = synchronized(nowPlayingCache) { HashMap(nowPlayingCache) }
 
     /** Forget every resolved title — the guide data or the offset moved underneath them. */
+    init {
+        combine(epgReader.guidePriorities, custom) { order, choices ->
+            Triple(order, choices.epgMatches, choices.epgMatchFeeds)
+        }.distinctUntilChanged().drop(1).onEach {
+            epgReader.clearCache()
+            clearNowPlaying()
+            epgRefresh.value++
+        }.launchIn(viewModelScope)
+    }
+
     private fun clearNowPlaying() {
         synchronized(nowPlayingCache) { nowPlayingCache.clear() }
         _nowPlaying.value = emptyMap()

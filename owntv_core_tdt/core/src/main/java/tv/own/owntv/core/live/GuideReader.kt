@@ -86,7 +86,7 @@ class GuideReader(
         val startedAt = SystemClock.elapsedRealtime()
         val epgKey = epgKeyOf(channel, cust)
         val shift = EpgShift.minutesFor(cust, channel, globalShiftMinutes)
-        val priority = epgSourceStore.priorities.first()[channel.sourceId].orEmpty()
+        val priority = guidePriority(channel, cust, epgSourceStore.priorities.first())
         val stored = when {
             epgKey == null -> emptyList()
             shift == 0 -> epgDao.programmeSummariesForChannel(epgKey, from, to)
@@ -94,8 +94,9 @@ class GuideReader(
                 .programmeSummariesForChannel(epgKey, EpgShift.toStored(from, shift), EpgShift.toStored(to, shift))
                 .map { EpgShift.apply(it, shift) }
         }
-        if (stored.isNotEmpty()) {
-            return@withContext EpgDedupe.collapse(preferredProgrammeRows(stored, priority)).also { collapsed ->
+        val selected = preferredProgrammeRows(stored, priority)
+        if (selected.isNotEmpty()) {
+            return@withContext EpgDedupe.collapse(selected).also { collapsed ->
                 CorePerf.log {
                     "guide_row source=stored channelId=${channel.id} key=$epgKey shift=$shift " +
                         "rows=${stored.size} collapsed=${collapsed.size} " +
@@ -111,6 +112,7 @@ class GuideReader(
         //
         // Only the part of it inside the asked-for window is returned, so a row never draws outside
         // the time it was asked about.
+        if (priority.isNotEmpty() && channel.sourceId !in priority) return@withContext emptyList()
         liveEpgReader.providerProgrammes(channel, cust, globalShiftMinutes)
             .filter { it.stopMs > from && it.startMs < to }
             .also { rows ->
@@ -142,7 +144,7 @@ class GuideReader(
         }
         if (keyed.isEmpty()) return@withContext emptyMap()
         val priorities = epgSourceStore.priorities.first()
-        val playlistByChannel = channels.associate { it.id to it.sourceId }
+        val channelsById = channels.associateBy { it.id }
         val startedAt = SystemClock.elapsedRealtime()
         var chunks = 0
         var rowsRead = 0
@@ -163,8 +165,9 @@ class GuideReader(
             for ((channelId, epgKey, _) in group) {
                 rowsByKey[epgKey]?.takeIf { it.isNotEmpty() }
                     ?.let { rows ->
-                        val priority = priorities[playlistByChannel[channelId]].orEmpty()
-                        collected[channelId] = EpgShift.apply(EpgDedupe.collapse(preferredProgrammeRows(rows, priority)), shift)
+                        val priority = guidePriority(channelsById.getValue(channelId), cust, priorities)
+                        val selected = preferredProgrammeRows(rows, priority)
+                        if (selected.isNotEmpty()) collected[channelId] = EpgShift.apply(EpgDedupe.collapse(selected), shift)
                     }
             }
         }
@@ -235,11 +238,16 @@ internal fun guideSlotAt(list: List<EpgProgrammeEntity>, atMs: Long): GuideSlot?
 /** What is on a channel now, and what follows it — both already on the user's clock. */
 data class GuideSlot(val now: EpgProgrammeEntity?, val next: EpgProgrammeEntity?)
 
-/** Use the first configured feed with coverage in this window, retaining shared guide fallback. */
+/** Use the first configured feed with coverage in this window, restricting configured playlists to their selected feeds. */
 internal fun preferredProgrammeRows(
     rows: List<EpgProgrammeEntity>,
     priority: List<Long>,
 ): List<EpgProgrammeEntity> {
+    if (priority.isEmpty()) return rows
     val firstAvailable = priority.firstOrNull { sourceId -> rows.any { it.sourceId == sourceId } }
-    return if (firstAvailable == null) rows else rows.filter { it.sourceId == firstAvailable }
+    return rows.filter { it.sourceId == firstAvailable }
 }
+
+internal fun guidePriority(
+    channel: ChannelEntity, custom: SectionCustomizations, priorities: Map<Long, List<Long>>,
+): List<Long> = custom.epgMatchFeed(channel)?.let(::listOf) ?: priorities[channel.sourceId].orEmpty()

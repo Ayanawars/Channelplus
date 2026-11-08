@@ -92,12 +92,34 @@ class LiveEpgReader(
         cache.remove(channelId)
     }
 
+    val guidePriorities = epgSourceStore.priorities
+
+    private suspend fun guideSourceNames(profileId: Long): Map<Long, String> =
+        sourceDao.observeForProfile(profileId).first().filter { it.syncLive }.associate { it.id to it.name } +
+            epgSourceStore.getAll().associate { it.id to it.name }
+
+    suspend fun guidePicker(profileId: Long, channelName: String, query: String) =
+        tv.own.owntv.core.epg.GuideCandidates(epgDao).forPicker(channelName, query, sourceNames = guideSourceNames(profileId))
+
+    suspend fun currentGuideSource(
+        profileId: Long, channel: ChannelEntity, custom: SectionCustomizations, shiftMinutes: Int,
+    ): Pair<Long, String>? {
+        val key = epgKeyOf(channel, custom) ?: return null
+        val priority = guidePriority(channel, custom, epgSourceStore.priorities.first())
+        val at = EpgShift.toStored(System.currentTimeMillis(), EpgShift.minutesFor(custom, channel, shiftMinutes))
+        val source = custom.epgMatchFeed(channel) ?: preferredSource(key, at, priority)
+            ?: if (priority.isEmpty()) {
+                epgDao.nowPlaying(key, at)?.sourceId ?: epgDao.upcoming(key, at, 1).first().firstOrNull()?.sourceId
+            } else null
+        return source?.let { id -> guideSourceNames(profileId)[id]?.let { id to it } }
+    }
+
     /** Now/next for [ch], cached ~5 min. Prefers a manual EPG match / stored bulk guide, then falls
      *  back to Xtream's short EPG API. */
     suspend fun nowNext(ch: ChannelEntity, cust: SectionCustomizations, globalShiftMinutes: Int): EpgNowNext? =
         withContext(Dispatchers.IO) {
             val now = System.currentTimeMillis()
-            val priority = epgSourceStore.priorities.first()[ch.sourceId].orEmpty()
+            val priority = guidePriority(ch, cust, epgSourceStore.priorities.first())
             cache[ch.id]?.takeIf { now - it.at < CACHE_TTL_MS && it.priority == priority }?.let { return@withContext it.data }
 
             // 1) Bulk guide via the effective EPG id (manual match overrides the channel's own id).
@@ -105,9 +127,9 @@ class LiveEpgReader(
             // Guide shift (global or per-channel): the stored rows keep the feed's own clock, so we look
             // up the SHIFTED "now" and move what comes back — display and catch-up then agree.
             val shift = EpgShift.minutesFor(cust, ch, globalShiftMinutes)
-            if (epgKey != null) {
-                val at = EpgShift.toStored(now, shift)
-                val sourceId = preferredSource(epgKey, at, priority)
+            val at = EpgShift.toStored(now, shift)
+            val sourceId = epgKey?.let { preferredSource(it, at, priority) }
+            if (epgKey != null && (priority.isEmpty() || sourceId != null)) {
                 val nowProg = epgDao.nowPlaying(epgKey, at, sourceId)
                 // Collapsed first: two feeds covering one channel list every programme twice, which
                 // put the same title in Next AND at the head of Later.
@@ -127,6 +149,7 @@ class LiveEpgReader(
             }
 
             // 2) Provider short-EPG API fallback (Xtream get_short_epg / Stalker get_short_epg).
+            if (priority.isNotEmpty() && ch.sourceId !in priority) return@withContext null
             val entries = providerEntries(ch, shift) ?: return@withContext null
             // A gap in the provider's own guide data around "now" (nothing covers this instant) must leave
             // current null — picking the next entry that simply hasn't ended yet would mislabel an upcoming
@@ -254,7 +277,7 @@ class LiveEpgReader(
         if (channels.isEmpty()) return@withContext emptyMap()
         val now = System.currentTimeMillis()
         val priorities = epgSourceStore.priorities.first()
-        val playlistByChannel = channels.associate { it.id to it.sourceId }
+        val channelsById = channels.associateBy { it.id }
         // Manual EPG-match overrides take precedence over the channel's own epgChannelId, mirroring nowNext.
         // Shifted channels look up a different instant, so the batch is grouped by shift — with no
         // offsets configured (the normal case) that's still exactly one query group.
@@ -281,7 +304,7 @@ class LiveEpgReader(
             for ((channelId, epgKey, _) in group) {
                 rowsByKey[epgKey]
                     ?.filter { at in it.startMs until it.stopMs }
-                    ?.let { preferredProgrammeRows(it, priorities[playlistByChannel[channelId]].orEmpty()) }
+                    ?.let { preferredProgrammeRows(it, guidePriority(channelsById.getValue(channelId), cust, priorities)) }
                     ?.firstOrNull()
                     ?.let { result[channelId] = XtEpgEntry(it.title, null, it.startMs + delta, it.stopMs + delta) }
             }
@@ -302,7 +325,8 @@ class LiveEpgReader(
         val fromStored = result.size
         for (ch in channels) {
             if (ch.id in result) continue
-            cachedNow(ch.id, now, priorities[ch.sourceId].orEmpty())?.let { result[ch.id] = it }
+            val priority = guidePriority(ch, cust, priorities)
+            if (priority.isEmpty() || ch.sourceId in priority) cachedNow(ch.id, now, priority)?.let { result[ch.id] = it }
         }
         CorePerf.log {
             "live_nowplaying channels=${channels.size} keyed=${channelKeys.size} " +
@@ -351,8 +375,9 @@ class LiveEpgReader(
         // instant and move what comes back, or the card would disagree with the archive it describes.
         val shift = EpgShift.minutesFor(cust, ch, globalShiftMinutes)
         val at = EpgShift.toStored(atMs, shift)
-        val priority = epgSourceStore.priorities.first()[ch.sourceId].orEmpty()
+        val priority = guidePriority(ch, cust, epgSourceStore.priorities.first())
         val sourceId = preferredSource(epgKey, at, priority)
+        if (priority.isNotEmpty() && sourceId == null) return@withContext null
         val playing = epgDao.nowPlaying(epgKey, at, sourceId)
         val then = epgDao.upcoming(epgKey, at, 4, sourceId).first()
             .firstOrNull { it.startMs > (playing?.startMs ?: 0) }
@@ -375,7 +400,7 @@ class LiveEpgReader(
         val now = System.currentTimeMillis()
         val days = ch.catchupDays.takeIf { it > 0 } ?: DEFAULT_CATCHUP_DAYS
         val windowMs = (days * 24L * 60 * 60 * 1000).coerceAtMost(CATCHUP_LOOKBACK_CAP_MS)
-        val priority = epgSourceStore.priorities.first()[ch.sourceId].orEmpty()
+        val priority = guidePriority(ch, cust, epgSourceStore.priorities.first())
         // Shifted guide → shifted window, and the rows come back on the corrected clock, so the
         // archive URL built from the picked programme asks for the time it really aired.
         val shift = EpgShift.minutesFor(cust, ch, globalShiftMinutes)
@@ -408,7 +433,7 @@ class LiveEpgReader(
             ?.trim()?.lowercase()?.takeIf { it.isNotEmpty() } ?: return@withContext null
         val shift = EpgShift.minutesFor(cust, ch, globalShiftMinutes)
         val from = EpgShift.toStored(afterStopMs, shift)
-        val priority = epgSourceStore.priorities.first()[ch.sourceId].orEmpty()
+        val priority = guidePriority(ch, cust, epgSourceStore.priorities.first())
         epgDao.programmesForChannel(epgKey, from, from + NEXT_PROGRAMME_GAP_CAP_MS)
             // The query keeps anything still running at [from]; the next programme is the one that
             // starts at or after it.
