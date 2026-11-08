@@ -64,7 +64,10 @@
     <string name="stayon_radio_playlists">Listas de radio</string>
     <string name="stayon_radio_stations">Emisoras de radio</string>
     <string name="stayon_radio_refresh">Actualizar</string>
-    <string name="stayon_radio_updated">%1$d emisoras importadas</string>
+    <plurals name="stayon_radio_updated">
+        <item quantity="one">%1$d emisora importada</item>
+        <item quantity="other">%1$d emisoras importadas</item>
+    </plurals>
     <string name="stayon_radio_empty">Aún no hay emisoras. Añade una lista o un enlace directo.</string>
     <string name="stayon_radio_stop">Detener</string>
     <string name="stayon_radio_listen">Escuchar</string>
