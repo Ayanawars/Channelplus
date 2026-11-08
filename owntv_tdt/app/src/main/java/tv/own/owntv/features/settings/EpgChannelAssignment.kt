@@ -42,8 +42,8 @@ import tv.own.owntv.ui.theme.mpx
  */
 @Composable
 internal fun EpgChannelAssignment(
-    onDismiss: () -> Unit,
     initialChannel: ChannelEntity? = null,
+    onDismiss: () -> Unit,
 ) {
     val vm: EpgViewModel = koinViewModel()
     // Long-press starts at this channel and continues in source order. Search spans ALL sources.
@@ -193,7 +193,7 @@ internal fun EpgChannelAssignment(
                         )
                         manual != null -> stringResource(R.string.stayon_epg_batch_manual, manual)
                         channel.epgChannelId.isNullOrBlank() -> stringResource(R.string.stayon_epg_batch_no_guide)
-                        else -> stringResource(R.string.stayon_epg_batch_auto_id, channel.epgChannelId)
+                        else -> stringResource(R.string.stayon_epg_batch_auto_id, channel.epgChannelId.orEmpty())
                     }
                     StageMenuItem(
                         text = channel.name,
