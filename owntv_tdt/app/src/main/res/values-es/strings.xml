@@ -44,7 +44,7 @@
     <string name="stayon_apps_system_info">Ajustes de aplicación de Android</string>
     <string name="stayon_epg_artwork_section">Imágenes de programas</string>
     <string name="stayon_epg_artwork_enabled">Utilizar imágenes del EPG</string>
-    <string name="stayon_epg_artwork_enabled_desc">Mostrar las imágenes de cualquier XMLTV compatible cuando la vista previa de vídeo del canal no esté disponible.</string>
+    <string name="stayon_epg_artwork_enabled_desc">Muestra imágenes de XMLTV en la guía y cuando no hay vista previa en directo. Si el XMLTV no tiene imagen, la guía puede usar el proveedor de metadatos configurado.</string>
     <string name="stayon_radio_section">Radio</string>
     <string name="stayon_radio_iptv_title">Radio IPTV</string>
     <string name="stayon_radio_iptv_desc">Listas y emisoras independientes de TV, con reproducción dentro de STAYON+.</string>

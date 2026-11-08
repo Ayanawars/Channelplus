@@ -44,7 +44,7 @@
     <string name="stayon_apps_system_info">Android application settings</string>
     <string name="stayon_epg_artwork_section">Programme imagery</string>
     <string name="stayon_epg_artwork_enabled">Use programme images from EPG</string>
-    <string name="stayon_epg_artwork_enabled_desc">Show artwork supplied by any compatible XMLTV guide when the channel video preview is unavailable.</string>
+    <string name="stayon_epg_artwork_enabled_desc">Show XMLTV programme images in the guide and when live preview is unavailable. The guide can use the configured metadata provider if XMLTV has no image.</string>
     <string name="stayon_radio_section">Radio</string>
     <string name="stayon_radio_iptv_title">IPTV Radio</string>
     <string name="stayon_radio_iptv_desc">Separate radio playlists, stations and listening; never mixes with TV playlists.</string>

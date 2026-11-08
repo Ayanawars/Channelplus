@@ -1062,6 +1062,23 @@ class EpgViewModel(
         return overridden
     }
 
+    /** Include TV channels with no guide so they can be assigned from Sources. */
+    internal suspend fun channelsForAssignment(query: String): List<ChannelEntity> {
+        val pid = currentProfileId() ?: return emptyList()
+        val ids = activeSourceIds(settings, sourceDao, pid, MediaType.LIVE)
+        if (ids.isEmpty()) return emptyList()
+        val cust = customize.observe(pid, MediaType.LIVE).first()
+        val isKids = profileDao.getById(pid)?.isKids == true
+        val hiddenCategories = tv.own.owntv.core.content.AdultCategoryClassifier.hiddenCategoryIds(
+            categoryDao.observe(ids, MediaType.LIVE).first(), cust.hiddenCategories, isKids,
+        )
+        return channelDao.channelsForGuide(ids, query.trim(), 200).mapNotNull { channel ->
+            val key = CustomizeKeys.channel(channel)
+            if (channel.categoryId in hiddenCategories || key in cust.hiddenItems) return@mapNotNull null
+            cust.itemNames[key]?.let { channel.copy(name = it) } ?: channel
+        }
+    }
+
     /** Guide channels for the manual "Match EPG" picker, ranked so ones resembling [channelName]
      *  come first. The candidate set is core's and is filtered by no source — see [GuideCandidates]. */
     suspend fun availableEpgChannels(channelName: String, query: String): List<GuideCandidate> {

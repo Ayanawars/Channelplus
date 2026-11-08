@@ -24,4 +24,7 @@
     <string name="stayon_apps_reset_order">Restore app order</string>
     <string name="stayon_apps_reset_order_desc">Return to alphabetical order, with favorites first.</string>
     <string name="stayon_home_broadcaster_logo_sizes">LOVEStv shortcut logo sizes</string>
+    <string name="stayon_epg_assign_channel">Assign EPG by channel</string>
+    <string name="stayon_epg_assign_channel_desc">Search for a TV channel and choose its entry in the guide.</string>
+    <string name="stayon_epg_assign_empty">No TV channels found</string>
 </resources>

@@ -435,7 +435,7 @@ fun EpgScreen(
         val full by produceState<EpgProgrammeEntity?>(null, topProgramme?.id) {
             value = topProgramme?.id?.takeIf { it > 0 }?.let { vm.programmeFull(it) }
         }
-        val shown = full ?: topProgramme
+        val shown = full?.takeIf { it.id == topProgramme?.id } ?: topProgramme
 
         Column(Modifier.fillMaxSize()) {
         // Top (44 → 404): the video, and beside it the programme under the cursor.
@@ -453,12 +453,11 @@ fun EpgScreen(
         Box(Modifier.weight(1f).fillMaxHeight()) {
             if (topChannel != null) {
                 val chName = ProviderTags.parse(topChannel.name).name
-                GuideProgrammeBlock(
-                    eyebrow = shown?.let { programmeEyebrow(it, chName, liveNow) },
-                    title = shown?.title ?: chName,
-                    details = if (shown == null) stringResource(R.string.content_epg_no_programme) else programmeDetailsLine(shown),
-                    synopsis = shown?.description,
-                    modifier = Modifier.padding(start = 46.mpx, top = 76.mpx).widthIn(max = 1080.mpx),
+                GuideProgrammeCard(
+                    programme = shown,
+                    channelName = chName,
+                    now = liveNow,
+                    modifier = Modifier.fillMaxWidth().padding(start = 46.mpx, top = 60.mpx).widthIn(max = 1080.mpx),
                 )
             }
             // The key hints at the bottom right of the top area, level with the video's bottom edge.

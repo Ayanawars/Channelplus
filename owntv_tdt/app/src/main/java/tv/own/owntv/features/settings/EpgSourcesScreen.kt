@@ -62,6 +62,9 @@ fun EpgSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier, startOnA
     var adding by remember { mutableStateOf(startOnAdd) }
     var confirmDelete by remember { mutableStateOf<EpgSource?>(null) }
     val addFocus = remember { FocusRequester() }
+    val assignmentFocus = remember { FocusRequester() }
+    var assigning by remember { mutableStateOf(false) }
+    val assignmentReturn = rememberDialogFocusRestore(assigning)
 
     // Per-row focus restore (mirrors ManageSourcesScreen / MoviesScreen): track the row the user is
     // acting on so edit/re-sync/delete returns focus INSIDE the list — same row if it survived, else
@@ -136,6 +139,14 @@ fun EpgSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier, startOnA
             )
         },
     ) {
+        StageSettingRow(
+            icon = OwnTVIcon.EPG,
+            title = stringResource(R.string.stayon_epg_assign_channel),
+            desc = stringResource(R.string.stayon_epg_assign_channel_desc),
+            value = SettingValue.Opens(null),
+            modifier = Modifier.focusRequester(assignmentFocus),
+            onClick = { assignmentReturn.value = assignmentFocus; assigning = true },
+        )
         StageSettingsHeading(stringResource(R.string.stayon_epg_artwork_section), null, first = true)
         StageSettingRow(
             icon = OwnTVIcon.IMAGE,
@@ -169,6 +180,8 @@ fun EpgSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier, startOnA
             )
         }
     }
+
+    if (assigning) EpgChannelAssignment { assigning = false }
 
     confirmDelete?.let { s ->
         ConfirmDialog(

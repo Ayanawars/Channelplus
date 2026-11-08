@@ -172,10 +172,8 @@ private fun StayHomeHeader(
     }
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(clock, color = White, fontSize = 20.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
-            Spacer(Modifier.width(10.dp))
-            StayIconAction(OwnTVIcon.SETTINGS, onSettings, onLongClick = onEdit)
-            StayIconAction(OwnTVIcon.SEARCH, onSearch)
+            Text(stringResource(R.string.stayon_wordmark), fontSize = 28.sp, fontWeight = FontWeight.Bold, color = White, maxLines = 1)
+            Text(stringResource(R.string.stayon_plus), fontSize = 32.sp, fontWeight = FontWeight.Bold, color = Yellow)
         }
         Box(Modifier.weight(1f).padding(horizontal = 12.dp), contentAlignment = Alignment.Center) {
             Row(
@@ -202,8 +200,10 @@ private fun StayHomeHeader(
             }
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(stringResource(R.string.stayon_wordmark), fontSize = 28.sp, fontWeight = FontWeight.Bold, color = White, maxLines = 1)
-            Text(stringResource(R.string.stayon_plus), fontSize = 32.sp, fontWeight = FontWeight.Bold, color = Yellow)
+            StayIconAction(OwnTVIcon.SEARCH, onSearch)
+            StayIconAction(OwnTVIcon.SETTINGS, onSettings, onLongClick = onEdit)
+            Spacer(Modifier.width(10.dp))
+            Text(clock, color = White, fontSize = 20.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
         }
     }
 }
@@ -409,10 +409,7 @@ private fun StayBroadcasters(layout: StayonHomeLayout, large: Boolean) {
                     painterResource(image),
                     contentDescription = broadcasterLabel(broadcaster),
                     contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxWidth(.72f * size).height((if (large) 54.dp else 46.dp) * size)
-                        .then(if (broadcaster == StayonBroadcaster.ATRESMEDIA) {
-                            Modifier.background(White, RoundedCornerShape(6.dp)).padding(6.dp)
-                        } else Modifier),
+                    modifier = Modifier.fillMaxWidth(.72f * size).height((if (large) 54.dp else 46.dp) * size),
                 )
             }
         }
