@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stayon_epg_auto_section">Automatic channel guide</string>
+    <string name="stayon_epg_shared_explanation">Your XMLTV guides are available to both TDT and IPTV channels. STAYON+ matches them automatically: first by guide ID, then by a reliable name match. You do not need to assign a guide URL to every playlist.</string>
+    <string name="stayon_epg_auto_assign">Find channel guides automatically</string>
+    <string name="stayon_epg_auto_assign_desc">Match unmatched channels from all imported TV sources. Manual edits are preserved.</string>
+    <string name="stayon_epg_auto_running">Checking channel names and guide entries…</string>
+    <string name="stayon_epg_auto_add_source">Add an EPG guide first; there are no XMLTV sources to match.</string>
+    <string name="stayon_epg_auto_syncing">The EPG has no stored programmes. Downloading guide data; channels will be matched when the sync finishes.</string>
+    <string name="stayon_epg_auto_done">%1$d new channel matches. %2$d uncertain matches were left for manual review. Existing guide IDs and manual assignments are preserved.</string>
+    <string name="stayon_epg_auto_failed">Could not finish matching. Check that your EPG guide has been downloaded, then try again.</string>
+    <string name="stayon_epg_show_unmatched">Show channels without EPG</string>
+    <string name="stayon_epg_show_unmatched_desc">Keep channels visible in the guide even if STAYON+ has not found their programme schedule.</string>
+</resources>
