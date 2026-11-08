@@ -1,4 +1,4 @@
-name: Channelplus checks
+name: STAYON+ 5.4.8 production build
 on:
   push:
     branches: [main, codex/complete-import-channel-review]
@@ -26,26 +26,14 @@ jobs:
         with:
           name: apk-signing-tool
           path: owntv_tdt/app/apksigner.jar
-      # Preview-only debug key (not the production release certificate).
-      # Keep it stable across runs of this PR so testing updates does not require a reinstall.
-      # GitHub Actions cache is scoped to this workflow/branch, never committed or published.
-      - name: Recover preview signing key
-        id: preview_signing
-        uses: actions/cache@v4
-        with:
-          path: ${{ runner.temp }}/stayon-preview.jks
-          key: stayon-preview-signing-v1
-      - name: Create preview-only signing key on first run
-        if: steps.preview_signing.outputs.cache-hit != 'true'
-        run: keytool -genkeypair -keystore "$RUNNER_TEMP/stayon-preview.jks" -storepass android -keypass android -alias tunerprobe -keyalg RSA -keysize 3072 -validity 3650 -dname 'CN=STAYON Preview Debug'
-      - name: Check and build
+      - name: Build official release
         working-directory: owntv_tdt
         env:
-          VERSION_CODE: '101007'
-          VERSION_NAME: '5.4.7'
-          CHANNELPLUS_TEST_KEYSTORE: ${{ runner.temp }}/stayon-preview.jks
-        run: ./gradlew :app:testStandardDebugUnitTest :owntv_core_tdt:core:testDebugUnitTest :owntv_core_tdt:player-core:testDebugUnitTest :app:assembleStandardDebug --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g -Dfile.encoding=UTF-8" -Pkotlin.daemon.jvmargs=-Xmx3g
+          VERSION_CODE: '101008'
+          VERSION_NAME: '5.4.8'
+        run: ./gradlew :app:assembleStandardRelease --no-daemon --build-cache --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g -Dfile.encoding=UTF-8" -Pkotlin.daemon.jvmargs=-Xmx3g
       - uses: actions/upload-artifact@v4
         with:
-          name: Channelplus-CI-test-only
-          path: owntv_tdt/app/build/outputs/apk/standard/debug/*.apk
+          name: StayON-5.4.8-unsigned-release
+          path: owntv_tdt/app/build/outputs/apk/standard/release/*-unsigned.apk
+          if-no-files-found: error
