@@ -17,7 +17,7 @@ EXPECTED_SIGNED = "580bb9aca689daab16f44d67ab616b831d17249190c867501e2a14fd962f5
 
 def payload_start(src, info):
     src.seek(info.header_offset)
-    if src.read(4) != b"PK\\x03\\x04":
+    if src.read(4) != bytes((80, 75, 3, 4)):
         raise ValueError("Bad ZIP local entry")
     src.seek(info.header_offset + 26)
     namelen, extralen = struct.unpack("<HH", src.read(4))
