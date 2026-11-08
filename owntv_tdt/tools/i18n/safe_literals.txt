@@ -131,6 +131,7 @@
 1	preference-key	app/src/main/java/tv/own/owntv/features/live/LiveScreen.kt	hide
 2	technical	app/src/main/java/tv/own/owntv/features/live/LiveScreen.kt	match_epg
 1	preference-key	app/src/main/java/tv/own/owntv/features/live/LiveScreen.kt	match_epg_batch
+1	empty	app/src/main/java/tv/own/owntv/features/settings/EpgChannelAssignment.kt	\0
 1	preference-key	app/src/main/java/tv/own/owntv/features/live/LiveScreen.kt	move
 1	preference-key	app/src/main/java/tv/own/owntv/features/live/LiveScreen.kt	move_to_category
 1	preference-key	app/src/main/java/tv/own/owntv/features/live/LiveScreen.kt	play_external
