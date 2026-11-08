@@ -93,6 +93,8 @@ val dataModule = module {
     single { ConnectivityObserver(androidContext()) }
     single { CustomizationStore(androidContext()) }
     single { tv.own.owntv.core.epg.EpgSourceStore(androidContext()) }
+    // Shared post-sync and on-demand TDT/IPTV guide matching.
+    single { tv.own.owntv.core.epg.EpgAutoAssignmentService(get(), get(), get(), get(), get()) }
     single { tv.own.owntv.core.player.ForceMpvStore(androidContext(), get()) }
     // Per-channel "watched without a picture" memory, for the mobile audio-only mode.
     single { tv.own.owntv.core.player.AudioOnlyStore(androidContext(), get()) }
