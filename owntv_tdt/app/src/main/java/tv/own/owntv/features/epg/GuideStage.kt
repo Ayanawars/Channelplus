@@ -377,6 +377,7 @@ internal class GuideProgrammeActions(
     val isFavorite: Boolean,
     val onFavorite: () -> Unit,
     val onPickEpg: (() -> Unit)?,
+    val onPickEpgBatch: (() -> Unit)?,
     /** Auto-match this one channel by name; its result opens in the review popup. */
     val onAutoMatch: (() -> Unit)?,
     val epgOffsetValue: String?,
@@ -399,6 +400,7 @@ internal fun guideProgrammeActions(
     onPlayFromStart: () -> Unit,
     onPickEpg: () -> Unit,
     onEpgOffset: () -> Unit,
+    onPickEpgBatch: (() -> Unit)? = null,
     /** Only where the review popup is on screen to show the result (the guide, not Live TV's list). */
     autoMatch: Boolean = true,
 ): GuideProgrammeActions {
@@ -439,6 +441,7 @@ internal fun guideProgrammeActions(
         isFavorite = ch.id in favoriteIds,
         onFavorite = { vm.toggleFavoriteChannel(ch) },
         onPickEpg = onPickEpg,
+        onPickEpgBatch = onPickEpgBatch,
         onAutoMatch = if (autoMatch) ({ vm.autoMatchOne(ch) }) else null,
         epgOffsetValue = vm.currentEpgShift(ch)?.let { tv.own.owntv.features.live.liveEpgShiftLabel(it) }
             ?: stringResource(R.string.content_epg_offset_global_short),
@@ -529,6 +532,9 @@ internal fun GuideProgrammeMenu(title: String, subtitle: String, actions: GuideP
         }
         if (actions.onPickEpg != null) {
             StageMenuItem(text = stringResource(R.string.content_epg_pick_manually), icon = OwnTVIcon.EPG, onClick = { onDismiss(); actions.onPickEpg.invoke() })
+        }
+        if (actions.onPickEpgBatch != null) {
+            StageMenuItem(text = stringResource(R.string.content_match_epg_batch), icon = OwnTVIcon.LIST, onClick = { onDismiss(); actions.onPickEpgBatch.invoke() })
         }
         if (actions.onEpgOffset != null) {
             StageMenuItem(
