@@ -6770,5 +6770,5 @@
 1	log	player-core/src/main/java/tv/own/owntv/player/VolumeBoost.kt	volume boost failed: ${it.javaClass.simpleName}
 1	log	player-core/src/main/java/tv/own/owntv/player/VolumeBoost.kt	volume boost unavailable: ${it.javaClass.simpleName}
 1	log	player-core/src/main/java/tv/own/owntv/player/ZapTiming.kt	(zap key press to first frame ${it}ms)
-1	log	core/src/main/java/tv/own/owntv/core/sync/work/EpgSyncWorker.kt	EPG automatic assignment skipped: ${it.message}
+1	log	core/src/main/java/tv/own/owntv/core/sync/work/EpgSyncWorker.kt	EPG automatic assignment skipped: ${e.message}
 1	log	core/src/main/java/tv/own/owntv/core/sync/work/EpgSyncWorker.kt	EPG automatic assignment: applied=${outcome.applied} review=${outcome.suggested}
