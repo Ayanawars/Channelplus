@@ -43,12 +43,13 @@ import tv.own.owntv.ui.theme.mpx
 @Composable
 internal fun EpgChannelAssignment(
     initialChannel: ChannelEntity? = null,
+    startWithoutProgrammes: Boolean = false,
     onDismiss: () -> Unit,
 ) {
     val vm: EpgViewModel = koinViewModel()
     // Long-press starts at this channel and continues in source order. Search spans ALL sources.
     var query by remember(initialChannel?.id) { mutableStateOf("") }
-    var filter by remember { mutableStateOf(EpgBatchFilter.ALL) }
+    var filter by remember { mutableStateOf(if (startWithoutProgrammes) EpgBatchFilter.UNASSIGNED else EpgBatchFilter.ALL) }
     var initialFocusPending by remember(initialChannel?.id) { mutableStateOf(initialChannel != null) }
     var selected by remember { mutableStateOf<ChannelEntity?>(null) }
     var nextFocusId by remember { mutableStateOf<Long?>(null) }
@@ -69,15 +70,19 @@ internal fun EpgChannelAssignment(
         }
         result
     }
+    val stagedSnapshot = staged.toMap()
+    val coverage by produceState<Set<Long>?>(null, fetchedChannels, stagedSnapshot) {
+        value = fetchedChannels?.let { vm.assignmentCoverage(it.map { row -> row.first }, stagedSnapshot) }
+    }
     // These filters affect the viewport only; every staged assignment survives search/filter changes.
-    val channels = fetchedChannels?.filter { (channel, _) ->
-        val queued = staged[channel.id]
-        val manual = if (staged.containsKey(channel.id)) queued?.second else vm.currentEpgMatch(channel)
-        when (filter) {
-            EpgBatchFilter.ALL -> true
-            EpgBatchFilter.UNASSIGNED -> manual == null && channel.epgChannelId.isNullOrBlank()
-            EpgBatchFilter.MAPPED -> manual != null || !channel.epgChannelId.isNullOrBlank()
-            EpgBatchFilter.PENDING -> staged.containsKey(channel.id)
+    val channels = coverage?.let { covered ->
+        fetchedChannels?.filter { (channel, _) ->
+            when (filter) {
+                EpgBatchFilter.ALL -> true
+                EpgBatchFilter.UNASSIGNED -> channel.id !in covered
+                EpgBatchFilter.MAPPED -> channel.id in covered
+                EpgBatchFilter.PENDING -> channel.id in staged
+            }
         }
     }
 
@@ -191,6 +196,8 @@ internal fun EpgChannelAssignment(
                             R.string.stayon_epg_batch_pending,
                             manual ?: stringResource(R.string.stayon_epg_batch_auto),
                         )
+                        channel.id !in coverage.orEmpty() && (manual != null || !channel.epgChannelId.isNullOrBlank()) ->
+                            stringResource(R.string.stayon_epg_batch_no_programmes, (manual ?: channel.epgChannelId).orEmpty())
                         manual != null -> stringResource(R.string.stayon_epg_batch_manual, manual)
                         channel.epgChannelId.isNullOrBlank() -> stringResource(R.string.stayon_epg_batch_no_guide)
                         else -> stringResource(R.string.stayon_epg_batch_auto_id, channel.epgChannelId.orEmpty())

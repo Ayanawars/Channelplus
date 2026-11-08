@@ -2,6 +2,7 @@ package tv.own.owntv.core.live
 
 import android.os.SystemClock
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import tv.own.owntv.core.CorePerf
 import tv.own.owntv.core.customize.SectionCustomizations
@@ -85,6 +86,7 @@ class GuideReader(
         val startedAt = SystemClock.elapsedRealtime()
         val epgKey = epgKeyOf(channel, cust)
         val shift = EpgShift.minutesFor(cust, channel, globalShiftMinutes)
+        val priority = epgSourceStore.priorities.first()[channel.sourceId].orEmpty()
         val stored = when {
             epgKey == null -> emptyList()
             shift == 0 -> epgDao.programmeSummariesForChannel(epgKey, from, to)
@@ -93,7 +95,7 @@ class GuideReader(
                 .map { EpgShift.apply(it, shift) }
         }
         if (stored.isNotEmpty()) {
-            return@withContext EpgDedupe.collapse(stored).also { collapsed ->
+            return@withContext EpgDedupe.collapse(preferredProgrammeRows(stored, priority)).also { collapsed ->
                 CorePerf.log {
                     "guide_row source=stored channelId=${channel.id} key=$epgKey shift=$shift " +
                         "rows=${stored.size} collapsed=${collapsed.size} " +
@@ -139,6 +141,8 @@ class GuideReader(
             epgKeyOf(ch, cust)?.let { key -> Triple(ch.id, key, EpgShift.minutesFor(cust, ch, globalShiftMinutes)) }
         }
         if (keyed.isEmpty()) return@withContext emptyMap()
+        val priorities = epgSourceStore.priorities.first()
+        val playlistByChannel = channels.associate { it.id to it.sourceId }
         val startedAt = SystemClock.elapsedRealtime()
         var chunks = 0
         var rowsRead = 0
@@ -158,7 +162,10 @@ class GuideReader(
                 .groupBy { it.epgChannelId }
             for ((channelId, epgKey, _) in group) {
                 rowsByKey[epgKey]?.takeIf { it.isNotEmpty() }
-                    ?.let { collected[channelId] = EpgShift.apply(EpgDedupe.collapse(it), shift) }
+                    ?.let { rows ->
+                        val priority = priorities[playlistByChannel[channelId]].orEmpty()
+                        collected[channelId] = EpgShift.apply(EpgDedupe.collapse(preferredProgrammeRows(rows, priority)), shift)
+                    }
             }
         }
         val ordered = LinkedHashMap<Long, List<EpgProgrammeEntity>>(collected.size)
@@ -227,3 +234,12 @@ internal fun guideSlotAt(list: List<EpgProgrammeEntity>, atMs: Long): GuideSlot?
 
 /** What is on a channel now, and what follows it — both already on the user's clock. */
 data class GuideSlot(val now: EpgProgrammeEntity?, val next: EpgProgrammeEntity?)
+
+/** Use the first configured feed with coverage in this window, retaining shared guide fallback. */
+internal fun preferredProgrammeRows(
+    rows: List<EpgProgrammeEntity>,
+    priority: List<Long>,
+): List<EpgProgrammeEntity> {
+    val firstAvailable = priority.firstOrNull { sourceId -> rows.any { it.sourceId == sourceId } }
+    return if (firstAvailable == null) rows else rows.filter { it.sourceId == firstAvailable }
+}

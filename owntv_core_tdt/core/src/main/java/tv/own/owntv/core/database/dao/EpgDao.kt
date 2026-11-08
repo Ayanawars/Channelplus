@@ -56,22 +56,28 @@ interface EpgDao {
     @Query("DELETE FROM epg_programmes WHERE epgChannelId = :epgChannelId AND sourceId IN (:sourceIds)")
     suspend fun clearChannelForSources(epgChannelId: String, sourceIds: List<Long>)
 
+    @Query("SELECT DISTINCT sourceId FROM epg_programmes WHERE epgChannelId = :epgKey AND stopMs > :from AND startMs < :to AND sourceId IN (:sourceIds)")
+    suspend fun sourcesWithProgrammes(epgKey: String, from: Long, to: Long, sourceIds: List<Long>): List<Long>
+
+    @Query("SELECT DISTINCT epgChannelId FROM epg_programmes WHERE epgChannelId IN (:keys) AND stopMs > :now")
+    suspend fun keysWithUpcomingProgrammes(keys: List<String>, now: Long): List<String>
+
     /** The programme airing at [now] on a given EPG channel. */
-    @Query("SELECT * FROM epg_programmes WHERE epgChannelId = :epgChannelId AND startMs <= :now AND stopMs > :now ORDER BY startMs DESC LIMIT 1")
-    suspend fun nowPlaying(epgChannelId: String, now: Long): EpgProgrammeEntity?
+    @Query("SELECT * FROM epg_programmes WHERE epgChannelId = :epgChannelId AND (:sourceId IS NULL OR sourceId = :sourceId) AND startMs <= :now AND stopMs > :now ORDER BY startMs DESC LIMIT 1")
+    suspend fun nowPlaying(epgChannelId: String, now: Long, sourceId: Long? = null): EpgProgrammeEntity?
 
     /** The most recently FINISHED programme on a channel (the "Before" slot in the player overlay). */
-    @Query("SELECT * FROM epg_programmes WHERE epgChannelId = :epgChannelId AND stopMs <= :now ORDER BY stopMs DESC LIMIT 1")
-    suspend fun previousProgramme(epgChannelId: String, now: Long): EpgProgrammeEntity?
+    @Query("SELECT * FROM epg_programmes WHERE epgChannelId = :epgChannelId AND (:sourceId IS NULL OR sourceId = :sourceId) AND stopMs <= :now ORDER BY stopMs DESC LIMIT 1")
+    suspend fun previousProgramme(epgChannelId: String, now: Long, sourceId: Long? = null): EpgProgrammeEntity?
 
     /** Now + upcoming programmes for a channel (now/next and a short guide). */
-    @Query("SELECT * FROM epg_programmes WHERE epgChannelId = :epgChannelId AND stopMs > :now ORDER BY startMs ASC LIMIT :limit")
-    fun upcoming(epgChannelId: String, now: Long, limit: Int): Flow<List<EpgProgrammeEntity>>
+    @Query("SELECT * FROM epg_programmes WHERE epgChannelId = :epgChannelId AND (:sourceId IS NULL OR sourceId = :sourceId) AND stopMs > :now ORDER BY startMs ASC LIMIT :limit")
+    fun upcoming(epgChannelId: String, now: Long, limit: Int, sourceId: Long? = null): Flow<List<EpgProgrammeEntity>>
 
     /** Total guide coverage for a channel, in whole days (latest stop − earliest start). Null when there
      *  is no stored guide for the channel. Used for the "EPG · Nd" hint in the Live preview metadata. */
-    @Query("SELECT (MAX(stopMs) - MIN(startMs)) / 86400000 FROM epg_programmes WHERE epgChannelId = :epgChannelId")
-    suspend fun coverageDays(epgChannelId: String): Int?
+    @Query("SELECT (MAX(stopMs) - MIN(startMs)) / 86400000 FROM epg_programmes WHERE epgChannelId = :epgChannelId AND (:sourceId IS NULL OR sourceId = :sourceId)")
+    suspend fun coverageDays(epgChannelId: String, sourceId: Long? = null): Int?
 
     // --- Guide reads: keyed by epgChannelId ALONE ------------------------------------------------
     //
@@ -208,6 +214,12 @@ interface EpgDao {
     // No ORDER BY. The caller ranks by name similarity, which is the order that matters, and an
     // `ORDER BY displayName` here would make [limit] truncate the end of the alphabet — silently
     // losing every candidate from some letter onwards.
+
+    @Query("SELECT epgChannelId, displayName, normName, normId FROM epg_channels WHERE sourceId = :sourceId LIMIT :limit")
+    suspend fun guideChannelNamesForSource(sourceId: Long, limit: Int): List<EpgChannelName>
+
+    @Query("SELECT DISTINCT epgChannelId FROM epg_programmes WHERE sourceId = :sourceId AND stopMs > :now LIMIT :limit")
+    suspend fun upcomingGuideIdsForSource(sourceId: Long, now: Long, limit: Int): List<String>
 
     /** Every named guide channel across every feed. Duplicates are expected: two feeds, one channel. */
     @Query("SELECT epgChannelId, displayName, normName, normId FROM epg_channels LIMIT :limit")

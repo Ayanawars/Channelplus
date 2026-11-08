@@ -64,6 +64,7 @@ class EpgAutoMatcher(
         cust: SectionCustomizations,
         playlistIds: List<Long>,
         maxChannels: Int = MAX_CHANNELS,
+        priorities: Map<Long, List<Long>> = emptyMap(),
     ): AutoMatchOutcome {
         val startedAt = SystemClock.elapsedRealtime()
         val candidates = guideCandidates.all()
@@ -77,14 +78,41 @@ class EpgAutoMatcher(
         val hasProgrammesById = candidates.associate { it.epgChannelId to it.hasProgrammes }
         val channels = channelDao.allForSources(playlistIds, maxChannels)
 
+        val now = System.currentTimeMillis()
+        val preferredCandidates = priorities.values.flatten().distinct().associateWith { sourceId ->
+            guideCandidates.upcomingForSource(sourceId, now)
+        }
         return withContext(Dispatchers.Default) {
             val prepared = prepareWithProgrammesFirst(candidates)
             // Narrow before scoring: the scan is channels × candidates, which is millions of
             // comparisons on a full lineup and minutes of spinner on TV silicon if it runs unfiltered.
-            val unmatched = channels.filter { needsMatch(it, cust, idsWithProgrammes) }
+            val priorityMatches = mutableMapOf<Long, String>()
+            for ((playlistId, playlistChannels) in channels.groupBy { it.sourceId }) {
+                val order = priorities[playlistId] ?: continue
+                val remaining = playlistChannels.filter { needsMatch(it, cust, emptySet()) }.toMutableList()
+                for (sourceId in order) {
+                    if (remaining.isEmpty()) break
+                    val feed = preferredCandidates[sourceId].orEmpty()
+                    if (feed.isEmpty()) continue
+                    val exactIds = feed.mapTo(HashSet()) { it.epgChannelId }
+                    val guesses = EpgMatcher.bestEpgMatchBulk(remaining.map { it.name }, prepareWithProgrammesFirst(feed))
+                    for ((channel, guess) in remaining.zip(guesses)) {
+                        val ownId = channel.epgChannelId?.trim()?.lowercase()
+                        val picked = ownId?.takeIf { it in exactIds }
+                            ?: guess?.takeIf { it.score >= EpgMatcher.AUTO_THRESHOLD }?.epgChannelId
+                        if (picked != null) priorityMatches[channel.id] = picked
+                    }
+                    remaining.removeAll { it.id in priorityMatches }
+                }
+            }
+            val unmatched = channels.filter { it.id !in priorityMatches && needsMatch(it, cust, idsWithProgrammes) }
             val best = EpgMatcher.bestEpgMatchBulk(unmatched.map { it.name }, prepared)
 
-            val applied = mutableListOf<Pair<String, String>>()
+            val applied = channels.mapNotNullTo(mutableListOf<Pair<String, String>>()) { channel ->
+                val picked = priorityMatches[channel.id] ?: return@mapNotNullTo null
+                val ownId = channel.epgChannelId?.trim()?.lowercase()
+                if (picked == ownId) null else CustomizeKeys.channel(channel) to picked
+            }
             val review = mutableListOf<AutoMatchSuggestion>()
             var withheld = 0
             for ((channel, match) in unmatched.zip(best)) {

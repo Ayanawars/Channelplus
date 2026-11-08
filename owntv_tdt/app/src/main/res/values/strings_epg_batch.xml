@@ -17,4 +17,11 @@
     <string name="stayon_epg_batch_no_guide">No guide assigned</string>
     <string name="stayon_epg_batch_auto_id">Auto: %1$s</string>
     <string name="stayon_epg_batch_source_status">%1$s · %2$s</string>
+    <string name="stayon_epg_priority">Guide priority by playlist</string>
+    <string name="stayon_epg_priority_desc">Set the XMLTV feed order for each IPTV playlist or antenna source.</string>
+    <string name="stayon_epg_priority_hint">Press OK on feeds in the order you want to use them. To move a feed to the end, remove it and add it again. With no preferred feed, STAYON+ searches all guides.</string>
+    <string name="stayon_epg_priority_position">Priority %1$d</string>
+    <string name="stayon_epg_coverage">Channels without programmes</string>
+    <string name="stayon_epg_coverage_desc">Review channels without upcoming programmes in the downloaded guide.</string>
+    <string name="stayon_epg_batch_no_programmes">%1$s · No downloaded programmes</string>
 </resources>

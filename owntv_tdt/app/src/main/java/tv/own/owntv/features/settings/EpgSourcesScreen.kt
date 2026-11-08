@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -40,6 +41,9 @@ import tv.own.owntv.ui.components.trapAllFocusExit
 import tv.own.owntv.core.sync.work.EpgSyncState
 import tv.own.owntv.core.util.classifySyncFailure
 import tv.own.owntv.ui.components.displayText
+import tv.own.owntv.ui.stage.StageButton
+import tv.own.owntv.ui.stage.StageMenuItem
+import tv.own.owntv.ui.stage.StagePopup
 
 /**
  * Settings → EPG Sources: standalone XMLTV feeds that fill the guide, independent of playlists.
@@ -66,6 +70,11 @@ fun EpgSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier, startOnA
     val addFocus = remember { FocusRequester() }
     val assignmentFocus = remember { FocusRequester() }
     var assigning by remember { mutableStateOf(false) }
+    var showCoverage by remember { mutableStateOf(false) }
+    var choosingPlaylist by remember { mutableStateOf(false) }
+    val playlists by vm.livePlaylists.collectAsStateWithLifecycle()
+    val priorities by vm.playlistPriorities.collectAsStateWithLifecycle()
+    var editingPlaylist by remember { mutableStateOf<Long?>(null) }
     val assignmentReturn = rememberDialogFocusRestore(assigning)
 
     // Per-row focus restore (mirrors ManageSourcesScreen / MoviesScreen): track the row the user is
@@ -178,7 +187,22 @@ fun EpgSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier, startOnA
             desc = stringResource(R.string.stayon_epg_assign_channel_desc),
             value = SettingValue.Opens(null),
             modifier = Modifier.focusRequester(assignmentFocus),
-            onClick = { assignmentReturn.value = assignmentFocus; assigning = true },
+            onClick = { assignmentReturn.value = assignmentFocus; showCoverage = false; assigning = true },
+        )
+        StageSettingRow(
+            icon = OwnTVIcon.SORT,
+            title = stringResource(R.string.stayon_epg_priority),
+            desc = stringResource(R.string.stayon_epg_priority_desc),
+            value = SettingValue.Opens(null),
+            enabled = sources.isNotEmpty() && playlists.isNotEmpty(),
+            onClick = { choosingPlaylist = true },
+        )
+        StageSettingRow(
+            icon = OwnTVIcon.INFO,
+            title = stringResource(R.string.stayon_epg_coverage),
+            desc = stringResource(R.string.stayon_epg_coverage_desc),
+            value = SettingValue.Opens(null),
+            onClick = { showCoverage = true; assigning = true },
         )
         StageSettingsHeading(stringResource(R.string.stayon_epg_artwork_section), null, first = true)
         StageSettingRow(
@@ -214,7 +238,54 @@ fun EpgSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier, startOnA
         }
     }
 
-    if (assigning) EpgChannelAssignment { assigning = false }
+    if (assigning) EpgChannelAssignment(startWithoutProgrammes = showCoverage) { assigning = false }
+
+    if (choosingPlaylist && editingPlaylist == null) {
+        StagePopup(onDismiss = { choosingPlaylist = false }, title = stringResource(R.string.stayon_epg_priority)) {
+            playlists.forEach { playlist ->
+                StageMenuItem(
+                    text = playlist.name,
+                    value = priorities[playlist.id].orEmpty().firstOrNull()
+                        ?.let { id -> sources.firstOrNull { it.id == id }?.name }
+                        ?: stringResource(R.string.stayon_epg_batch_auto),
+                    icon = OwnTVIcon.PLAYLIST,
+                    onClick = { editingPlaylist = playlist.id },
+                )
+            }
+        }
+    }
+
+    val playlist = playlists.firstOrNull { it.id == editingPlaylist }
+    if (playlist != null) {
+        key(playlist.id) {
+            var order by remember { mutableStateOf(priorities[playlist.id].orEmpty()) }
+            StagePopup(
+                onDismiss = { editingPlaylist = null },
+                title = playlist.name,
+                body = stringResource(R.string.stayon_epg_priority_hint),
+                buttons = {
+                    StageButton(stringResource(R.string.content_close), onClick = { editingPlaylist = null })
+                    StageButton(stringResource(R.string.common_save), tinted = true, onClick = {
+                        vm.savePlaylistPriority(playlist.id, order)
+                        editingPlaylist = null
+                    })
+                },
+            ) {
+                (order.mapNotNull { id -> sources.firstOrNull { it.id == id } } + sources.filter { it.id !in order })
+                    .forEach { source ->
+                        key(source.id) {
+                            val position = order.indexOf(source.id)
+                            StageMenuItem(
+                                text = source.name,
+                                value = if (position >= 0) stringResource(R.string.stayon_epg_priority_position, position + 1) else null,
+                                icon = if (position >= 0) OwnTVIcon.CHECK else OwnTVIcon.ADD,
+                                onClick = { order = if (position >= 0) order - source.id else order + source.id },
+                            )
+                        }
+                    }
+            }
+        }
+    }
 
     confirmDelete?.let { s ->
         ConfirmDialog(

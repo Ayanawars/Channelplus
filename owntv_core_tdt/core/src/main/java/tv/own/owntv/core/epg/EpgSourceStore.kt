@@ -37,6 +37,7 @@ class EpgSourceStore(private val context: Context) {
     private object Keys {
         val LIST = stringPreferencesKey("sources")
         val NEXT_ID = longPreferencesKey("next_id") // counts down: -1, -2, …
+        val PRIORITIES = stringPreferencesKey("playlist_priorities")
         val MIGRATED = longPreferencesKey("migrated_v1")
     }
 
@@ -45,6 +46,28 @@ class EpgSourceStore(private val context: Context) {
     }
 
     suspend fun getAll(): List<EpgSource> = parse(context.epgStore.data.first()[Keys.LIST])
+
+    val priorities: Flow<Map<Long, List<Long>>> = context.epgStore.data.map { prefs ->
+        val json = JSONObject(prefs[Keys.PRIORITIES] ?: "{}")
+        val available = parse(prefs[Keys.LIST]).mapTo(HashSet()) { it.id }
+        json.keys().asSequence().mapNotNull { key ->
+            val playlistId = key.toLongOrNull() ?: return@mapNotNull null
+            val feeds = json.optJSONArray(key) ?: return@mapNotNull null
+            val ids = (0 until feeds.length()).map { feeds.optLong(it) }.filter { it in available }
+            playlistId.takeIf { ids.isNotEmpty() }?.let { it to ids }
+        }.toMap()
+    }
+
+    suspend fun setPriority(playlistId: Long, sourceIds: List<Long>) {
+        context.epgStore.edit { prefs ->
+            val json = JSONObject(prefs[Keys.PRIORITIES] ?: "{}")
+            val available = parse(prefs[Keys.LIST]).mapTo(HashSet()) { it.id }
+            val ids = sourceIds.distinct().filter { it in available }
+            if (ids.isEmpty()) json.remove(playlistId.toString())
+            else json.put(playlistId.toString(), JSONArray(ids))
+            prefs[Keys.PRIORITIES] = json.toString()
+        }
+    }
 
     suspend fun add(name: String, url: String, userAgent: String? = null): EpgSource {
         var created: EpgSource? = null
@@ -109,6 +132,7 @@ class EpgSourceStore(private val context: Context) {
     suspend fun importJson(raw: String?) {
         context.epgStore.edit { prefs ->
             val list = parse(raw)
+            prefs.remove(Keys.PRIORITIES)
             if (list.isEmpty()) prefs.remove(Keys.LIST) else prefs[Keys.LIST] = write(list)
             // Keep the id counter below the lowest restored id so new sources never collide.
             prefs[Keys.NEXT_ID] = (list.minOfOrNull { it.id } ?: 0L).coerceAtMost(0L) - 1

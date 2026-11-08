@@ -50,6 +50,11 @@ data class GuideCandidate(
  */
 class GuideCandidates(private val epgDao: EpgDao) {
 
+    suspend fun upcomingForSource(sourceId: Long, now: Long): List<GuideCandidate> = merge(
+        named = epgDao.guideChannelNamesForSource(sourceId, MAX_CANDIDATES),
+        withProgrammes = epgDao.upcomingGuideIdsForSource(sourceId, now, MAX_CANDIDATES),
+    ).filter { it.hasProgrammes }
+
     /**
      * Every guide channel, at most [limit] of each underlying table.
      *

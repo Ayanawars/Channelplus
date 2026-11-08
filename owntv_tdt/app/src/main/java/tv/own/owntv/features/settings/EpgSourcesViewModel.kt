@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -98,6 +101,28 @@ class EpgSourcesViewModel(
 
     val sources: StateFlow<List<EpgSource>> =
         store.sources.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val playlistPriorities = store.priorities
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
+
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    val livePlaylists = settings.activeProfileId.flatMapLatest { profileId ->
+        if (profileId < 0) flowOf(emptyList())
+        else sourceRepository.observeSources(profileId).map { sources -> sources.filter { it.syncLive } }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    fun savePlaylistPriority(playlistId: Long, feedIds: List<Long>) {
+        viewModelScope.launch {
+            store.setPriority(playlistId, feedIds)
+            try {
+                automaticAssignment.assign()
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                _autoAssignStatus.value = AutoAssignStatus.Failed
+            }
+        }
+    }
 
     /** Per-source EPG auto-refresh selection (Off / Startup / staleness threshold). */
     val autoRefresh: StateFlow<Map<Long, EpgRefresh>> = settings.epgAutoRefresh

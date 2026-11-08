@@ -17,7 +17,11 @@
 5. Para corregir excepciones, entrar en **Asignar EPG manualmente**: elegir canal,
    buscar la entrada XMLTV correcta, continuar con el siguiente y pulsar **Guardar**
    al final. Restaurar automático elimina la corrección manual.
-6. «Mostrar canales sin EPG» ayuda a identificar canales pendientes.
+6. **Canales sin programación** abre el editor filtrado por cobertura de la guía
+   descargada. Distingue entre una guía sin asignar y un ID sin próximos programas.
+7. **Prioridad de EPG por lista** permite ordenar los feeds XMLTV para una lista IPTV o
+   fuente de antena. La guía usa el primer feed con datos para el ID efectivo y la
+   ventana solicitada. Si ninguno tiene datos, vuelve a la guía compartida.
 
 ## Detalles de integridad
 
@@ -35,8 +39,8 @@
 
 ## Limitaciones y pruebas
 
-- Esta versión **no implementa todavía una prioridad de fuentes EPG por lista**; los
-  IDs compartidos entre feeds distintos podrían necesitar selección manual.
+- Las asignaciones ya guardadas se conservan. Si dos guías usan IDs diferentes,
+  restaura la asignación automática del canal para buscar de nuevo con el orden actual.
 - Las listas IPTV enormes se pueden filtrar por búsqueda en la asignación manual.
   El listado inicial no intenta materializar decenas de miles de filas a la vez.
 - Pruebas necesarias en TCL: TDT sin `tvg-id`, M3U con `tvg-id`, M3U con

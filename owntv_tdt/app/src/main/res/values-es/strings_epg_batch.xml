@@ -17,4 +17,11 @@
     <string name="stayon_epg_batch_no_guide">Sin guía asignada</string>
     <string name="stayon_epg_batch_auto_id">Auto: %1$s</string>
     <string name="stayon_epg_batch_source_status">%1$s · %2$s</string>
+    <string name="stayon_epg_priority">Prioridad de EPG por lista</string>
+    <string name="stayon_epg_priority_desc">Ordena las fuentes XMLTV para cada lista IPTV o fuente de antena.</string>
+    <string name="stayon_epg_priority_hint">Pulsa OK en las fuentes en el orden en que quieras usarlas. Para mover una al final, quítala y añádela de nuevo. Si dejas la selección vacía, STAYON+ busca en todas las guías.</string>
+    <string name="stayon_epg_priority_position">Prioridad %1$d</string>
+    <string name="stayon_epg_coverage">Canales sin programación</string>
+    <string name="stayon_epg_coverage_desc">Revisa los canales que no tienen próximos programas en la guía descargada.</string>
+    <string name="stayon_epg_batch_no_programmes">%1$s · Sin programas descargados</string>
 </resources>

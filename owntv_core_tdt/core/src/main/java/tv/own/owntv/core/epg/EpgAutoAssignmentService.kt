@@ -20,6 +20,7 @@ class EpgAutoAssignmentService(
     private val channelDao: ChannelDao,
     private val epgDao: EpgDao,
     private val customization: CustomizationStore,
+    private val sourceStore: EpgSourceStore,
 ) {
     data class Result(
         val applied: Int,
@@ -39,7 +40,7 @@ class EpgAutoAssignmentService(
 
         val current = customization.observe(profileId, MediaType.LIVE).first()
         val outcome = EpgAutoMatcher(channelDao, GuideCandidates(epgDao))
-            .run(current, channelSourceIds)
+            .run(current, channelSourceIds, priorities = sourceStore.priorities.first())
         if (outcome.applied.isEmpty()) {
             return Result(0, outcome.review.size, outcome.hadCandidates)
         }

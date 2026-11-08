@@ -778,7 +778,7 @@ class EpgViewModel(
                 if (playlistIds.isEmpty()) { _matchSummary.value = EpgMatchSummary.AddPlaylist; return@launch }
                 val cust = customize.observe(pid, MediaType.LIVE).first()
 
-                val outcome = autoMatcher.run(cust, playlistIds)
+                val outcome = autoMatcher.run(cust, playlistIds, priorities = epgSourceStore.priorities.first())
                 if (!outcome.hadCandidates) { finishRun(EpgMatchSummary.NoData); return@launch }
 
                 // Persist the confident hits — in one write, see [saveEpgMatches].
@@ -1130,6 +1130,25 @@ class EpgViewModel(
             }
             // Keep the original channel identity. Channels without a provider ID are keyed by name.
             channel to sources.getValue(channel.sourceId).name
+        }
+    }
+
+    internal suspend fun assignmentCoverage(
+        channels: List<ChannelEntity>,
+        changes: Map<Long, Pair<ChannelEntity, String?>>,
+    ): Set<Long> {
+        val now = System.currentTimeMillis()
+        val keyed = channels.mapNotNull { channel ->
+            val assignment = if (channel.id in changes) changes[channel.id]?.second else currentEpgMatch(channel)
+            val guideId = (assignment ?: channel.epgChannelId)?.trim()?.lowercase()?.takeIf { it.isNotEmpty() }
+            guideId?.let { Triple(channel.id, it, currentEpgShift(channel) ?: globalEpgShift()) }
+        }
+        return buildSet {
+            for ((shift, group) in keyed.groupBy { it.third }) {
+                val keysWithGuide = group.map { it.second }.distinct().chunked(400)
+                    .flatMap { epgDao.keysWithUpcomingProgrammes(it, now - shift * 60_000L) }.toSet()
+                group.filter { it.second in keysWithGuide }.forEach { add(it.first) }
+            }
         }
     }
 
