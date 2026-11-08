@@ -162,7 +162,7 @@ fun RadioIptvSettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                 busy = true
                 scope.launch {
                     runCatching { radio.refreshPlaylist(list.id) }
-                        .onSuccess { status = context.getString(R.string.stayon_radio_updated, it) }
+                        .onSuccess { status = context.resources.getQuantityString(R.plurals.stayon_radio_updated, it, it) }
                         .onFailure { status = context.getString(R.string.stayon_radio_failed) }
                     busy = false
                 }

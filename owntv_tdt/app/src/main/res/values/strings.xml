@@ -64,7 +64,10 @@
     <string name="stayon_radio_playlists">Radio playlists</string>
     <string name="stayon_radio_stations">Radio stations</string>
     <string name="stayon_radio_refresh">Refresh</string>
-    <string name="stayon_radio_updated">%1$d stations imported</string>
+    <plurals name="stayon_radio_updated">
+        <item quantity="one">%1$d station imported</item>
+        <item quantity="other">%1$d stations imported</item>
+    </plurals>
     <string name="stayon_radio_empty">No radio stations yet. Add a playlist or a direct stream.</string>
     <string name="stayon_radio_stop">Stop</string>
     <string name="stayon_radio_listen">Listen</string>
