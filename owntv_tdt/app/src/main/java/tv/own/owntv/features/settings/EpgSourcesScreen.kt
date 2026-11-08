@@ -50,6 +50,8 @@ import tv.own.owntv.ui.components.displayText
 fun EpgSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier, startOnAdd: Boolean = false) {
     val vm: EpgSourcesViewModel = koinViewModel()
     val sources by vm.sources.collectAsStateWithLifecycle()
+    val autoAssignStatus by vm.autoAssignStatus.collectAsStateWithLifecycle()
+    val showUnmatched by vm.showUnmatchedChannels.collectAsStateWithLifecycle()
     val autoRefreshMap by vm.autoRefresh.collectAsStateWithLifecycle()
     val useLogosIds by vm.useLogos.collectAsStateWithLifecycle()
     val deletingIds by vm.deletingIds.collectAsStateWithLifecycle()
@@ -111,7 +113,8 @@ fun EpgSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier, startOnA
     if (adding || editing != null) {
         EpgSourceForm(
             initial = editing,
-            initialAutoRefresh = editing?.let { autoRefreshMap[it.id] } ?: EpgRefresh.OFF,
+            initialAutoRefresh = editing?.let { autoRefreshMap[it.id] ?: EpgRefresh.OFF }
+                ?: EpgRefresh(EpgAutoRefresh.HOURS_24),
             initialUseLogos = editing?.let { it.id in useLogosIds } ?: false,
             loadPlaylistOptions = { vm.playlistEpgOptions() },
             onSave = { name, url, ua, autoRefresh, useLogos ->
@@ -139,6 +142,36 @@ fun EpgSourcesScreen(onBack: () -> Unit, modifier: Modifier = Modifier, startOnA
             )
         },
     ) {
+        StageSettingsHeading(stringResource(R.string.stayon_epg_auto_section), null, first = true)
+        StageSettingsNote(stringResource(R.string.stayon_epg_shared_explanation), null)
+        StageSettingRow(
+            icon = OwnTVIcon.REFRESH,
+            title = stringResource(R.string.stayon_epg_auto_assign),
+            desc = stringResource(R.string.stayon_epg_auto_assign_desc),
+            value = SettingValue.Opens(null),
+            enabled = autoAssignStatus !is EpgSourcesViewModel.AutoAssignStatus.Running,
+            onClick = { vm.assignAutomatically() },
+        )
+        when (val state = autoAssignStatus) {
+            EpgSourcesViewModel.AutoAssignStatus.Idle -> Unit
+            EpgSourcesViewModel.AutoAssignStatus.Running ->
+                StageSettingsNote(stringResource(R.string.stayon_epg_auto_running), null)
+            EpgSourcesViewModel.AutoAssignStatus.NoSources ->
+                StageSettingsNote(stringResource(R.string.stayon_epg_auto_add_source), null)
+            EpgSourcesViewModel.AutoAssignStatus.UpdatingGuide ->
+                StageSettingsNote(stringResource(R.string.stayon_epg_auto_syncing), null)
+            is EpgSourcesViewModel.AutoAssignStatus.Done ->
+                StageSettingsNote(stringResource(R.string.stayon_epg_auto_done, state.applied, state.review), null)
+            EpgSourcesViewModel.AutoAssignStatus.Failed ->
+                StageSettingsNote(stringResource(R.string.stayon_epg_auto_failed), null)
+        }
+        StageSettingRow(
+            icon = OwnTVIcon.EPG,
+            title = stringResource(R.string.stayon_epg_show_unmatched),
+            desc = stringResource(R.string.stayon_epg_show_unmatched_desc),
+            value = SettingValue.Switch(showUnmatched),
+            onClick = { vm.setShowUnmatchedChannels(!showUnmatched) },
+        )
         StageSettingRow(
             icon = OwnTVIcon.EPG,
             title = stringResource(R.string.stayon_epg_assign_channel),
