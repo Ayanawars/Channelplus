@@ -70,7 +70,7 @@
 - Renombrar, sustituir o quitar prefijos/sufijos, ordenar, mover en bloque, ocultar/mostrar, favoritos, deshacer/rehacer, guardar/revisar; preservar overrides tras refresh.
 - **Agrupar duplicados** (La 1 TDT, IPTV FHD, IPTV HD, etc.) automáticamente con corrección/separación manual. Prioridad predeterminada TDT y, si falla, IPTV por calidad; permitir override por canal.
 - Asignación manual EPG por canal; búsqueda por ID/nombre, candidatos automáticos y EPG elegida, reset automático, offset individual.
-- Modo **asignación rápida por lotes con mando**: arriba/abajo elige canal; OK abre búsqueda/selección EPG; al aceptar autoguarda y pasa al siguiente; marcar asignado/no asignado/dudoso, omitir y volver.
+- Modo **asignación secuencial EPG con mando**: arriba/abajo elige canal; OK abre búsqueda/selección EPG. Cada elección queda pendiente y la lista permite continuar con otros canales. **Guardar** confirma todas las asignaciones juntas; al salir, preguntar si desea descartar. Restaurar automático elimina la asignación manual, no toca la lista IPTV. Las búsquedas no descartan cambios de canales que ya no están visibles. La lista debe permitir revisar asignado/no asignado/dudoso y omitir o volver. Estado: primera implementación en rama de EPG secuencial (pendiente de compilación y prueba real).
 - Acceso directo a asignación manual de logo.
 
 ### 2.6 Logos (Picons)

@@ -625,6 +625,44 @@ class EpgViewModel(
         customize.update(profileId, MediaType.LIVE) { it.copy(epgMatches = it.epgMatches + clean) }
     }
 
+    /**
+     * Commit the sequential EPG editor's draft in one persistent update.
+     * Null values remove an override and restore automatic matching.
+     * Existing unrelated preferences and guide mappings remain untouched.
+     */
+    fun saveManualEpgAssignments(
+        assignments: Map<ChannelEntity, String?>,
+        onComplete: (Boolean) -> Unit,
+    ) {
+        if (assignments.isEmpty()) { onComplete(true); return }
+        viewModelScope.launch {
+            try {
+                val pid = settings.activeProfileId.first()
+                val updates = assignments.map { (channel, id) ->
+                    CustomizeKeys.channel(channel) to id?.trim()?.lowercase()?.takeIf { it.isNotEmpty() }
+                }.toMap()
+                customize.update(pid, MediaType.LIVE) { current ->
+                    val mapped = current.epgMatches.toMutableMap()
+                    updates.forEach { (key, id) ->
+                        if (id == null) mapped.remove(key) else mapped[key] = id
+                    }
+                    current.copy(epgMatches = mapped)
+                }
+                // Wait for the in-memory profile to observe this write before refreshing guide rows.
+                kotlinx.coroutines.withTimeoutOrNull(1_500) {
+                    custom.first { current -> updates.all { (key, id) -> current.epgMatches[key] == id } }
+                }
+                val ids = updates.values.filterNotNull().distinct()
+                if (ids.isNotEmpty()) fillMatchedInBackground(ids) else load()
+                onComplete(true)
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                onComplete(false)
+            }
+        }
+    }
+
     /** Set/clear a channel's manual EPG match (null clears → auto-match), then reload the guide. */
     fun setEpgMatch(channel: ChannelEntity, epgChannelId: String?) {
         viewModelScope.launch {
@@ -992,7 +1030,9 @@ class EpgViewModel(
             _cacheRevision.value++
         }
 
-        val hasEpg = epgIds.isNotEmpty()
+        // A tuner or IPTV provider may already have guide rows even without a separate XMLTV URL.
+        // Do not show the misleading Add EPG empty-state when its programmes are present.
+        val hasEpg = epgIds.isNotEmpty() || stored > 0
         val message = when {
             stored == 0 -> null // handled by the "No EPG added" prompt (hasEpgSources=false)
             channels.isEmpty() && q.isNotBlank() -> EpgMessage.NoChannelsForQuery(q)
@@ -1073,7 +1113,10 @@ class EpgViewModel(
         val hiddenCategories = tv.own.owntv.core.content.AdultCategoryClassifier.hiddenCategoryIds(
             categoryDao.observe(ids, MediaType.LIVE).first(), cust.hiddenCategories, isKids,
         )
-        return channelDao.channelsForGuide(ids, query.trim(), 200).mapNotNull { channel ->
+        // Editing only the first 200 channels made most IPTV lineups appear unassignable.
+        // Search still queries the full database, while LazyColumn only renders visible rows.
+        val limit = if (query.isBlank()) 2_000 else 5_000
+        return channelDao.channelsForGuide(ids, query.trim(), limit).mapNotNull { channel ->
             if (channel.categoryId in hiddenCategories || CustomizeKeys.channel(channel) in cust.hiddenItems) {
                 return@mapNotNull null
             }
