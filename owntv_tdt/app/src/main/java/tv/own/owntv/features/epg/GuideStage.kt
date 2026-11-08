@@ -611,6 +611,7 @@ internal fun GuideChannelMenu(
     onFavorite: () -> Unit,
     onAutoMatch: () -> Unit,
     onPickEpg: () -> Unit,
+    onPickEpgBatch: () -> Unit,
     onEpgOffset: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -631,6 +632,7 @@ internal fun GuideChannelMenu(
         )
         StageMenuItem(text = stringResource(R.string.content_epg_match_button), icon = OwnTVIcon.SPARKLE, onClick = { onDismiss(); onAutoMatch() })
         StageMenuItem(text = stringResource(R.string.content_epg_pick_manually), icon = OwnTVIcon.EPG, onClick = { onDismiss(); onPickEpg() })
+        StageMenuItem(text = stringResource(R.string.content_match_epg_batch), icon = OwnTVIcon.LIST, onClick = { onDismiss(); onPickEpgBatch() })
         StageMenuItem(text = stringResource(R.string.content_epg_time_offset), icon = OwnTVIcon.CLOCK, value = epgOffsetValue, onClick = { onDismiss(); onEpgOffset() })
     }
 }
