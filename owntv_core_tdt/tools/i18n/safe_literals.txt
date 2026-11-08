@@ -2091,6 +2091,7 @@
 3	preference-key	core/src/main/java/tv/own/owntv/core/menu/ContentMenus.kt	hide
 2	preference-key	core/src/main/java/tv/own/owntv/core/menu/ContentMenus.kt	mark_watched
 1	preference-key	core/src/main/java/tv/own/owntv/core/menu/ContentMenus.kt	match_epg
+1	preference-key	core/src/main/java/tv/own/owntv/core/menu/ContentMenus.kt	match_epg_batch
 3	preference-key	core/src/main/java/tv/own/owntv/core/menu/ContentMenus.kt	move
 3	preference-key	core/src/main/java/tv/own/owntv/core/menu/ContentMenus.kt	move_to_category
 3	preference-key	core/src/main/java/tv/own/owntv/core/menu/ContentMenus.kt	play_external
