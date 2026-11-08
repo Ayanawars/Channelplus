@@ -130,6 +130,7 @@
 1	preference-key	app/src/main/java/tv/own/owntv/features/live/LiveScreen.kt	favourite
 1	preference-key	app/src/main/java/tv/own/owntv/features/live/LiveScreen.kt	hide
 2	technical	app/src/main/java/tv/own/owntv/features/live/LiveScreen.kt	match_epg
+1	preference-key	app/src/main/java/tv/own/owntv/features/live/LiveScreen.kt	match_epg_batch
 1	preference-key	app/src/main/java/tv/own/owntv/features/live/LiveScreen.kt	move
 1	preference-key	app/src/main/java/tv/own/owntv/features/live/LiveScreen.kt	move_to_category
 1	preference-key	app/src/main/java/tv/own/owntv/features/live/LiveScreen.kt	play_external
@@ -285,7 +286,6 @@
 1	technical	app/src/main/java/tv/own/owntv/features/settings/DeveloperScreen.kt	Rebuild Now Trending
 1	preference-key	app/src/main/java/tv/own/owntv/features/settings/EpgArtworkPreferences.kt	show_programme_artwork
 1	preference-key	app/src/main/java/tv/own/owntv/features/settings/EpgArtworkPreferences.kt	stayon_epg_artwork
-1	empty	app/src/main/java/tv/own/owntv/features/settings/EpgChannelAssignment.kt	\0
 6	empty	app/src/main/java/tv/own/owntv/features/settings/EpgSourcesScreen.kt	\0
 1	technical	app/src/main/java/tv/own/owntv/features/settings/EpgSourcesViewModel.kt	add
 1	technical	app/src/main/java/tv/own/owntv/features/settings/EpgSourcesViewModel.kt	manual_resync
