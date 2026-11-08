@@ -1030,7 +1030,9 @@ class EpgViewModel(
             _cacheRevision.value++
         }
 
-        val hasEpg = epgIds.isNotEmpty()
+        // A tuner or IPTV provider may already have guide rows even without a separate XMLTV URL.
+        // Do not show the misleading Add EPG empty-state when its programmes are present.
+        val hasEpg = epgIds.isNotEmpty() || stored > 0
         val message = when {
             stored == 0 -> null // handled by the "No EPG added" prompt (hasEpgSources=false)
             channels.isEmpty() && q.isNotBlank() -> EpgMessage.NoChannelsForQuery(q)
