@@ -40,7 +40,7 @@ internal fun EpgChannelAssignment(onDismiss: () -> Unit) {
     val searchFocus = remember { FocusRequester() }
     val restoreFocus = rememberDialogFocusRestore(selected != null)
     val channels = key(query) {
-        val result by produceState<List<ChannelEntity>?>(null) {
+        val result by produceState<List<Pair<ChannelEntity, String>>?>(null) {
             if (query.isNotBlank()) delay(250)
             value = vm.channelsForAssignment(query)
         }
@@ -67,11 +67,11 @@ internal fun EpgChannelAssignment(onDismiss: () -> Unit) {
             channels == null -> OwnTVSpinner(sizeDp = 24)
             channels.isEmpty() -> StageSettingsNote(stringResource(R.string.stayon_epg_assign_empty), null)
             else -> LazyColumn(Modifier.fillMaxWidth().height(380.mpx)) {
-                items(channels, key = { it.id }) { channel ->
+                items(channels, key = { it.first.id }) { (channel, sourceName) ->
                     val row = remember { FocusRequester() }
                     StageMenuItem(
                         text = channel.name,
-                        value = channel.number?.toString(),
+                        value = sourceName,
                         icon = OwnTVIcon.LIVE_TV,
                         modifier = Modifier.focusRequester(row),
                         onClick = { restoreFocus.value = row; selected = channel },
