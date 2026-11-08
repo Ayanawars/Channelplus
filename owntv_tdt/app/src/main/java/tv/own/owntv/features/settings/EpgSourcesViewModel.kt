@@ -34,6 +34,18 @@ class EpgSourcesViewModel(
     private val automaticAssignment: tv.own.owntv.core.epg.EpgAutoAssignmentService,
 ) : ViewModel() {
 
+    init {
+        // An older install may already contain guide URLs but no refresh preference, which
+        // previously meant OFF. Enable 24h refresh only where the user never chose a value;
+        // an explicitly disabled feed stays disabled.
+        viewModelScope.launch {
+            val configured = settings.epgAutoRefresh.first()
+            store.getAll().filter { it.id !in configured }.forEach {
+                settings.setEpgAutoRefresh(it.id, EpgRefresh(EpgAutoRefresh.HOURS_24))
+            }
+        }
+    }
+
     /** An existing playlist's EPG feed, offered as a one-tap "fill from playlist" option. */
     data class PlaylistEpg(val name: String, val url: String)
 
