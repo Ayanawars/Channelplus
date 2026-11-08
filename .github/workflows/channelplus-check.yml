@@ -49,3 +49,17 @@ jobs:
         with:
           name: Channelplus-CI-test-only
           path: owntv_tdt/app/build/outputs/apk/standard/debug/*.apk
+      # Production-variant output stays unsigned in CI. The real signing key must NEVER
+      # enter the repository or Actions cache. Sign it separately with the retained
+      # production keystore after verifying the full build and package metadata.
+      - name: Build unsigned production variant for verified external signing
+        working-directory: owntv_tdt
+        env:
+          VERSION_CODE: '101009'
+          VERSION_NAME: '5.4.9'
+        run: ./gradlew :app:assembleStandardRelease --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g -Dfile.encoding=UTF-8" -Pkotlin.daemon.jvmargs=-Xmx3g
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Stayon-5.4.9-UNSIGNED-for-signing
+          path: owntv_tdt/app/build/outputs/apk/standard/release/*.apk
+          if-no-files-found: error
