@@ -28,4 +28,5 @@
     <string name="stayon_epg_priority_title">Guías EPG de %1$s</string>
     <string name="stayon_epg_native_source">%1$s (guía integrada)</string>
     <string name="stayon_epg_source_label">Fuente EPG: %1$s</string>
+    <string name="stayon_guide_move_instructions">Mueve el canal con Arriba o Abajo. Pulsa OK para guardar o Atrás para cancelar.</string>
 </resources>

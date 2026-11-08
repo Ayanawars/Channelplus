@@ -28,4 +28,5 @@
     <string name="stayon_epg_priority_title">EPG guides for %1$s</string>
     <string name="stayon_epg_native_source">%1$s (built-in guide)</string>
     <string name="stayon_epg_source_label">Guide source: %1$s</string>
+    <string name="stayon_guide_move_instructions">Move with Up or Down. Press OK to save or Back to cancel.</string>
 </resources>

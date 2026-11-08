@@ -52,6 +52,7 @@ fun MoveOrderOverlay(
     onMove: (from: Int, to: Int) -> Unit,
     onCommit: () -> Unit,
     onCancel: () -> Unit,
+    commitOnDrop: Boolean = false,
 ) {
     val settingsVm: SettingsViewModel = koinViewModel()
     val chNavEnabled by settingsVm.chNavEnabled.collectAsStateWithLifecycle()
@@ -87,7 +88,7 @@ fun MoveOrderOverlay(
     StagePopup(
         onDismiss = onCancel,
         title = title,
-        body = stringResource(R.string.sports_move_instructions),
+        body = stringResource(if (commitOnDrop) R.string.stayon_guide_move_instructions else R.string.sports_move_instructions),
         width = 760.mpx,
         scroll = false,
         modifier = Modifier
@@ -126,7 +127,10 @@ fun MoveOrderOverlay(
                 StagePopupOption(
                     title = name,
                     chosen = carried,
-                    onClick = { picked = if (carried) null else idx },
+                    onClick = {
+                        if (carried && commitOnDrop) onCommit()
+                        else picked = if (carried) null else idx
+                    },
                     modifier = (if (idx == focusPos) Modifier.focusRequester(rowFocus) else Modifier)
                         .onFocusChanged { if (it.isFocused) focusPos = idx },
                     leading = { _ -> StagePopupIcon(OwnTVIcon.MOVE, if (carried) accent else StageColors.Dim) },

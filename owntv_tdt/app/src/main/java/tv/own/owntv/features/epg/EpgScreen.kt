@@ -713,6 +713,7 @@ fun EpgScreen(
             onMove = vm::moveGuideChannel,
             onCommit = vm::commitGuideMove,
             onCancel = vm::cancelGuideMove,
+            commitOnDrop = true,
         )
     }
     if (dayOpen) {
