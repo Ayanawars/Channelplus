@@ -130,6 +130,7 @@ val appModule = module {
             userDataWriter = get(),
             epgRepository = get(),
             epgSourceStore = get(),
+            epgSyncScheduler = get(),
             launcherIntegrationRepository = get(),
             catalogSyncScheduler = get(),
             okHttpClient = get(),
