@@ -9,4 +9,11 @@
     <string name="stayon_epg_batch_discard">Descartar</string>
     <string name="stayon_epg_batch_error_title">No se pudieron guardar las asignaciones EPG</string>
     <string name="stayon_epg_batch_error_body">No se han confirmado los cambios. Revísalos e intenta guardarlos de nuevo.</string>
+
+    <string name="stayon_epg_filter_all">Todos</string>
+    <string name="stayon_epg_filter_unassigned">Sin EPG</string>
+    <string name="stayon_epg_filter_manual">Manual</string>
+    <string name="stayon_epg_filter_pending">Pendientes</string>
+    <string name="stayon_epg_batch_no_guide">Sin guía asignada</string>
+    <string name="stayon_epg_batch_auto_id">Auto: %1$s</string>
 </resources>
