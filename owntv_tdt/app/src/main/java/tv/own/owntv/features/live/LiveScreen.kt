@@ -975,6 +975,7 @@ fun LiveScreen(
                 onWatch = { vm.watchFullscreen(ch, emptyList()); if (!externalPlayerOn) onFullscreen() },
                 onPlayFromStart = { vm.playCatchupProgramme(ch, p); if (!externalPlayerOn) onFullscreen() },
                 onPickEpg = { contextChannelId = ch.id; matchingEpg = ch },
+                onPickEpgBatch = { contextChannelId = ch.id; batchEpgChannel = ch },
                 onEpgOffset = { contextChannelId = ch.id; offsettingEpg = ch },
                 autoMatch = false,
             ),
