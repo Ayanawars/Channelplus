@@ -159,10 +159,10 @@ private fun SettingsHub(onChoose: (SettingsGroup) -> Unit) {
         runCatching { nativeFocus.requestFocus() }
     }
     Column(
-        Modifier.fillMaxSize().padding(
-            start = 58.mpx, end = 58.mpx, top = 128.mpx, bottom = 38.mpx,
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(
+            start = 58.mpx, end = 58.mpx, top = 76.mpx, bottom = 38.mpx,
         ),
-        verticalArrangement = Arrangement.spacedBy(20.mpx),
+        verticalArrangement = Arrangement.spacedBy(16.mpx),
     ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.channel_brand_name), style = stageText(43, 800), color = ivory)
@@ -177,7 +177,7 @@ private fun SettingsHub(onChoose: (SettingsGroup) -> Unit) {
         val groups: List<SettingsGroup?> = listOf(null) + categoryOrder.map { it }
         groups.chunked(3).forEachIndexed { rowIndex, rowItems ->
             Row(
-                Modifier.fillMaxWidth().weight(1f),
+                Modifier.fillMaxWidth().height(IntrinsicSize.Min),
                 horizontalArrangement = Arrangement.spacedBy(17.mpx),
             ) {
                 rowItems.forEachIndexed { colIndex, group ->
@@ -191,29 +191,34 @@ private fun SettingsHub(onChoose: (SettingsGroup) -> Unit) {
                                 }
                             } else onChoose(group)
                         },
-                        radius = 14.mpx, focusStyle = StageFocus.FILLED,
+                        radius = 14.mpx, focusStyle = StageFocus.FX,
+                        contentAlignment = Alignment.TopStart,
                         accent = StageAccent(lemon, Color.Black, lemon),
                         idle = Modifier.background(Color(0xFF141414), RoundedCornerShape(14.mpx)),
                         modifier = Modifier.weight(1f).fillMaxHeight()
                             .then(if (first) Modifier.focusRequester(nativeFocus) else Modifier),
-                    ) { focused ->
-                        Column(Modifier.fillMaxSize().padding(24.mpx),
-                            verticalArrangement = Arrangement.spacedBy(12.mpx)) {
-                            OwnTVIcon(group?.sidebarIcon ?: OwnTVIcon.SETTINGS,
-                                if (focused) Color.Black else lemon, Modifier.size(29.mpx))
-                            Text(
-                                if (group == null) stringResource(R.string.stayon_tv_settings) else settingsCategoryTitle(group),
-                                style = stageText(25, 700),
-                                color = if (focused) Color.Black else ivory,
-                                maxLines = 1, overflow = TextOverflow.Ellipsis,
-                            )
-                            Text(
-                                if (group == null) stringResource(R.string.stayon_tv_settings_desc)
-                                else stringResource(settingsCategorySubtitleRes(group)),
-                                style = stageText(17, 500),
-                                color = if (focused) Color.Black.copy(alpha = 0.77f) else StageColors.Muted,
-                                maxLines = 2, overflow = TextOverflow.Ellipsis,
-                            )
+                    ) {
+                        Row(
+                            Modifier.fillMaxWidth().heightIn(min = 142.mpx).padding(19.mpx),
+                            horizontalArrangement = Arrangement.spacedBy(14.mpx),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            OwnTVIcon(group?.sidebarIcon ?: OwnTVIcon.SETTINGS, lemon, Modifier.size(29.mpx))
+                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.mpx)) {
+                                Text(
+                                    if (group == null) stringResource(R.string.stayon_tv_settings) else settingsCategoryTitle(group),
+                                    style = stageText(25, 700),
+                                    color = ivory,
+                                    maxLines = 2, overflow = TextOverflow.Ellipsis,
+                                )
+                                Text(
+                                    if (group == null) stringResource(R.string.stayon_tv_settings_desc)
+                                    else stringResource(settingsCategorySubtitleRes(group)),
+                                    style = stageText(20, 500),
+                                    color = ivory.copy(alpha = .83f),
+                                    maxLines = 2, overflow = TextOverflow.Ellipsis,
+                                )
+                            }
                         }
                     }
                 }

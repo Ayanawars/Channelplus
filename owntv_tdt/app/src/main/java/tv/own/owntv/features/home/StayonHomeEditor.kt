@@ -71,7 +71,9 @@ internal fun StayonHomeEditor(
                 })
         }
         StageSettingsHeading(stringResource(R.string.stayon_home_widgets), null)
-        draft.order.forEach { widget ->
+        val broadcasterRow = StayonHomeWidget.BROADCASTERS
+        val widgetOrder = draft.order.filterNot { it == broadcasterRow } + broadcasterRow
+        widgetOrder.forEach { widget ->
             val visible = widget !in draft.hidden
             val label = stringResource(when (widget) {
                 StayonHomeWidget.LAST_CHANNEL -> R.string.stayon_last_channel
@@ -80,15 +82,16 @@ internal fun StayonHomeEditor(
                 StayonHomeWidget.SPORTS -> R.string.stayon_home_sports
                 StayonHomeWidget.BROADCASTERS -> R.string.stayon_home_broadcasters
             })
-            StageSettingRow(OwnTVIcon.GRID, label, stringResource(R.string.stayon_home_widget_controls),
+            val controls = if (widget == broadcasterRow) R.string.stayon_home_broadcaster_controls else R.string.stayon_home_widget_controls
+            StageSettingRow(OwnTVIcon.GRID, label, stringResource(controls),
                 SettingValue.Switch(visible),
                 onClick = { update(draft.copy(hidden = if (visible) draft.hidden + widget else draft.hidden - widget)) },
-                onStep = { delta ->
-                    val order = draft.order.toMutableList()
+                onStep = if (widget == broadcasterRow) null else { delta ->
+                    val order = widgetOrder.dropLast(1).toMutableList()
                     val index = order.indexOf(widget)
                     if (index + delta in order.indices) {
                         order.add(index + delta, order.removeAt(index))
-                        update(draft.copy(order = order))
+                        update(draft.copy(order = order + broadcasterRow))
                     }
                 },
                 onLongClick = { update(draft.copy(large = if (widget in draft.large) draft.large - widget else draft.large + widget)) })

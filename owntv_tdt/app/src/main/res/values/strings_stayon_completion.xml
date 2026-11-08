@@ -27,4 +27,5 @@
     <string name="stayon_epg_assign_channel">Assign EPG by channel</string>
     <string name="stayon_epg_assign_channel_desc">Search for a TV channel and choose its entry in the guide.</string>
     <string name="stayon_epg_assign_empty">No TV channels found</string>
+    <string name="stayon_home_broadcaster_controls">Fixed at the bottom. OK: show or hide. Hold OK: resize.</string>
 </resources>

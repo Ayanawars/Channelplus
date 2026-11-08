@@ -239,14 +239,14 @@ private fun StayButton(label: String, onClick: () -> Unit, modifier: Modifier = 
         modifier
             .onFocusChanged { focused = it.isFocused }
             .clip(shape)
-            .background(if (focused) Yellow else White)
-            .border(if (focused) 2.dp else 0.dp, if (focused) White else Color.Transparent, shape)
+            .background(if (focused) Yellow else Panel)
+            .border(if (focused) 2.dp else 1.dp, if (focused) White else Muted.copy(alpha = .42f), shape)
             .clickable(onClick = onClick)
             .focusable()
             .padding(horizontal = 24.dp, vertical = if (large) 20.dp else 12.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(label, fontSize = 16.sp, color = Ink, fontWeight = FontWeight.Bold)
+        Text(label, fontSize = 16.sp, color = if (focused) Ink else White, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -287,50 +287,54 @@ private fun TvDashboard(
     val artwork = guide?.imageUrl ?: metadata?.tvdbArtwork ?: metadata?.posterUrl
     val timeFormat = stringResource(R.string.stayon_time_format)
 
-    BoxWithConstraints(modifier.fillMaxSize()) {
-        val viewportHeight = maxHeight
-        Column(
-            Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).heightIn(min = viewportHeight),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            if (StayonHomeWidget.LAST_CHANNEL in layout.hidden) {
-                StayButton(stringResource(R.string.stayon_browse_tv), onOpenTv)
-            }
-            val visibleWidgets = layout.order.filterNot { it in layout.hidden }
-            visibleWidgets.forEach { widget ->
-                val large = widget in layout.large
-                when (widget) {
-                    StayonHomeWidget.LAST_CHANNEL -> Box(Modifier.fillMaxWidth().height(if (large) 430.dp else 330.dp)) {
-                        Box(
-                            Modifier.fillMaxSize()
-                                .background(Ink),
-                        ) {
-                            if (!artwork.isNullOrBlank()) {
-                                AsyncImage(
-                                    model = artwork,
-                                    contentDescription = null,
-                                    contentScale = ContentScale.Crop,
-                                    alignment = Alignment.Center,
-                                    modifier = Modifier.align(Alignment.CenterEnd).fillMaxWidth(.78f).fillMaxHeight(),
-                                )
-                                Box(
-                                    Modifier.fillMaxSize().background(
-                                        Brush.horizontalGradient(
-                                            0f to Ink, .28f to Ink.copy(alpha = .94f),
-                                            .60f to Ink.copy(alpha = .38f), 1f to Color.Transparent,
+    val showBroadcasters = StayonHomeWidget.BROADCASTERS !in layout.hidden
+    Column(modifier.fillMaxSize()) {
+        BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
+            val heroMinHeight = minOf(maxHeight * .62f, if (StayonHomeWidget.LAST_CHANNEL in layout.large) 330.dp else 245.dp)
+            Column(
+                Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                if (StayonHomeWidget.LAST_CHANNEL in layout.hidden) {
+                    StayButton(stringResource(R.string.stayon_browse_tv), onOpenTv)
+                }
+                val visibleWidgets = layout.order.filterNot { it == StayonHomeWidget.BROADCASTERS || it in layout.hidden }
+                visibleWidgets.forEach { widget ->
+                    val large = widget in layout.large
+                    when (widget) {
+                        StayonHomeWidget.LAST_CHANNEL -> Box(Modifier.fillMaxWidth().background(Ink)) {
+                            Box(Modifier.matchParentSize()) {
+                                if (!artwork.isNullOrBlank()) {
+                                    AsyncImage(
+                                        model = artwork,
+                                        contentDescription = null,
+                                        contentScale = ContentScale.Crop,
+                                        alignment = Alignment.Center,
+                                        modifier = Modifier.align(Alignment.CenterEnd).fillMaxWidth(.78f).fillMaxHeight(),
+                                    )
+                                    Box(
+                                        Modifier.fillMaxSize().background(
+                                            Brush.horizontalGradient(
+                                                0f to Ink, .28f to Ink.copy(alpha = .94f),
+                                                .60f to Ink.copy(alpha = .38f), 1f to Color.Transparent,
+                                            ),
                                         ),
-                                    ),
-                                )
-                                Box(
-                                    Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Ink.copy(alpha = .28f)))),
-                                )
+                                    )
+                                    Box(
+                                        Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Ink.copy(alpha = .28f)))),
+                                    )
+                                }
                             }
                             Column(
-                                Modifier.fillMaxSize().padding(start = 14.dp, top = 12.dp, bottom = 28.dp, end = 14.dp),
+                                Modifier.fillMaxWidth().heightIn(min = heroMinHeight)
+                                    .padding(start = 14.dp, top = 12.dp, bottom = 16.dp, end = 14.dp),
                                 verticalArrangement = Arrangement.SpaceBetween,
                             ) {
                                 Text(stringResource(R.string.stayon_last_channel), letterSpacing = 3.sp, fontSize = 12.sp, color = Muted)
-                                Column(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth(.74f)) {
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                    modifier = Modifier.fillMaxWidth(.74f).padding(top = 10.dp),
+                                ) {
                                     if (last != null) {
                                         Row(verticalAlignment = Alignment.CenterVertically) {
                                             if (!last.displayLogoUrl.isNullOrBlank()) {
@@ -352,7 +356,6 @@ private fun TvDashboard(
                                             Box(Modifier.fillMaxWidth(progress).fillMaxHeight().background(Yellow, RoundedCornerShape(9.dp)))
                                         }
                                     }
-                                    Spacer(Modifier.height(6.dp))
                                     if (last != null) {
                                         StayButton(stringResource(R.string.stayon_watch), { onWatchChannel(last.id) })
                                     } else {
@@ -361,28 +364,26 @@ private fun TvDashboard(
                                 }
                             }
                         }
-                    }
-                    StayonHomeWidget.GUIDE -> StayButton(stringResource(R.string.stayon_guide), onOpenGuide, large = large)
-                    StayonHomeWidget.FAVORITE -> favorite?.let { channel ->
-                        StayButton(channel.name, { onWatchChannel(channel.id) }, large = large)
-                    }
-                    StayonHomeWidget.SPORTS -> match?.let { event ->
-                        StayButton(event.title, { onOpenMatch(event) }, large = large)
-                    }
-                    StayonHomeWidget.BROADCASTERS -> {
-                        if (widget == visibleWidgets.last()) Spacer(Modifier.weight(1f))
-                        StayBroadcasters(layout, large)
+                        StayonHomeWidget.GUIDE -> StayButton(stringResource(R.string.stayon_guide), onOpenGuide, large = large)
+                        StayonHomeWidget.FAVORITE -> favorite?.let { channel ->
+                            StayButton(channel.name, { onWatchChannel(channel.id) }, large = large)
+                        }
+                        StayonHomeWidget.SPORTS -> match?.let { event ->
+                            StayButton(event.title, { onOpenMatch(event) }, large = large)
+                        }
+                        StayonHomeWidget.BROADCASTERS -> Unit // Rendered in its own footer below the scroll area.
                     }
                 }
             }
         }
+        if (showBroadcasters) StayBroadcasters(layout, StayonHomeWidget.BROADCASTERS in layout.large)
     }
 }
 
 @Composable
 private fun StayBroadcasters(layout: StayonHomeLayout, large: Boolean) {
     Row(
-        Modifier.fillMaxWidth().height(if (large) 110.dp else 91.dp),
+        Modifier.fillMaxWidth().heightIn(min = if (large) 100.dp else 80.dp).padding(vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
