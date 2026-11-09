@@ -1616,6 +1616,42 @@ class LivePreviewEngine(
         }
     })
     val tunerTimeshift: StateFlow<TunerTimeshiftState> = tvInput.timeshift
+    val tunerProbePauseRequested: StateFlow<Boolean> = tvInput.tclProbePauseRequested
+    fun canOfferTclTimeshiftProbe(): Boolean = _tvInputActive.value && tvInput.canOfferTclProbe()
+
+    /**
+     * Launch the exported TCL Timeshift activity only from the diagnostic preview.
+     * This opens TCL's own UI, it does not embed or control their private PVR API.
+     * Explicit intent avoids relying on package visibility queries on Android 11+.
+     */
+    fun openTclTimeshift(): Boolean {
+        if (!canOfferTclTimeshiftProbe()) {
+            android.util.Log.w("StayonTimeshift", "tcl_bridge blocked preview_or_tuner_unavailable")
+            return false
+        }
+        val intent = android.content.Intent("com.tcl.tv.action.TIMESHIFT")
+            .setClassName("com.tcl.tv", "com.tcl.tv.timeshift.TimeShiftMainActivity")
+            .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+        return try {
+            android.util.Log.i("StayonTimeshift", "tcl_bridge request component=TimeShiftMainActivity")
+            context.startActivity(intent)
+            // Free the STAYON TV Input session once Android has accepted the
+            // external activity launch, so it can acquire the tuner. Never reset
+            // anything if launching was denied.
+            tvInput.stop()
+            _tvInputActive.value = false
+            tifPaused = false
+            tifVideoAvailable = false
+            _isPlaying.value = false
+            _buffering.value = false
+            android.util.Log.i("StayonTimeshift", "tcl_bridge dispatched tuner_released=true")
+            true
+        } catch (e: Exception) {
+            android.util.Log.e("StayonTimeshift", "tcl_bridge exception type=${e.javaClass.simpleName}", e)
+            false
+        }
+    }
+
     fun seekTunerBy(deltaSec: Int): Boolean = _tvInputActive.value && tvInput.seekBy(deltaSec)
     fun goToTunerLive(): Boolean = _tvInputActive.value && tvInput.goLive()
     fun attachTvInputView(view: android.media.tv.TvView) = tvInput.attach(view)

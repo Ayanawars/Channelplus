@@ -67,6 +67,12 @@ internal fun LivePlayerFooter(
     val meta by player.currentMeta.collectAsStateWithLifecycle()
     val playing by player.isPlaying.collectAsStateWithLifecycle()
     val qualities by player.videoQualities.collectAsStateWithLifecycle()
+    val nativeTuner = player as? LivePreviewEngine
+    val localContext = androidx.compose.ui.platform.LocalContext.current
+    val tunerActive = nativeTuner?.tvInputActive?.collectAsStateWithLifecycle()?.value == true
+    val probePauseRequested = nativeTuner?.tunerProbePauseRequested?.collectAsStateWithLifecycle()?.value == true
+    val nativePauseConfirmed = nativeTuner?.tunerTimeshift?.collectAsStateWithLifecycle()?.value?.paused == true
+    val showTclProbe = tunerActive && nativeTuner?.canOfferTclTimeshiftProbe() == true
     val primary = primaryFocus ?: remember { FocusRequester() }
     val timeline = seekFocus ?: remember { FocusRequester() }
     val menuReady = remember { booleanArrayOf(false) }
@@ -98,7 +104,29 @@ internal fun LivePlayerFooter(
                         Column(Modifier.fillMaxWidth().heightIn(max = 240.dp).background(hudShade(0.65f), RoundedCornerShape(16.dp))
                             .verticalScroll(rememberScrollState()).padding(8.dp),
                             verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            LiveIcon(OwnTVIcon.VOLUME_HIGH, stringResource(R.string.player_tool_volume), Modifier.focusRequester(primary).onKeyEvent { event ->
+                            // TCL preview controls belong to the D-pad reachable tools panel,
+                            // not the top metadata row. Expanding tools moves focus directly here.
+                            if (showTclProbe) {
+                                LiveIcon(
+                                    OwnTVIcon.LIVE_TV,
+                                    stringResource(R.string.tuner_tcl_bridge_open),
+                                    modifier = Modifier.focusRequester(primary),
+                                ) {
+                                    if (nativeTuner?.openTclTimeshift() != true) {
+                                        android.widget.Toast.makeText(
+                                            localContext,
+                                            localContext.getString(R.string.tuner_tcl_bridge_failed),
+                                            android.widget.Toast.LENGTH_LONG,
+                                        ).show()
+                                    }
+                                }
+                                val resume = probePauseRequested || nativePauseConfirmed
+                                LiveIcon(
+                                    if (resume) OwnTVIcon.PLAY else OwnTVIcon.PAUSE,
+                                    stringResource(if (resume) R.string.tuner_tcl_probe_resume else R.string.tuner_tcl_probe_pause),
+                                ) { player.togglePlayPause() }
+                            }
+                            LiveIcon(OwnTVIcon.VOLUME_HIGH, stringResource(R.string.player_tool_volume), Modifier.then(if (showTclProbe) Modifier else Modifier.focusRequester(primary)).onKeyEvent { event ->
                                 if (event.type == KeyEventType.KeyDown && event.key == Key.DirectionUp) { onToolsExpandedChange(false); true } else false
                             }) { onDialog(HudDialog.VOLUME) }
                             tv.own.owntv.ui.stage.StageButton(stringResource(R.string.player_tool_speed_value, speedLabel), { onDialog(HudDialog.SPEED) }, height = 58.mpx, textSize = 20)

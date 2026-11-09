@@ -6783,3 +6783,61 @@
 1	room-schema	core/src/main/java/tv/own/owntv/core/database/dao/EpgDao.kt	SELECT DISTINCT epgChannelId FROM epg_programmes WHERE sourceId = :sourceId AND stopMs > :now LIMIT :limit
 1	preference-key	core/src/main/java/tv/own/owntv/core/epg/EpgSourceStore.kt	playlist_priorities
 2	json	core/src/main/java/tv/own/owntv/core/epg/EpgSourceStore.kt	{}
+1	protocol	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	AVAILABLE
+1	protocol	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	OTHER
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	StayonTimeshift
+1	protocol	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	UNAVAILABLE
+1	protocol	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	UNKNOWN
+1	protocol	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	UNSUPPORTED
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	attach
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	attach sdk=${Build.VERSION.SDK_INT} replacingView=${view != null}
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	channel_change
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	command operation=$operation result=dispatched
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	command operation=$operation result=exception type=${e.javaClass.simpleName}
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	command_exception
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	current_position rawMs=$timeMs valid=${timeMs >= 0} status=${statusName(shiftStatus)}
+2	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	detach
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	go_live
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	go_live blocked=buffer_unavailable status=${statusName(shiftStatus)}
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	go_live blocked=no_view
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	go_live request liveMs=$now
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	mode_auto dispatched
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	mode_auto not_requested api_below_34=true
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	mode_auto rejected type=${it.javaClass.simpleName}
+2	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	pause
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	pause blocked=no_view
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	pause blocked=status_not_available status=${statusName(shiftStatus)}
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	pause request=${if (before.paused) "resume" else "pause"} bufferStart=${before.startMs != null}
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	pause_toggle
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	reset reason=$reason status=${statusName(shiftStatus)} available=${_timeshift.value.available}
+2	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	resume
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	seek
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	seek blocked=buffer_unavailable deltaSec=$deltaSec status=${statusName(shiftStatus)}
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	seek blocked=no_view
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	seek request deltaSec=$deltaSec targetMs=$position
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	session_failure
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	session_failure input=$input message=$message
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	start_position rawMs=$timeMs valid=${start != null} status=${statusName(shiftStatus)}
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	status input=$inputId value=${statusName(status)}($status)
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	status_ignored staleSession=true status=${statusName(status)}
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	stop
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	tune
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	tune blocked=other_session_in_use
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	tune input=${request.inputId} sdk=${Build.VERSION.SDK_INT}
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	tune result=dispatched
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	tune result=exception type=${e.javaClass.simpleName}
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	video_available input=$inputId sdk=${Build.VERSION.SDK_INT} status=${statusName(shiftStatus)}
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	video_unavailable input=$inputId reason=$reason
+1	protocol	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	.preview
+1	protocol	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	com.tcl.tvinput/
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	tcl_probe request=${if (pause) "pause" else "resume"} status=UNKNOWN
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	tcl_probe dispatched requestedPaused=$pause confirmed=false
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	tcl_probe exception type=${e.javaClass.simpleName}
+4	log	player-core/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	StayonTimeshift
+1	log	player-core/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	tcl_bridge blocked preview_or_tuner_unavailable
+1	protocol	player-core/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	com.tcl.tv.action.TIMESHIFT
+1	protocol	player-core/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	com.tcl.tv
+1	protocol	player-core/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	com.tcl.tv.timeshift.TimeShiftMainActivity
+1	log	player-core/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	tcl_bridge request component=TimeShiftMainActivity
+1	log	player-core/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	tcl_bridge dispatched tuner_released=true
+1	log	player-core/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	tcl_bridge exception type=${e.javaClass.simpleName}

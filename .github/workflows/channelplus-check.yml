@@ -26,6 +26,20 @@ jobs:
         with:
           name: apk-signing-tool
           path: owntv_tdt/app/apksigner.jar
+      - name: Create temporary key for isolated TCL diagnostic preview
+        if: github.event_name == 'pull_request' && github.head_ref == 'diagnostics/tcl-v138-timeshift-tif'
+        working-directory: owntv_tdt
+        run: keytool -genkeypair -keystore test-signing.jks -storepass android -keypass android -alias tunerprobe -keyalg RSA -keysize 2048 -validity 365 -dname "CN=STAYON Diagnostic,O=STAYON,C=ES"
+      - name: Build TCL Timeshift diagnostic APK
+        if: github.event_name == 'pull_request' && github.head_ref == 'diagnostics/tcl-v138-timeshift-tif'
+        working-directory: owntv_tdt
+        run: ./gradlew :app:assembleStandardDebug --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g -Dfile.encoding=UTF-8" -Pkotlin.daemon.jvmargs=-Xmx3g
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'pull_request' && github.head_ref == 'diagnostics/tcl-v138-timeshift-tif'
+        with:
+          name: STAYON-TCL-V138-timeshift-diagnostic-APK
+          path: owntv_tdt/app/build/outputs/apk/standard/debug/*.apk
+          if-no-files-found: error
       - name: Check and build production APK
         working-directory: owntv_tdt
         run: ./gradlew :app:testStandardDebugUnitTest :owntv_core_tdt:core:testDebugUnitTest :owntv_core_tdt:player-core:testDebugUnitTest :app:assembleStandardRelease --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g -Dfile.encoding=UTF-8" -Pkotlin.daemon.jvmargs=-Xmx3g
