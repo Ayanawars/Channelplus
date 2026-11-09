@@ -93,35 +93,6 @@ internal fun LivePlayerFooter(
                         .joinToString(stringResource(R.string.content_metadata_separator)),
                         style = stageText(25, 600), color = hudInk, maxLines = 1,
                         overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-                    if (showTclProbe) {
-                        val resume = probePauseRequested || nativePauseConfirmed
-                        // Explicit and user-triggered: this may only dispatch a command, not
-                        // actually start the vendor's private USB buffer.
-                        tv.own.owntv.ui.stage.StageButton(
-                            stringResource(if (resume) R.string.tuner_tcl_probe_resume else R.string.tuner_tcl_probe_pause),
-                            { player.togglePlayPause() },
-                            modifier = Modifier.width(206.dp),
-                            height = 48.mpx,
-                            textSize = 18,
-                            icon = if (resume) OwnTVIcon.PLAY else OwnTVIcon.PAUSE,
-                        )
-                        tv.own.owntv.ui.stage.StageButton(
-                            stringResource(R.string.tuner_tcl_bridge_open),
-                            {
-                                if (nativeTuner?.openTclTimeshift() != true) {
-                                    android.widget.Toast.makeText(
-                                        localContext,
-                                        localContext.getString(R.string.tuner_tcl_bridge_failed),
-                                        android.widget.Toast.LENGTH_LONG,
-                                    ).show()
-                                }
-                            },
-                            modifier = Modifier.width(210.dp),
-                            height = 48.mpx,
-                            textSize = 18,
-                            icon = OwnTVIcon.LIVE_TV,
-                        )
-                    }
                     LiveStateBadge(offset)
                 }
                 match?.invoke()
@@ -133,7 +104,29 @@ internal fun LivePlayerFooter(
                         Column(Modifier.fillMaxWidth().heightIn(max = 240.dp).background(hudShade(0.65f), RoundedCornerShape(16.dp))
                             .verticalScroll(rememberScrollState()).padding(8.dp),
                             verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            LiveIcon(OwnTVIcon.VOLUME_HIGH, stringResource(R.string.player_tool_volume), Modifier.focusRequester(primary).onKeyEvent { event ->
+                            // TCL preview controls belong to the D-pad reachable tools panel,
+                            // not the top metadata row. Expanding tools moves focus directly here.
+                            if (showTclProbe) {
+                                LiveIcon(
+                                    OwnTVIcon.LIVE_TV,
+                                    stringResource(R.string.tuner_tcl_bridge_open),
+                                    modifier = Modifier.focusRequester(primary),
+                                ) {
+                                    if (nativeTuner?.openTclTimeshift() != true) {
+                                        android.widget.Toast.makeText(
+                                            localContext,
+                                            localContext.getString(R.string.tuner_tcl_bridge_failed),
+                                            android.widget.Toast.LENGTH_LONG,
+                                        ).show()
+                                    }
+                                }
+                                val resume = probePauseRequested || nativePauseConfirmed
+                                LiveIcon(
+                                    if (resume) OwnTVIcon.PLAY else OwnTVIcon.PAUSE,
+                                    stringResource(if (resume) R.string.tuner_tcl_probe_resume else R.string.tuner_tcl_probe_pause),
+                                ) { player.togglePlayPause() }
+                            }
+                            LiveIcon(OwnTVIcon.VOLUME_HIGH, stringResource(R.string.player_tool_volume), Modifier.then(if (showTclProbe) Modifier else Modifier.focusRequester(primary)).onKeyEvent { event ->
                                 if (event.type == KeyEventType.KeyDown && event.key == Key.DirectionUp) { onToolsExpandedChange(false); true } else false
                             }) { onDialog(HudDialog.VOLUME) }
                             tv.own.owntv.ui.stage.StageButton(stringResource(R.string.player_tool_speed_value, speedLabel), { onDialog(HudDialog.SPEED) }, height = 58.mpx, textSize = 20)
