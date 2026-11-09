@@ -6804,13 +6804,13 @@
 1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	mode_auto dispatched
 1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	mode_auto not_requested api_below_34=true
 1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	mode_auto rejected type=${it.javaClass.simpleName}
-1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	pause
+2	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	pause
 1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	pause blocked=no_view
 1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	pause blocked=status_not_available status=${statusName(shiftStatus)}
 1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	pause request=${if (before.paused) "resume" else "pause"} bufferStart=${before.startMs != null}
 1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	pause_toggle
 1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	reset reason=$reason status=${statusName(shiftStatus)} available=${_timeshift.value.available}
-1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	resume
+2	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	resume
 1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	seek
 1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	seek blocked=buffer_unavailable deltaSec=$deltaSec status=${statusName(shiftStatus)}
 1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	seek blocked=no_view
@@ -6828,3 +6828,8 @@
 1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	tune result=exception type=${e.javaClass.simpleName}
 1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	video_available input=$inputId sdk=${Build.VERSION.SDK_INT} status=${statusName(shiftStatus)}
 1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	video_unavailable input=$inputId reason=$reason
+1	protocol	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	.preview
+1	protocol	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	com.tcl.tvinput/
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	tcl_probe request=${if (pause) "pause" else "resume"} status=UNKNOWN
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	tcl_probe dispatched requestedPaused=$pause confirmed=false
+1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	tcl_probe exception type=${e.javaClass.simpleName}
