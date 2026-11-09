@@ -17,4 +17,6 @@
     <string name="tuner_tune_failed">No se pudo sintonizar: %1$s</string>
     <string name="tuner_tcl_probe_pause">Pausar TV (prueba)</string>
     <string name="tuner_tcl_probe_resume">Reanudar TV (prueba)</string>
+    <string name="tuner_tcl_bridge_open">Timeshift TCL</string>
+    <string name="tuner_tcl_bridge_failed">No se pudo abrir Timeshift de TCL. Vuelve a STAYON+ y selecciona el canal de nuevo.</string>
 </resources>
