@@ -6833,3 +6833,11 @@
 1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	tcl_probe request=${if (pause) "pause" else "resume"} status=UNKNOWN
 1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	tcl_probe dispatched requestedPaused=$pause confirmed=false
 1	log	player-core/src/main/java/tv/own/owntv/player/TifPlayback.kt	tcl_probe exception type=${e.javaClass.simpleName}
+4	log	player-core/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	StayonTimeshift
+1	log	player-core/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	tcl_bridge blocked preview_or_tuner_unavailable
+1	protocol	player-core/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	com.tcl.tv.action.TIMESHIFT
+1	protocol	player-core/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	com.tcl.tv
+1	protocol	player-core/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	com.tcl.tv.timeshift.TimeShiftMainActivity
+1	log	player-core/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	tcl_bridge request component=TimeShiftMainActivity
+1	log	player-core/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	tcl_bridge dispatched tuner_released=true
+1	log	player-core/src/main/java/tv/own/owntv/player/LivePreviewEngine.kt	tcl_bridge exception type=${e.javaClass.simpleName}
