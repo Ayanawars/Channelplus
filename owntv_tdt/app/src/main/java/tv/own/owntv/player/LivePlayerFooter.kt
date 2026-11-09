@@ -68,6 +68,7 @@ internal fun LivePlayerFooter(
     val playing by player.isPlaying.collectAsStateWithLifecycle()
     val qualities by player.videoQualities.collectAsStateWithLifecycle()
     val nativeTuner = player as? LivePreviewEngine
+    val localContext = androidx.compose.ui.platform.LocalContext.current
     val tunerActive = nativeTuner?.tvInputActive?.collectAsStateWithLifecycle()?.value == true
     val probePauseRequested = nativeTuner?.tunerProbePauseRequested?.collectAsStateWithLifecycle()?.value == true
     val nativePauseConfirmed = nativeTuner?.tunerTimeshift?.collectAsStateWithLifecycle()?.value?.paused == true
@@ -103,6 +104,22 @@ internal fun LivePlayerFooter(
                             height = 48.mpx,
                             textSize = 18,
                             icon = if (resume) OwnTVIcon.PLAY else OwnTVIcon.PAUSE,
+                        )
+                        tv.own.owntv.ui.stage.StageButton(
+                            stringResource(R.string.tuner_tcl_bridge_open),
+                            {
+                                if (nativeTuner?.openTclTimeshift() != true) {
+                                    android.widget.Toast.makeText(
+                                        localContext,
+                                        localContext.getString(R.string.tuner_tcl_bridge_failed),
+                                        android.widget.Toast.LENGTH_LONG,
+                                    ).show()
+                                }
+                            },
+                            modifier = Modifier.width(210.dp),
+                            height = 48.mpx,
+                            textSize = 18,
+                            icon = OwnTVIcon.LIVE_TV,
                         )
                     }
                     LiveStateBadge(offset)
