@@ -67,6 +67,11 @@ internal fun LivePlayerFooter(
     val meta by player.currentMeta.collectAsStateWithLifecycle()
     val playing by player.isPlaying.collectAsStateWithLifecycle()
     val qualities by player.videoQualities.collectAsStateWithLifecycle()
+    val nativeTuner = player as? LivePreviewEngine
+    val tunerActive = nativeTuner?.tvInputActive?.collectAsStateWithLifecycle()?.value == true
+    val probePauseRequested = nativeTuner?.tunerProbePauseRequested?.collectAsStateWithLifecycle()?.value == true
+    val nativePauseConfirmed = nativeTuner?.tunerTimeshift?.collectAsStateWithLifecycle()?.value?.paused == true
+    val showTclProbe = tunerActive && nativeTuner?.canOfferTclTimeshiftProbe() == true
     val primary = primaryFocus ?: remember { FocusRequester() }
     val timeline = seekFocus ?: remember { FocusRequester() }
     val menuReady = remember { booleanArrayOf(false) }
@@ -87,6 +92,19 @@ internal fun LivePlayerFooter(
                         .joinToString(stringResource(R.string.content_metadata_separator)),
                         style = stageText(25, 600), color = hudInk, maxLines = 1,
                         overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                    if (showTclProbe) {
+                        val resume = probePauseRequested || nativePauseConfirmed
+                        // Explicit and user-triggered: this may only dispatch a command, not
+                        // actually start the vendor's private USB buffer.
+                        tv.own.owntv.ui.stage.StageButton(
+                            stringResource(if (resume) R.string.tuner_tcl_probe_resume else R.string.tuner_tcl_probe_pause),
+                            { player.togglePlayPause() },
+                            modifier = Modifier.width(206.dp),
+                            height = 48.mpx,
+                            textSize = 18,
+                            icon = if (resume) OwnTVIcon.PLAY else OwnTVIcon.PAUSE,
+                        )
+                    }
                     LiveStateBadge(offset)
                 }
                 match?.invoke()
