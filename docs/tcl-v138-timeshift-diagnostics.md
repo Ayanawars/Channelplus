@@ -38,6 +38,20 @@ Inspección estática de manifiestos y tablas de métodos de `classes.dex`:
 
 **Recomendación técnica:** mantener la funcionalidad experimental fuera de `main`. Investigar únicamente interfaces disponibles para una app sin privilegios de sistema, o acordar acceso soportado con TCL. No modificar firmware, valores de fábrica, permisos de sistema ni el USB; no anunciar un Timeshift funcional que no esté confirmado por pruebas.
 
+## Nueva prueba: abrir el controlador TCL desde STAYON+
+
+Inspección del **manifiesto real** de `TIF_LiveTV.apk`: la actividad `com.tcl.tv.timeshift.TimeShiftMainActivity` declara el filtro de intención `com.tcl.tv.action.TIMESHIFT` y **no declara `android:exported` explícitamente**. En las versiones de Android anteriores a la obligatoriedad de ese atributo, un filtro de intención puede implicar que el componente sea exportado. Esto **no garantiza** que el fabricante permita el lanzamiento desde otra aplicación, ni que Timeshift disponga de un canal activo.
+
+Solo en la APK `.preview`, cuando reproduce el sintonizador `com.tcl.tvinput/`, se muestra el botón **Timeshift TCL** junto al de pausa de diagnóstico. Al pulsarlo:
+
+1. Se construye una intención **explícita** con la acción documentada en el manifiesto y el componente `com.tcl.tv/com.tcl.tv.timeshift.TimeShiftMainActivity`. No se requiere root.
+2. Se llama `startActivity`; si Android rechaza la llamada, la aplicación registra `tcl_bridge exception` y mantiene la sesión TDT original de STAYON+.
+3. Si Android acepta el lanzamiento, se libera la sesión TIF de STAYON+ para que TCL pueda adquirir el sintonizador, y se registra `tcl_bridge dispatched tuner_released=true`.
+4. Se abre **la interfaz original de TCL**, no una interfaz interna incrustada en STAYON+. Al salir con Atrás, se regresa a nuestra aplicación; puede ser necesario volver a sintonizar el canal.
+5. Comprobar visualmente si la pantalla TCL permite pausar/reanudar y recuperar `logcat -d -v time -s StayonTimeshift:V '*:S' | tail -n 80`.
+
+No asumir que `dispatched` significa que la TV realmente haya activado Timeshift. Esta prueba identifica si el componente exportado acepta arrancar y si el traspaso del sintonizador funciona; **no resuelve todavía una integración de la barra de pausa de TCL dentro del reproductor STAYON+**.
+
 ## Captura con Bugjaeger
 
 1. Instalar una compilación de STAYON+ que incorpore este cambio.
