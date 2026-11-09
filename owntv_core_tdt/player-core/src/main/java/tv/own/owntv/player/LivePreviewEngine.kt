@@ -1616,6 +1616,8 @@ class LivePreviewEngine(
         }
     })
     val tunerTimeshift: StateFlow<TunerTimeshiftState> = tvInput.timeshift
+    val tunerProbePauseRequested: StateFlow<Boolean> = tvInput.tclProbePauseRequested
+    fun canOfferTclTimeshiftProbe(): Boolean = _tvInputActive.value && tvInput.canOfferTclProbe()
     fun seekTunerBy(deltaSec: Int): Boolean = _tvInputActive.value && tvInput.seekBy(deltaSec)
     fun goToTunerLive(): Boolean = _tvInputActive.value && tvInput.goLive()
     fun attachTvInputView(view: android.media.tv.TvView) = tvInput.attach(view)
