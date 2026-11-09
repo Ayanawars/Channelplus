@@ -15,4 +15,6 @@
     <string name="tuner_parental_block">Canal bloqueado por el control parental de la televisión</string>
     <string name="tuner_in_use">El sintonizador ya se está usando en otra ventana</string>
     <string name="tuner_tune_failed">No se pudo sintonizar: %1$s</string>
+    <string name="tuner_tcl_probe_pause">Pausar TV (prueba)</string>
+    <string name="tuner_tcl_probe_resume">Reanudar TV (prueba)</string>
 </resources>
