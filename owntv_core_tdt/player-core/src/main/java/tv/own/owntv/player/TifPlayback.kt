@@ -27,6 +27,16 @@ internal class TifPlayback(private val context: android.content.Context, private
     private var shiftStatus = TvInputManager.TIME_SHIFT_STATUS_UNKNOWN
     private var loggedCurrentPosition = false
     private var lastPositionLogElapsedMs = 0L
+    private var lastStartPositionLoggedMs: Long? = null
+
+    // This is the requested state of the *experiment*, not confirmation from TCL.
+    private val _tclProbePauseRequested = MutableStateFlow(false)
+    val tclProbePauseRequested = _tclProbePauseRequested.asStateFlow()
+
+    /** The preview APK alone may attempt a native TIF command on this TCL input. */
+    fun canOfferTclProbe(): Boolean = view != null &&
+        context.packageName.endsWith(".preview") &&
+        channel?.inputId?.startsWith("com.tcl.tvinput/") == true
 
     private fun statusName(status: Int): String = when (status) {
         TvInputManager.TIME_SHIFT_STATUS_AVAILABLE -> "AVAILABLE"
@@ -45,6 +55,8 @@ internal class TifPlayback(private val context: android.content.Context, private
         Log.i(TAG, "reset reason=$reason status=${statusName(shiftStatus)} available=${_timeshift.value.available}")
         loggedCurrentPosition = false
         lastPositionLogElapsedMs = 0L
+        lastStartPositionLoggedMs = null
+        _tclProbePauseRequested.value = false
         modeRequested = false
         shiftStatus = TvInputManager.TIME_SHIFT_STATUS_UNKNOWN
         updateTimeshift(TunerTimeshiftState())
@@ -66,6 +78,7 @@ internal class TifPlayback(private val context: android.content.Context, private
                 }
                 Log.i(TAG, "status input=$inputId value=${statusName(status)}($status)")
                 shiftStatus = status
+                if (status != TvInputManager.TIME_SHIFT_STATUS_UNKNOWN) _tclProbePauseRequested.value = false
                 updateTimeshift(if (status == TvInputManager.TIME_SHIFT_STATUS_AVAILABLE)
                     _timeshift.value.copy(available = true) else TunerTimeshiftState())
             }
@@ -102,7 +115,10 @@ internal class TifPlayback(private val context: android.content.Context, private
             override fun onTimeShiftStartPositionChanged(inputId: String, timeMs: Long) {
                 if (view !== next || channel?.inputId != inputId) return
                 val start = timeMs.takeIf { it > 0 && it <= System.currentTimeMillis() }
-                Log.i(TAG, "start_position rawMs=$timeMs valid=${start != null} status=${statusName(shiftStatus)}")
+                if (lastStartPositionLoggedMs != timeMs) {
+                    Log.i(TAG, "start_position rawMs=$timeMs valid=${start != null} status=${statusName(shiftStatus)}")
+                    lastStartPositionLoggedMs = timeMs
+                }
                 val state = _timeshift.value
                 updateTimeshift(state.copy(
                     startMs = start,
@@ -148,6 +164,23 @@ internal class TifPlayback(private val context: android.content.Context, private
         val target = view ?: run { Log.w(TAG, "pause blocked=no_view"); return false }
         val before = _timeshift.value
         if (!before.available) {
+            // Some TCL firmwares do not send a TIF timeshift status even though their TV app
+            // can pause. On an *explicit tap* in our separately installed preview APK, test
+            // the public TvView command once; never auto-probe or claim it was successful.
+            if (canOfferTclProbe() && shiftStatus == TvInputManager.TIME_SHIFT_STATUS_UNKNOWN) {
+                val pause = !_tclProbePauseRequested.value
+                Log.i(TAG, "tcl_probe request=${if (pause) "pause" else "resume"} status=UNKNOWN")
+                return try {
+                    if (pause) target.timeShiftPause() else target.timeShiftResume()
+                    _tclProbePauseRequested.value = pause
+                    Log.i(TAG, "tcl_probe dispatched requestedPaused=$pause confirmed=false")
+                    true // command accepted by Android; TCL may still silently ignore it
+                } catch (e: Exception) {
+                    _tclProbePauseRequested.value = false
+                    Log.e(TAG, "tcl_probe exception type=${e.javaClass.simpleName}", e)
+                    false
+                }
+            }
             Log.w(TAG, "pause blocked=status_not_available status=${statusName(shiftStatus)}")
             return false
         }
