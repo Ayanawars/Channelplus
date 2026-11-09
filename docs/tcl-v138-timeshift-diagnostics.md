@@ -19,6 +19,25 @@ Los botones se muestran solo en el APK `.preview` sobre la entrada `com.tcl.tvin
 
 Las posiciones iniciales inválidas repetidas se registran una sola vez por valor, evitando saturar Logcat.
 
+## Hallazgo confirmado: análisis de los APK TCL originales (9 noviembre 2026)
+
+Recuperados de la biblioteca de archivos existente; **no es necesario volver a extraerlos de la TV**:
+
+- `TIF_LiveTV.apk`, SHA-256 `d84372dcd33f56177beb43ff58aeee1121bf930100a7d82f25e38019b3dc83b5`.
+- `TIF_TvInput.apk`, SHA-256 `d530fd42884355dfb36d5be314b8a8a3d12225478397af1dd53bd609a6183b24`.
+- También existe el análisis anterior `TCL-LOVEStv-analisis-V138.zip`, que describe comprobaciones de autorización TVSDK en el firmware.
+
+Inspección estática de manifiestos y tablas de métodos de `classes.dex`:
+
+1. `com.tcl.tvinput.TvInputSession` hereda de `android.media.tv.TvInputService.Session` y **no declara** `onTimeShiftPause`, `onTimeShiftResume`, ni `onTimeShiftSeekTo`. Su APK no tiene métodos nombrados `onTimeShift*` en la tabla DEX. Es evidencia sólida de que esa implementación del TV Input Framework no publica las operaciones de Timeshift a STAYON+.
+2. `TIF_LiveTV.apk` sí implementa `com.tcl.tv.timeshift.TimeShiftMainActivity`, `com.tcl.tv.google.timeshift.TimeShiftManager` y referencias a una API propietaria externa `com.tcl.tvmanager.TDtvPvrManager`. Esta última ofrece `startTimeshiftRecord`, `timeShiftPlayback`, `returnToLive`, `getTShiftPlaybackPosition` y `stopThimeshiftRecord`.
+3. Los dos APK tienen `android:sharedUserId="android.uid.system"` en el manifiesto y solicitan permisos de sistema. Las operaciones propietarias no deben asumirse disponibles para una aplicación de terceros; la presencia de un método referenciado no demuestra que sea una API pública.
+4. La prueba física del usuario confirmó que `TimeShiftMainActivity` pausa/reanuda en la app TCL, mientras el TIF externo informa estado `UNKNOWN` y tiempo inválido `Long.MIN_VALUE`. Al pulsar el botón experimental, el log muestra `tcl_probe request=pause` seguido de `tcl_probe dispatched ... confirmed=false`, pero la imagen continúa en directo.
+
+**Conclusión:** no es un error del control de pausa de STAYON+. El `TvInputService.Session` de esta TCL no implementa los callbacks Timeshift que nuestra app necesita. No hay una solución comprobada basada solo en `TvView.timeShiftPause()`. Integrar la ruta propietaria requeriría conocer una interfaz oficialmente accesible a terceros y verificar sus autorizaciones; no basta copiar o invocar clases internas.
+
+**Recomendación técnica:** mantener la funcionalidad experimental fuera de `main`. Investigar únicamente interfaces disponibles para una app sin privilegios de sistema, o acordar acceso soportado con TCL. No modificar firmware, valores de fábrica, permisos de sistema ni el USB; no anunciar un Timeshift funcional que no esté confirmado por pruebas.
+
 ## Captura con Bugjaeger
 
 1. Instalar una compilación de STAYON+ que incorpore este cambio.
@@ -46,4 +65,4 @@ Si el registro está vacío, comprobar que se instaló la compilación correcta 
 
 No compartir más datos de Logcat que los filtrados si contienen información privada de otras aplicaciones.
 
-**Pendiente:** validar en la TCL V138. Compilar, instalar y ejecutar sobre la TV; estos registros no prueban por sí mismos que el Timeshift funcione en apps de terceros.
+**Estado:** prueba física realizada en TCL V138. La sesión TIF estándar no proporciona Timeshift, y la pausa experimental se envía pero no funciona. La vía propietaria de TCL sigue sin integración compatible con apps de terceros.
