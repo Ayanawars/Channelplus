@@ -10,6 +10,9 @@ on:
       - owntv_tdt/app/src/main/java/tv/own/owntv/features/shell/components/StayonOrderedSettingsHub.kt
       - owntv_tdt/app/src/main/assets/stayon_settings_order.json
       - .github/workflows/stayon-menu-order-check.yml
+      - owntv_tdt/tools/i18n/safe_literals.txt
+      - owntv_tdt/app/src/main/res/values/strings_stayon_order.xml
+      - owntv_tdt/app/src/main/res/values-es/strings_stayon_order.xml
   workflow_dispatch:
 
 permissions:
