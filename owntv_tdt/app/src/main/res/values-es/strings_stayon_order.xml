@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stayon_order_heading">STAYON+ / CONFIGURACIÓN</string>
+    <string name="stayon_order_sections">CONFIGURACIÓN · SECCIONES</string>
+    <string name="stayon_order_load_error">No se pudo cargar el menú. Abre los ajustes generales para acceder a las opciones originales.</string>
+    <string name="stayon_order_open_general">Abrir ajustes generales</string>
+    <string name="stayon_order_open_native">Abrir ajuste existente</string>
+    <string name="stayon_order_count_options">%1$d opciones</string>
+    <string name="stayon_order_count_groups">%1$d grupos</string>
+    <string name="stayon_order_general">Ajustes generales y rápidos</string>
+    <string name="stayon_order_general_description">Idioma, inicio, preferencias y ajustes originales</string>
+    <string name="stayon_order_tv_settings">Ajustes del televisor</string>
+    <string name="stayon_order_tv_settings_description">Abrir ajustes de Android TV</string>
+</resources>
