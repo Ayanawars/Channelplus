@@ -1,0 +1,724 @@
+{
+  "app": "STAYON+",
+  "version": "5.4.11",
+  "config": {
+    "menu": [
+      {
+        "id": "sources_and_content",
+        "title": "1. FUENTES Y CONTENIDO",
+        "groups": [
+          {
+            "id": "tv_radio_channels",
+            "title": "Canales y Radios TV (TDT / IPTV)",
+            "options": [
+              {
+                "id": "add_source",
+                "label": "Añadir fuente (M3U / Xtream / Stalker / Importar TDT)",
+                "type": "action"
+              },
+              {
+                "id": "default_source",
+                "label": "Fuente predeterminada",
+                "type": "select"
+              },
+              {
+                "id": "edit_channels",
+                "label": "Editar y ordenar canales / emisoras",
+                "type": "action"
+              },
+              {
+                "id": "sync_update",
+                "label": "Actualización y resincronización",
+                "type": "select",
+                "values": [
+                  "Limpia",
+                  "Automática"
+                ]
+              },
+              {
+                "id": "test_info",
+                "label": "Probar conexión / Información de fuente",
+                "type": "action"
+              },
+              {
+                "id": "delete_source",
+                "label": "Eliminar fuente / emisora",
+                "type": "action",
+                "danger": true
+              }
+            ]
+          },
+          {
+            "id": "epg_guide",
+            "title": "Guía de Programación (EPG)",
+            "options": [
+              {
+                "id": "epg_sources",
+                "label": "Fuentes EPG (Añadir / Editar / Eliminar)",
+                "type": "action"
+              },
+              {
+                "id": "epg_assignment",
+                "label": "Asignación de EPG",
+                "type": "select",
+                "values": [
+                  "Automática",
+                  "Manual por canal",
+                  "Canales sin EPG"
+                ]
+              },
+              {
+                "id": "update_frequency",
+                "label": "Frecuencia de actualización",
+                "type": "select"
+              },
+              {
+                "id": "time_offset",
+                "label": "Desplazamiento horario",
+                "type": "number"
+              },
+              {
+                "id": "epg_priority_images",
+                "label": "Cobertura, prioridad e imágenes de programas",
+                "type": "action"
+              },
+              {
+                "id": "epg_radio",
+                "label": "EPG Radio",
+                "type": "action"
+              }
+            ]
+          },
+          {
+            "id": "catchup",
+            "title": "Catch-up (Grabaciones en diferido)",
+            "options": [
+              {
+                "id": "catchup_config",
+                "label": "Configuración general",
+                "type": "action"
+              },
+              {
+                "id": "catchup_timezone",
+                "label": "Zona horaria",
+                "type": "select",
+                "values": [
+                  "Global",
+                  "Por lista"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "metadata",
+            "title": "Metadatos (TMDB y Proveedores)",
+            "options": [
+              {
+                "id": "metadata_source",
+                "label": "Fuente de metadatos",
+                "type": "select",
+                "values": [
+                  "Proveedor",
+                  "TMDB",
+                  "Mixto"
+                ]
+              },
+              {
+                "id": "metadata_language",
+                "label": "Idioma de metadatos",
+                "type": "select"
+              },
+              {
+                "id": "external_api",
+                "label": "Clave API y Servidor externo",
+                "type": "action"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "playback_and_live",
+        "title": "2. REPRODUCCIÓN Y CONTROL EN DIRECTO",
+        "groups": [
+          {
+            "id": "playback_engines",
+            "title": "Motores de Reproducción",
+            "options": [
+              {
+                "id": "default_player",
+                "label": "Reproductor predeterminado",
+                "type": "select",
+                "values": [
+                  "TV en directo",
+                  "VOD",
+                  "Externo"
+                ]
+              },
+              {
+                "id": "engine_by_list",
+                "label": "Asignación de motor por lista",
+                "type": "action"
+              },
+              {
+                "id": "reset_engines",
+                "label": "Restablecer elecciones",
+                "type": "action"
+              }
+            ]
+          },
+          {
+            "id": "video_image",
+            "title": "Video e Imagen",
+            "options": [
+              {
+                "id": "decoding",
+                "label": "Decodificación",
+                "type": "select",
+                "values": [
+                  "Hardware",
+                  "Software >1080p"
+                ]
+              },
+              {
+                "id": "prefer_sdr",
+                "label": "Preferir SDR",
+                "type": "toggle",
+                "default": false
+              },
+              {
+                "id": "afr_settings",
+                "label": "Cambio de refresco (AFR)",
+                "type": "action"
+              },
+              {
+                "id": "tunneled_playback",
+                "label": "Tunneled playback y Calidad máxima",
+                "type": "toggle"
+              },
+              {
+                "id": "aspect_ratio",
+                "label": "Aspecto de pantalla (Zoom)",
+                "type": "select"
+              }
+            ]
+          },
+          {
+            "id": "audio_sound",
+            "title": "Audio y Sonido",
+            "options": [
+              {
+                "id": "audio_lang",
+                "label": "Idioma preferido de audio",
+                "type": "select"
+              },
+              {
+                "id": "audio_output",
+                "label": "Salida de audio",
+                "type": "select",
+                "values": [
+                  "Surround",
+                  "Passthrough",
+                  "FFmpeg"
+                ]
+              },
+              {
+                "id": "night_mode",
+                "label": "Modo nocturno y Nivelación de volumen",
+                "type": "toggle"
+              },
+              {
+                "id": "audio_sync",
+                "label": "Sincronización y Retardo de audio",
+                "type": "action"
+              },
+              {
+                "id": "default_volume",
+                "label": "Volumen predeterminado",
+                "type": "slider",
+                "min": 0,
+                "max": 100
+              }
+            ]
+          },
+          {
+            "id": "subtitles",
+            "title": "Subtítulos",
+            "options": [
+              {
+                "id": "sub_lang",
+                "label": "Idioma preferido",
+                "type": "select"
+              },
+              {
+                "id": "sub_appearance",
+                "label": "Apariencia (Tamaño, Fuente, Posición, Color)",
+                "type": "action"
+              },
+              {
+                "id": "opensubtitles_integration",
+                "label": "Integración OpenSubtitles",
+                "type": "action"
+              }
+            ]
+          },
+          {
+            "id": "live_control",
+            "title": "Control de TV en directo y Búfer",
+            "options": [
+              {
+                "id": "timeshift_config",
+                "label": "Timeshift",
+                "type": "action"
+              },
+              {
+                "id": "latency_buffer",
+                "label": "Latencia, Preroll y Búfer",
+                "type": "action"
+              },
+              {
+                "id": "multiview",
+                "label": "Multivista",
+                "type": "action"
+              },
+              {
+                "id": "miniplayer",
+                "label": "Minirreproductor",
+                "type": "toggle"
+              },
+              {
+                "id": "recordings",
+                "label": "Grabaciones (Reserva y Márgenes)",
+                "type": "action"
+              }
+            ]
+          },
+          {
+            "id": "continuity",
+            "title": "Continuidad",
+            "options": [
+              {
+                "id": "resume_playback",
+                "label": "Reanudar reproducción",
+                "type": "toggle",
+                "default": true
+              },
+              {
+                "id": "autoplay_next",
+                "label": "Reproducir siguiente episodio automáticamente",
+                "type": "toggle",
+                "default": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "home_sections",
+        "title": "3. PANTALLA PRINCIPAL (HOME) Y SECCIONES",
+        "groups": [
+          {
+            "id": "home_customization",
+            "title": "Personalización del Home",
+            "options": [
+              {
+                "id": "manage_sections",
+                "label": "Secciones (Visibles / Ocultas / Reordenar)",
+                "type": "action"
+              },
+              {
+                "id": "long_ok_edit",
+                "label": "Editar con OK prolongado",
+                "type": "toggle"
+              },
+              {
+                "id": "main_preview",
+                "label": "Vista previa principal (Video / Audio)",
+                "type": "action"
+              },
+              {
+                "id": "focus_update",
+                "label": "Actualizar contenido al enfocar",
+                "type": "toggle"
+              }
+            ]
+          },
+          {
+            "id": "continue_history",
+            "title": "Continuar Viendo e Historial",
+            "options": [
+              {
+                "id": "continue_watching",
+                "label": "Activar Continuar viendo (TV / Películas / Series)",
+                "type": "action"
+              },
+              {
+                "id": "history_management",
+                "label": "Historial de reproducción (Limpieza y gestión)",
+                "type": "action"
+              }
+            ]
+          },
+          {
+            "id": "trends_recommendations",
+            "title": "Tendencias y Recomendaciones",
+            "options": [
+              {
+                "id": "trends_layout",
+                "label": "Diseño",
+                "type": "select",
+                "values": [
+                  "Pantalla completa",
+                  "Pósteres"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "sports_mode",
+            "title": "Modo Deportes",
+            "options": [
+              {
+                "id": "show_sports_menu",
+                "label": "Activar sección Deportes en menú",
+                "type": "toggle"
+              },
+              {
+                "id": "my_teams_leagues",
+                "label": "Mis Equipos / Ligas seguidas / Países",
+                "type": "action"
+              },
+              {
+                "id": "goal_alerts",
+                "label": "Alertas de goles y Recordatorios",
+                "type": "toggle"
+              },
+              {
+                "id": "spoiler_free",
+                "label": "Modo sin spoilers",
+                "type": "toggle"
+              },
+              {
+                "id": "event_filters",
+                "label": "Filtros y reconstrucción de eventos",
+                "type": "action"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ui_appearance",
+        "title": "4. APARIENCIA E INTERFAZ (UI)",
+        "groups": [
+          {
+            "id": "visual_style",
+            "title": "Estilo Visual",
+            "options": [
+              {
+                "id": "theme_selection",
+                "label": "Tema visual y Temas descargables",
+                "type": "action"
+              },
+              {
+                "id": "accent_colors",
+                "label": "Color de acento y Resaltado",
+                "type": "action"
+              },
+              {
+                "id": "glass_effect",
+                "label": "Efecto cristal y Resplandor ambiental",
+                "type": "action"
+              },
+              {
+                "id": "fonts_scale",
+                "label": "Fuentes y Escala general",
+                "type": "action"
+              }
+            ]
+          },
+          {
+            "id": "picons",
+            "title": "Picons y Logos",
+            "options": [
+              {
+                "id": "logo_style",
+                "label": "Estilo de logos de canales",
+                "type": "select"
+              }
+            ]
+          },
+          {
+            "id": "panels_guide",
+            "title": "Paneles y Guía de Canales",
+            "options": [
+              {
+                "id": "panel_width",
+                "label": "Anchura de paneles (TV, Películas, Series)",
+                "type": "action"
+              },
+              {
+                "id": "guide_layout",
+                "label": "Layout de Guía EPG (Anchura)",
+                "type": "action"
+              }
+            ]
+          },
+          {
+            "id": "clock_weather",
+            "title": "Widget de Fecha, Hora y Clima",
+            "options": [
+              {
+                "id": "datetime_format",
+                "label": "Formato y colores (Reloj y Fecha)",
+                "type": "action"
+              },
+              {
+                "id": "weather_toggle",
+                "label": "Meteorología",
+                "type": "select",
+                "values": [
+                  "Desactivado",
+                  "Celsius",
+                  "Fahrenheit"
+                ]
+              },
+              {
+                "id": "weather_location",
+                "label": "Ubicación",
+                "type": "select",
+                "values": [
+                  "Automática",
+                  "Manual"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "remote_navigation",
+        "title": "5. MANDO, ATAJOS Y NAVEGACIÓN",
+        "groups": [
+          {
+            "id": "channel_nav",
+            "title": "Navegación de Canales",
+            "options": [
+              {
+                "id": "arrow_actions",
+                "label": "Acción de flechas (Arriba / Abajo)",
+                "type": "select"
+              },
+              {
+                "id": "direct_numpad",
+                "label": "Numeración directa de canales",
+                "type": "toggle"
+              },
+              {
+                "id": "large_jumps",
+                "label": "Configuración de saltos grandes",
+                "type": "action"
+              }
+            ]
+          },
+          {
+            "id": "button_mapping",
+            "title": "Mapeo de Botones y Atajos",
+            "options": [
+              {
+                "id": "enable_shortcuts",
+                "label": "Activar atajos del mando",
+                "type": "toggle"
+              },
+              {
+                "id": "color_buttons",
+                "label": "Configurar botones de colores",
+                "type": "action"
+              },
+              {
+                "id": "assign_actions",
+                "label": "Asignar acciones (Corta / Larga)",
+                "type": "action"
+              },
+              {
+                "id": "capture_key",
+                "label": "Capturar nueva tecla",
+                "type": "action"
+              }
+            ]
+          },
+          {
+            "id": "context_menus",
+            "title": "Menús Contextuales",
+            "options": [
+              {
+                "id": "context_options",
+                "label": "Opciones en menú (TV, Películas, Series)",
+                "type": "action"
+              },
+              {
+                "id": "reorder_context",
+                "label": "Reordenar / Restaurar acciones",
+                "type": "action"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "apps_services",
+        "title": "6. APLICACIONES Y SERVICIOS EXTERNOS",
+        "groups": [
+          {
+            "id": "launcher_apps",
+            "title": "Lanzador y Aplicaciones",
+            "options": [
+              {
+                "id": "launcher_mode",
+                "label": "Modo Launcher STAYON+",
+                "type": "action"
+              },
+              {
+                "id": "manage_apps",
+                "label": "Gestión de Apps instaladas",
+                "type": "action"
+              },
+              {
+                "id": "show_hidden_apps",
+                "label": "Mostrar apps no optimizadas / ocultas",
+                "type": "toggle"
+              },
+              {
+                "id": "native_settings",
+                "label": "Ajustes nativos del televisor",
+                "type": "link"
+              }
+            ]
+          },
+          {
+            "id": "music_integration",
+            "title": "Integración de Música",
+            "options": [
+              {
+                "id": "open_spotify",
+                "label": "Spotify",
+                "type": "link"
+              },
+              {
+                "id": "open_ytmusic",
+                "label": "YouTube Music",
+                "type": "link"
+              },
+              {
+                "id": "open_amazonmusic",
+                "label": "Amazon Music",
+                "type": "link"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "system_network",
+        "title": "7. SISTEMA, RED Y MANTENIMIENTO",
+        "groups": [
+          {
+            "id": "updates",
+            "title": "Actualizaciones",
+            "options": [
+              {
+                "id": "check_update_now",
+                "label": "Buscar actualizaciones ahora",
+                "type": "action"
+              },
+              {
+                "id": "check_update_startup",
+                "label": "Buscar al iniciar la aplicación",
+                "type": "toggle"
+              }
+            ]
+          },
+          {
+            "id": "backups",
+            "title": "Copias de Seguridad (Backup)",
+            "options": [
+              {
+                "id": "create_restore_backup",
+                "label": "Crear / Restaurar copia",
+                "type": "action"
+              },
+              {
+                "id": "backup_content",
+                "label": "Selección de contenido a respaldar",
+                "type": "action"
+              },
+              {
+                "id": "backup_encryption",
+                "label": "Exportación (Cifrado / Contraseña)",
+                "type": "action"
+              }
+            ]
+          },
+          {
+            "id": "sync",
+            "title": "Sincronización entre Dispositivos",
+            "options": [
+              {
+                "id": "sync_mode",
+                "label": "Modo de sincronización local",
+                "type": "select",
+                "values": [
+                  "Enviar",
+                  "Recibir",
+                  "Combinar"
+                ]
+              },
+              {
+                "id": "pair_device",
+                "label": "Emparejar por PIN o Buscar dispositivo",
+                "type": "action"
+              },
+              {
+                "id": "manage_devices",
+                "label": "Gestión de dispositivos vinculados",
+                "type": "action"
+              }
+            ]
+          },
+          {
+            "id": "network_dns",
+            "title": "Red, DNS y Proxy",
+            "options": [
+              {
+                "id": "proxy_config",
+                "label": "Configuración Proxy",
+                "type": "action"
+              },
+              {
+                "id": "custom_dns",
+                "label": "DNS Personalizado",
+                "type": "action"
+              }
+            ]
+          },
+          {
+            "id": "diagnostics",
+            "title": "Diagnóstico y Rendimiento",
+            "options": [
+              {
+                "id": "playback_stats",
+                "label": "Estadísticas de reproducción en pantalla",
+                "type": "toggle"
+              },
+              {
+                "id": "detailed_logs",
+                "label": "Registro detallado (Logs)",
+                "type": "toggle"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
