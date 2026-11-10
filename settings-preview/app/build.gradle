@@ -1,0 +1,5 @@
+plugins { id 'com.android.application' }
+android { namespace 'com.stayon.settingspreview'; compileSdk 35
+ defaultConfig { applicationId 'com.stayon.settingspreview'; minSdk 23; targetSdk 28; versionCode 1; versionName '5.4.11-preview' }
+ compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
