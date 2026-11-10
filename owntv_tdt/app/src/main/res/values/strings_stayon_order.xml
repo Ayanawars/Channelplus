@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stayon_order_heading">STAYON+ / SETTINGS</string>
+    <string name="stayon_order_sections">SETTINGS · SECTIONS</string>
+    <string name="stayon_order_load_error">Could not load the ordered menu. Open General settings to access all original options.</string>
+    <string name="stayon_order_open_general">Open General settings</string>
+    <string name="stayon_order_open_native">Open existing setting</string>
+    <string name="stayon_order_count_options">%1$d options</string>
+    <string name="stayon_order_count_groups">%1$d groups</string>
+    <string name="stayon_order_general">General and Quick settings</string>
+    <string name="stayon_order_general_description">Language, startup, preferences, and all original settings</string>
+    <string name="stayon_order_tv_settings">TV system settings</string>
+    <string name="stayon_order_tv_settings_description">Open Android TV settings</string>
+</resources>
