@@ -1568,3 +1568,5 @@
 1	technical	app/src/main/java/tv/own/owntv/features/shell/components/StayonOrderedSettingsHub.kt	WEATHER
 2	json	app/src/main/java/tv/own/owntv/features/shell/components/StayonOrderedSettingsHub.kt	title
 3	json	app/src/main/java/tv/own/owntv/features/shell/components/StayonOrderedSettingsHub.kt	id
+1	technical	app/src/main/java/tv/own/owntv/features/shell/components/StayonOrderedSettingsHub.kt	epg_radio
+1	technical	app/src/main/java/tv/own/owntv/features/shell/components/StayonOrderedSettingsHub.kt	RADIO_EPG
