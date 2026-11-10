@@ -69,7 +69,11 @@ private fun orderedTarget(section: String, group: String, option: String): Order
             "edit_channels" -> OrderedSettingsTarget(SettingsGroup.SOURCES, "CUSTOMIZE")
             else -> OrderedSettingsTarget(SettingsGroup.SOURCES, "SOURCES")
         }
-        "epg_guide" -> OrderedSettingsTarget(SettingsGroup.SOURCES, if (option == "time_offset") null else "EPG")
+        "epg_guide" -> when (option) {
+            "epg_radio" -> OrderedSettingsTarget(SettingsGroup.SOURCES, "RADIO_EPG")
+            "time_offset" -> OrderedSettingsTarget(SettingsGroup.SOURCES)
+            else -> OrderedSettingsTarget(SettingsGroup.SOURCES, "EPG")
+        }
         "catchup" -> OrderedSettingsTarget(SettingsGroup.SOURCES)
         "metadata" -> OrderedSettingsTarget(SettingsGroup.SOURCES, "METADATA")
         else -> OrderedSettingsTarget(SettingsGroup.SOURCES)
