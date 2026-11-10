@@ -61,6 +61,9 @@ fun SettingsScreen(
     // Deep links may still open a category directly.
     val initialGroup = if (openEpgAdd) SettingsGroup.SOURCES.ordinal else -1
     var selected by rememberSaveable { mutableIntStateOf(initialGroup) }
+    var orderedSection by rememberSaveable { mutableIntStateOf(-1) }
+    var orderedGroup by rememberSaveable { mutableIntStateOf(-1) }
+    var selectedDetail by rememberSaveable { mutableStateOf<String?>(null) }
     var navigationVersion by remember { mutableIntStateOf(0) }
     val contentFocus = remember { FocusRequester() }
     val navigation = SettingsNavigation(
@@ -81,9 +84,19 @@ fun SettingsScreen(
         Box(modifier.fillMaxSize().background(Color.Black)) {
             if (selected < 0) {
                 androidx.activity.compose.BackHandler(enabled = onBack != null) { onBack?.invoke() }
-                SettingsHub(
-                    onChoose = { group ->
-                        selected = group.ordinal
+                StayonOrderedSettingsHub(
+                    sectionIndex = orderedSection,
+                    groupIndex = orderedGroup,
+                    onSectionChange = { orderedSection = it; orderedGroup = -1 },
+                    onGroupChange = { orderedGroup = it },
+                    onOpenSetting = { target ->
+                        selectedDetail = target.detail
+                        selected = target.category.ordinal
+                        navigationVersion++
+                    },
+                    onOpenGeneral = {
+                        selectedDetail = null
+                        selected = SettingsGroup.APP.ordinal
                         navigationVersion++
                     },
                 )
@@ -91,8 +104,9 @@ fun SettingsScreen(
                 SettingsContent(
                     themeMode, uiZoomPercent, onSetZoom, fontCustomization, onSetFontCustomization,
                     onOpenPlaylist, Modifier.fillMaxSize(),
-                    onBack = { selected = -1 },
+                    onBack = { selected = -1; selectedDetail = null },
                     openEpgAdd = openEpgAdd, onEpgAddConsumed = onEpgAddConsumed,
+                    initialTabKey = selectedDetail,
                     selectedGroup = selected,
                     onSelectGroup = { selected = it },
                     navigationVersion = navigationVersion,
