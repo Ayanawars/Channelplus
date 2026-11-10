@@ -1,0 +1,51 @@
+name: Build STAYON Settings Preview APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/stayon-settings-preview.yml
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Compilar APK de prueba para Android TV
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Obtener proyecto independiente de pruebas
+        uses: actions/checkout@v4
+        with:
+          ref: stayon-settings-preview
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Configurar Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Instalar plataforma Android 35
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Configurar Gradle 8.9
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Compilar APK debug
+        working-directory: settings-preview
+        run: gradle --no-daemon :app:assembleDebug --stacktrace
+
+      - name: Publicar APK descargable
+        uses: actions/upload-artifact@v4
+        with:
+          name: STAYON-Settings-Preview-debug-APK
+          path: settings-preview/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
