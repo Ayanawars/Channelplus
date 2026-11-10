@@ -156,11 +156,14 @@ internal fun SettingsContent(
     selectedGroup: Int,
     onSelectGroup: (Int) -> Unit,
     navigationVersion: Int,
+    initialTabKey: String? = null,
 ) {
     // A cross-script language change recreates the Activity so Android can apply the new script's
     // shaping and font fallback. Keep the open settings sub-screen across that configuration change
     // instead of dropping back to the Settings root/sidebar.
-    var tab by rememberSaveable { mutableStateOf(SettingsTab.ROOT) }
+    var tab by rememberSaveable(navigationVersion, initialTabKey) {
+        mutableStateOf(SettingsTab.entries.firstOrNull { it.name == initialTabKey } ?: SettingsTab.ROOT)
+    }
     // Deep-link from the Guide's "Add EPG" button: jump straight to EPG Sources in add mode.
     var consumeEpgAdd by remember { mutableStateOf(false) }
     var showZoom by remember { mutableStateOf(false) }
@@ -371,7 +374,7 @@ internal fun SettingsContent(
     // from it would aim at the shortcut instead of the row just used.
     LaunchedEffect(navigationVersion) {
         if (navigationVersion > 0) {
-            tab = SettingsTab.ROOT
+            tab = SettingsTab.entries.firstOrNull { it.name == initialTabKey } ?: SettingsTab.ROOT
             lastTab = null
             deepReturnKey = null
             videoRowKey = null
@@ -842,12 +845,9 @@ internal fun SettingsContent(
                 "stayon_home" -> group to (rows + layoutRows.filter { it.key == homeKey })
                 "stayon_remote" -> group to (rows + layoutRows.filter { it.key in remoteKeys })
                 "group_layout" -> group to rows.filterNot { it.key == homeKey || it.key in remoteKeys || it.key == guideKey }
-                "group_sources" -> group to (rows +
-                    contentRows.filter { it.key in sourceDetailKeys } +
-                    layoutRows.filter { it.key == guideKey } +
-                    appearanceRows.filter { it.key == "picons" })
+                "group_sources" -> group to (rows + contentRows.filter { it.key in sourceDetailKeys })
                 "group_content_metadata" -> group to emptyList()
-                "group_appearance" -> group to rows.filterNot { it.key == "picons" }
+                "group_appearance" -> group to (rows + layoutRows.filter { it.key == guideKey })
                 "group_player" -> group to (rows + contentRows.filter { it.key == subtitleKey })
                 else -> group to rows
             }
