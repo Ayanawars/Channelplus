@@ -27,6 +27,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import tv.own.owntv.R
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.tv.material3.Text
 import org.json.JSONObject
@@ -142,12 +144,12 @@ internal fun StayonOrderedSettingsHub(
     }
 
     Column(Modifier.fillMaxSize().background(Color.Black).padding(horizontal = 52.mpx, vertical = 26.mpx)) {
-        Text("STAYON+  /  CONFIGURACIÓN", style = stageText(30, 800), color = ivory)
+        Text(stringResource(R.string.stayon_order_heading), style = stageText(30, 800), color = ivory)
         Text(
             when {
                 activeGroup != null -> activeSection!!.title + "   ›   " + activeGroup.title
                 activeSection != null -> activeSection.title
-                else -> "CONFIGURACIÓN · SECCIONES"
+                else -> stringResource(R.string.stayon_order_sections)
             },
             style = stageText(18, 500), color = lemon,
             modifier = Modifier.padding(top = 9.mpx, bottom = 14.mpx),
@@ -155,11 +157,11 @@ internal fun StayonOrderedSettingsHub(
         )
         Box(Modifier.fillMaxWidth().padding(bottom = 12.mpx).background(lemon).heightIn(min = 2.mpx))
         if (sections.isEmpty()) {
-            Text("No se pudo cargar el menú. Abre Ajustes generales para acceder a las opciones originales.",
+            Text(stringResource(R.string.stayon_order_load_error),
                 style = stageText(19, 500), color = ivory)
             StageSurface(onClick = onOpenGeneral, radius = 10.mpx,
                 focusStyle = StageFocus.FX, modifier = Modifier.fillMaxWidth().focusRequester(focus)) {
-                Text("Abrir ajustes generales", style = stageText(22, 600), color = ivory, modifier = Modifier.padding(18.mpx))
+                Text(stringResource(R.string.stayon_order_open_general), style = stageText(22, 600), color = ivory, modifier = Modifier.padding(18.mpx))
             }
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(9.mpx)) {
@@ -167,7 +169,7 @@ internal fun StayonOrderedSettingsHub(
                     itemsIndexed(activeGroup.options) { i, option ->
                         OrderedMenuRow(
                             title = option.title,
-                            subtitle = "Abrir ajuste nativo",
+                            subtitle = stringResource(R.string.stayon_order_open_native),
                             index = i,
                             initialFocus = focus,
                             icon = OwnTVIcon.SETTINGS,
@@ -184,7 +186,7 @@ internal fun StayonOrderedSettingsHub(
                     itemsIndexed(activeSection.groups) { i, group ->
                         OrderedMenuRow(
                             title = group.title,
-                            subtitle = group.options.size.toString() + " opciones",
+                            subtitle = stringResource(R.string.stayon_order_count_options, group.options.size),
                             index = i,
                             initialFocus = focus,
                             icon = OwnTVIcon.LIST,
@@ -194,7 +196,7 @@ internal fun StayonOrderedSettingsHub(
                     itemsIndexed(sections) { i, section ->
                         OrderedMenuRow(
                             title = section.title,
-                            subtitle = section.groups.size.toString() + " grupos",
+                            subtitle = stringResource(R.string.stayon_order_count_groups, section.groups.size),
                             index = i,
                             initialFocus = focus,
                             icon = sectionIcon(i),
@@ -202,8 +204,8 @@ internal fun StayonOrderedSettingsHub(
                     }
                     item {
                         OrderedMenuRow(
-                            title = "Ajustes generales y rápidos",
-                            subtitle = "Idioma, inicio, preferencias y acceso a los ajustes clásicos",
+                            title = stringResource(R.string.stayon_order_general),
+                            subtitle = stringResource(R.string.stayon_order_general_description),
                             index = -1,
                             initialFocus = focus,
                             icon = OwnTVIcon.SETTINGS,
@@ -212,8 +214,8 @@ internal fun StayonOrderedSettingsHub(
                     }
                     item {
                         OrderedMenuRow(
-                            title = "Ajustes del televisor",
-                            subtitle = "Abrir los ajustes de Android TV",
+                            title = stringResource(R.string.stayon_order_tv_settings),
+                            subtitle = stringResource(R.string.stayon_order_tv_settings_description),
                             index = -1,
                             initialFocus = focus,
                             icon = OwnTVIcon.SETTINGS,
@@ -267,7 +269,7 @@ private fun OrderedMenuRow(
                     maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             Spacer(Modifier.width(8.mpx))
-            Text("›", style = stageText(28, 500), color = lemon)
+            Text('›'.toString(), style = stageText(28, 500), color = lemon)
         }
     }
 }
