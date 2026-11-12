@@ -5,8 +5,14 @@
     <string name="stayon_order_load_error">No se pudo cargar el menú. Abre los ajustes generales para acceder a las opciones originales.</string>
     <string name="stayon_order_open_general">Abrir ajustes generales</string>
     <string name="stayon_order_open_native">Abrir ajuste existente</string>
-    <string name="stayon_order_count_options">%1$d opciones</string>
-    <string name="stayon_order_count_groups">%1$d grupos</string>
+    <plurals name="stayon_order_count_options">
+        <item quantity="one">%1$d opción</item>
+        <item quantity="other">%1$d opciones</item>
+    </plurals>
+    <plurals name="stayon_order_count_groups">
+        <item quantity="one">%1$d grupo</item>
+        <item quantity="other">%1$d grupos</item>
+    </plurals>
     <string name="stayon_order_general">Ajustes generales y rápidos</string>
     <string name="stayon_order_general_description">Idioma, inicio, preferencias y ajustes originales</string>
     <string name="stayon_order_tv_settings">Ajustes del televisor</string>
