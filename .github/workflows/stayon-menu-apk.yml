@@ -1,0 +1,54 @@
+name: Build STAYON Settings Menu Preview APK
+
+on:
+  push:
+    branches:
+      - build/stayon-menu-preview-20261112
+      - main
+    paths:
+      - owntv_tdt/app/src/main/res/values/strings_stayon_order.xml
+      - owntv_tdt/app/src/main/res/values-es/strings_stayon_order.xml
+      - owntv_tdt/app/src/main/java/tv/own/owntv/features/shell/components/StayonOrderedSettingsHub.kt
+      - .github/workflows/stayon-menu-apk.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Configure Android SDK
+        run: |
+          export ANDROID_HOME=/usr/local/lib/android/sdk
+          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | head -n 1)
+          test -n "$SDKMANAGER"
+          yes | "$SDKMANAGER" --sdk_root="$ANDROID_HOME" --licenses >/dev/null || true
+          "$SDKMANAGER" --sdk_root="$ANDROID_HOME" "platforms;android-37.0" "build-tools;37.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Create isolated debug signing certificate
+        run: |
+          keytool -genkeypair -keystore "$RUNNER_TEMP/stayon-menu-preview.jks" \
+            -alias tunerprobe -keyalg RSA -keysize 2048 -validity 3650 \
+            -storepass android -keypass android \
+            -dname "CN=STAYON Menu Preview, OU=Development, O=STAYON"
+      - name: Build Android TV installer
+        working-directory: owntv_tdt
+        env:
+          CHANNELPLUS_TEST_KEYSTORE: ${{ runner.temp }}/stayon-menu-preview.jks
+        run: |
+          ./gradlew :app:assembleStandardDebug --no-daemon --max-workers=2 \
+            -Dorg.gradle.jvmargs="-Xmx3g -Dfile.encoding=UTF-8" -Pkotlin.daemon.jvmargs=-Xmx3g
+      - name: Upload installable preview APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: STAYON-Menu-7-Secciones-Preview-APK
+          path: owntv_tdt/app/build/outputs/apk/standard/debug/*.apk
+          if-no-files-found: error
