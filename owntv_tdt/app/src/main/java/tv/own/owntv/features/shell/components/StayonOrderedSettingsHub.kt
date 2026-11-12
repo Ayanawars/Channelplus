@@ -27,6 +27,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import tv.own.owntv.R
 import androidx.compose.ui.text.style.TextOverflow
@@ -190,7 +191,7 @@ internal fun StayonOrderedSettingsHub(
                     itemsIndexed(activeSection.groups) { i, group ->
                         OrderedMenuRow(
                             title = group.title,
-                            subtitle = stringResource(R.string.stayon_order_count_options, group.options.size),
+                            subtitle = pluralStringResource(R.plurals.stayon_order_count_options, group.options.size, group.options.size),
                             index = i,
                             initialFocus = focus,
                             icon = OwnTVIcon.LIST,
@@ -200,7 +201,7 @@ internal fun StayonOrderedSettingsHub(
                     itemsIndexed(sections) { i, section ->
                         OrderedMenuRow(
                             title = section.title,
-                            subtitle = stringResource(R.string.stayon_order_count_groups, section.groups.size),
+                            subtitle = pluralStringResource(R.plurals.stayon_order_count_groups, section.groups.size, section.groups.size),
                             index = i,
                             initialFocus = focus,
                             icon = sectionIcon(i),
